@@ -33,7 +33,7 @@ public class MazeGenerator : MonoBehaviour
         DefineStartAndExit();
         InstantiateMaze();
         SpawnPlayer();
-        SpawnExit();
+        //SpawnExit();
     }
 
     IEnumerator GenerateMazeCoroutine()
@@ -168,10 +168,11 @@ public class MazeGenerator : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
+                Vector3 Wallposition = new Vector3(x, 0.5f, y);
 
                 if (maze[x, y] == 0)
                 {
-                    Instantiate(wallPrefab, position, Quaternion.identity);
+                    Instantiate(wallPrefab, Wallposition, Quaternion.identity);
                 }
                 else if (maze[x, y] == 1)
                 {
@@ -185,19 +186,19 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        Instantiate(startPointPrefab, new Vector3(startPosition.x, 0.5f, startPosition.y), Quaternion.identity);
-        Instantiate(exitPointPrefab, new Vector3(exitPosition.x, 0.5f, exitPosition.y), Quaternion.identity);
+        Instantiate(startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
+        Instantiate(exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
     }
 
     void SpawnPlayer()
     {
-        Vector3 spawnPosition = new Vector3(startPosition.x, 1, startPosition.y);
+        Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
         Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
     }
 
-    void SpawnExit()
+    /*void SpawnExit()
     {
         Vector3 exitPos = new Vector3(exitPosition.x, 0.5f, exitPosition.y);
         Instantiate(exitPointPrefab, exitPos, Quaternion.identity);
-    }
+    }*/
 }

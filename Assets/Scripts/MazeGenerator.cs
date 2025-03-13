@@ -33,7 +33,6 @@ public class MazeGenerator : MonoBehaviour
         DefineStartAndExit();
         InstantiateMaze();
         SpawnPlayer();
-        //SpawnExit();
     }
 
     IEnumerator GenerateMazeCoroutine()
@@ -195,10 +194,4 @@ public class MazeGenerator : MonoBehaviour
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
         Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
     }
-
-    /*void SpawnExit()
-    {
-        Vector3 exitPos = new Vector3(exitPosition.x, 0.5f, exitPosition.y);
-        Instantiate(exitPointPrefab, exitPos, Quaternion.identity);
-    }*/
 }

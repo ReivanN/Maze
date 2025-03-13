@@ -3,14 +3,14 @@ using UnityEngine.InputSystem;
 
 public class TopDownCharacterController : MonoBehaviour
 {
-    [SerializeField] public float moveSpeed = 5f;
-    [SerializeField] private Vector2 moveInput;
-    [SerializeField] private CharacterController characterController;
-    [SerializeField] private Animator animator;
-    [SerializeField] public Transform cameraTransform;
-    [SerializeField] public float cameraSmoothSpeed = 5f;
-    [SerializeField] public float gravity = 9.81f;
-    [SerializeField] private Vector3 velocity;
+    [SerializeField]public float moveSpeed = 5f;
+    [SerializeField][HideInInspector]private Vector2 moveInput;
+    [SerializeField][HideInInspector]private CharacterController characterController;
+    [SerializeField][HideInInspector]private Animator animator;
+    [SerializeField][HideInInspector]public Transform cameraTransform;
+    [SerializeField]public float cameraSmoothSpeed = 5f;
+    [SerializeField][HideInInspector]public float gravity = 9.81f;
+    [SerializeField][HideInInspector]private Vector3 velocity;
 
     void Awake()
     {

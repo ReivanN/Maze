@@ -13,15 +13,26 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject trapPrefab;
+    [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject startPointPrefab;
     [SerializeField] private GameObject exitPointPrefab;
 
-    private Vector2Int startPosition;
+    private ObjectPool wallPool;
+    private ObjectPool floorPool;
+    private ObjectPool enemyPool;
+    private ObjectPool bombPool;
+
+
+    private Vector2Int startPosition ;
     private Vector2Int exitPosition;
 
     void Start()
     {
+        wallPool = new ObjectPool(wallPrefab, 250, transform);
+        floorPool = new ObjectPool(floorPrefab, 200, transform);
+        enemyPool = new ObjectPool(enemyPrefab, 5, transform);
+        bombPool = new ObjectPool(trapPrefab, 5, transform);
         StartCoroutine(GenerateAndSpawn());
     }
 
@@ -29,9 +40,9 @@ public class MazeGenerator : MonoBehaviour
     {
         yield return StartCoroutine(GenerateMazeCoroutine());
 
-        PlaceTraps(5);
+        PlaceEnemiesAndTraps(5,5);
         DefineStartAndExit();
-        InstantiateMaze();
+        SpawnEntities();
         SpawnPlayer();
     }
 
@@ -95,23 +106,44 @@ public class MazeGenerator : MonoBehaviour
         return neighbors;
     }
 
-    void PlaceTraps(int count)
+    void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
+{
+    List<Vector2Int> possiblePositions = new List<Vector2Int>();
+
+    for (int x = 1; x < width; x += 2)
     {
-        List<Vector2Int> possiblePositions = new List<Vector2Int>();
-
-        for (int x = 1; x < width; x += 2)
-            for (int y = 1; y < height; y += 2)
-                if (maze[x, y] == 1)
-                    possiblePositions.Add(new Vector2Int(x, y));
-
-        for (int i = 0; i < count && possiblePositions.Count > 0; i++)
+        for (int y = 1; y < height; y += 2)
         {
-            int index = rand.Next(possiblePositions.Count);
-            Vector2Int trapPos = possiblePositions[index];
-            possiblePositions.RemoveAt(index);
-            maze[trapPos.x, trapPos.y] = 2;
+            Vector2Int pos = new Vector2Int(x, y);
+            if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
+            {
+                possiblePositions.Add(pos);
+            }
         }
     }
+
+    System.Random rand = new System.Random();
+
+    // Спавн бомб (ловушек)
+    for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
+    {
+        int index = rand.Next(possiblePositions.Count);
+        Vector2Int trapPos = possiblePositions[index];
+        possiblePositions.RemoveAt(index);
+
+        maze[trapPos.x, trapPos.y] = 2;
+    }
+
+    // Спавн врагов
+    for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
+    {
+        int index = rand.Next(possiblePositions.Count);
+        Vector2Int enemyPos = possiblePositions[index];
+        possiblePositions.RemoveAt(index);
+
+        maze[enemyPos.x, enemyPos.y] = 3;
+    }
+}
 
     void DefineStartAndExit()
     {
@@ -119,72 +151,88 @@ public class MazeGenerator : MonoBehaviour
         exitPosition = FindFarthestExit(startPosition);
     }
 
-    Vector2Int FindFarthestExit(Vector2Int start)
+Vector2Int FindFarthestExit(Vector2Int start)
+{
+    Queue<Vector2Int> queue = new Queue<Vector2Int>();
+    Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
+    HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+    queue.Enqueue(start);
+    distances[start] = 0;
+    visited.Add(start);
+
+    Vector2Int farthestPoint = start;
+    int maxDistance = 0;
+    float maxEuclideanDist = 0;
+
+    while (queue.Count > 0)
     {
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
+        Vector2Int current = queue.Dequeue();
+        int currentDistance = distances[current];
 
-        queue.Enqueue(start);
-        distances[start] = 0;
-
-        Vector2Int farthestPoint = start;
-        int maxDistance = 0;
-
-        while (queue.Count > 0)
+        foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
         {
-            Vector2Int current = queue.Dequeue();
-            int currentDistance = distances[current];
+            Vector2Int next = current + dir;
 
-            foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+            // Проверяем, что точка находится в пределах лабиринта
+            if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2)|| maze[next.x, next.y]== 3)
             {
-                Vector2Int next = current + dir;
-
-                if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2))
+                // Проходим ТОЛЬКО по полу (1), избегая бомб (2) и врагов (3)
+                if (!visited.Contains(next))
                 {
-                    if (!distances.ContainsKey(next))
-                    {
-                        distances[next] = currentDistance + 1;
-                        queue.Enqueue(next);
+                    distances[next] = currentDistance + 1;
+                    queue.Enqueue(next);
+                    visited.Add(next);
 
-                        if (distances[next] > maxDistance)
-                        {
-                            maxDistance = distances[next];
-                            farthestPoint = next;
-                        }
+                    // Рассчитываем евклидово расстояние от старта
+                    float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2, height - 2));
+
+                    // Проверяем, что точка дальше как по BFS-расстоянию, так и географически
+                    if (distances[next] > maxDistance || 
+                       (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
+                    {
+                        maxDistance = distances[next];
+                        maxEuclideanDist = euclideanDist;
+                        farthestPoint = next;
                     }
                 }
             }
         }
-
-        return farthestPoint;
     }
 
+    return farthestPoint;
+}
 
-    void InstantiateMaze()
+
+    void SpawnEntities()
     {
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
-                Vector3 Wallposition = new Vector3(x, 0.5f, y);
-
+                Vector3 wallPosition = new Vector3(x, 0.5f, y);
+                
                 if (maze[x, y] == 0)
                 {
-                    Instantiate(wallPrefab, Wallposition, Quaternion.identity);
+                    InstantiateFromPool(wallPool, wallPosition);
                 }
                 else if (maze[x, y] == 1)
                 {
-                    Instantiate(floorPrefab, position, Quaternion.identity);
+                    InstantiateFromPool(floorPool, position);
                 }
                 else if (maze[x, y] == 2)
                 {
-                    Instantiate(floorPrefab, position, Quaternion.identity);
-                    Instantiate(trapPrefab, position + Vector3.up * 0.5f, Quaternion.identity);
+                    InstantiateFromPool(floorPool, position);
+                    InstantiateFromPool(bombPool, position + Vector3.up * 0.5f);
+                }
+                else if (maze[x, y] == 3)
+                {
+                    InstantiateFromPool(floorPool, position);
+                    InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
                 }
             }
         }
-
         Instantiate(startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
         Instantiate(exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
     }
@@ -193,5 +241,11 @@ public class MazeGenerator : MonoBehaviour
     {
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
         Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+    }
+
+    private void InstantiateFromPool(ObjectPool pool, Vector3 position)
+    {
+        GameObject obj = pool.Get();
+        obj.transform.position = position;
     }
 }

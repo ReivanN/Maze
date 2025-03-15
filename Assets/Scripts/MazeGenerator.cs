@@ -33,23 +33,29 @@ public class MazeGenerator : MonoBehaviour
         floorPool = new ObjectPool(floorPrefab, 200, transform);
         enemyPool = new ObjectPool(enemyPrefab, 5, transform);
         bombPool = new ObjectPool(trapPrefab, 5, transform);
-        StartCoroutine(GenerateAndSpawn());
+        GenerateAndSpawn();
     }
-
-    IEnumerator GenerateAndSpawn()
+    void Update()
     {
-        yield return StartCoroutine(GenerateMazeCoroutine());
-
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RegenerateMaze();
+        }
+    }
+    
+    public void GenerateAndSpawn()
+    {
+        GenerateMazeCoroutine();
         PlaceEnemiesAndTraps(5,5);
         DefineStartAndExit();
         SpawnEntities();
         SpawnPlayer();
     }
 
-    IEnumerator GenerateMazeCoroutine()
+    public void GenerateMazeCoroutine()
     {
         maze = new int[width, height];
-
+        
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
                 maze[x, y] = 0;
@@ -79,7 +85,6 @@ public class MazeGenerator : MonoBehaviour
                 stack.Pop();
             }
 
-            yield return null;
         }
     }
 
@@ -124,7 +129,6 @@ public class MazeGenerator : MonoBehaviour
 
     System.Random rand = new System.Random();
 
-    // Спавн бомб (ловушек)
     for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
     {
         int index = rand.Next(possiblePositions.Count);
@@ -134,7 +138,6 @@ public class MazeGenerator : MonoBehaviour
         maze[trapPos.x, trapPos.y] = 2;
     }
 
-    // Спавн врагов
     for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
     {
         int index = rand.Next(possiblePositions.Count);
@@ -173,21 +176,16 @@ Vector2Int FindFarthestExit(Vector2Int start)
         foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
         {
             Vector2Int next = current + dir;
-
-            // Проверяем, что точка находится в пределах лабиринта
             if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2)|| maze[next.x, next.y]== 3)
             {
-                // Проходим ТОЛЬКО по полу (1), избегая бомб (2) и врагов (3)
                 if (!visited.Contains(next))
                 {
                     distances[next] = currentDistance + 1;
                     queue.Enqueue(next);
                     visited.Add(next);
 
-                    // Рассчитываем евклидово расстояние от старта
                     float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2, height - 2));
 
-                    // Проверяем, что точка дальше как по BFS-расстоянию, так и географически
                     if (distances[next] > maxDistance || 
                        (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
                     {
@@ -247,5 +245,54 @@ Vector2Int FindFarthestExit(Vector2Int start)
     {
         GameObject obj = pool.Get();
         obj.transform.position = position;
+        //obj.gameObject.SetActive(true);
+    }
+    private void ClearMaze()
+{
+    foreach (Transform child in transform)
+    {
+        if (child.gameObject.activeInHierarchy)
+        {
+            ObjectPool pool = GetPoolForObject(child.gameObject);
+            if (pool != null)
+            {
+                pool.Return(child.gameObject);
+            }
+            else
+            {
+                //child.gameObject.SetActive(false);
+            }
+        }
+    }
+}
+private ObjectPool GetPoolForObject(GameObject obj)
+{
+    if (obj.name.Contains(wallPrefab.name))
+    {
+        return wallPool;
+    }
+    else if (obj.name.Contains(floorPrefab.name))
+    {
+        return floorPool;
+    }
+    else if (obj.name.Contains(enemyPrefab.name))
+    {
+        return enemyPool;
+    }
+    else if (obj.name.Contains(trapPrefab.name))
+    {
+        return bombPool;
+    }
+    return null;
+}
+    public void RegenerateMaze()
+    {
+        ClearMaze();
+        wallPool.Return(wallPrefab);
+        floorPool.Return(floorPrefab);
+        enemyPool.Return(enemyPrefab);
+        bombPool.Return(trapPrefab);
+
+        GenerateAndSpawn();
     }
 }

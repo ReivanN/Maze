@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.LowLevel.InputStateHistory;
 
@@ -8,6 +9,8 @@ public class Enemy : MonoBehaviour
     private Rigidbody[] ragdollBodies;
     private Animator animator;
     public InputAction reloadAction;
+    [HideInInspector]public UnityAction EnemyDeath;
+    public bool isAlive = true;
 
     void Start()
     {
@@ -21,8 +24,10 @@ public class Enemy : MonoBehaviour
         animator.enabled = false;
         foreach (var rb in ragdollBodies)
         {
+            isAlive = false;
             rb.isKinematic = false;
-            StartCoroutine(Died());
+            EnemyDeath?.Invoke();
+            this.enabled = false;
         }
     }
 
@@ -31,12 +36,9 @@ public class Enemy : MonoBehaviour
         foreach (var rb in ragdollBodies)
         {
             rb.isKinematic = true;
+
         }
     }
-    IEnumerator Died()
-    {
-        yield return new WaitForSeconds(5);
-        Destroy(this.gameObject);
-    }
+    
 
 }

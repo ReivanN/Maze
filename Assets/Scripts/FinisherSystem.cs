@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,6 +15,7 @@ public class FinisherSystem : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private GameObject gun;
     [SerializeField] private GameObject sword;
+    [SerializeField] private CharacterController playerController;
 
     [Header("Events")]
     public UnityEvent<Transform> OnFinisherStarted;
@@ -24,6 +25,7 @@ public class FinisherSystem : MonoBehaviour
     [SerializeField] private InputAction finisherAction;
     private Enemy[] enemies;
     private bool isFinishing = false;
+
     private void Start()
     {
         finisherUI = GameObject.FindGameObjectWithTag("finisherUI");
@@ -31,7 +33,7 @@ public class FinisherSystem : MonoBehaviour
         if (finisherUI != null)
             finisherUI.SetActive(false);
 
-        enemies = FindObjectsOfType<Enemy>();
+        UpdateEnemies();
     }
 
     private void OnEnable()
@@ -49,30 +51,20 @@ public class FinisherSystem : MonoBehaviour
     void Update()
     {
         FindClosestEnemy();
-        if (isFinishing)
-        {
-
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            if (stateInfo.IsName("Finisher") && stateInfo.normalizedTime >= 0.02f)
-            {
-                isFinishing = false;
-                ChangeWeapon();
-            }
-        }
     }
 
     void FindClosestEnemy()
     {
-        Debug.Log($"Найдено врагов: {enemies.Length}");
+        if (enemies == null || enemies.Length == 0) return;
 
         float minDistance = float.MaxValue;
         targetEnemy = null;
 
         foreach (var enemy in enemies)
         {
-            float distance = Vector3.Distance(transform.position, enemy.transform.position);
-            Debug.Log($"Проверка {enemy.name} на расстоянии {distance}");
+            if (enemy == null || !enemy.isAlive) continue;
 
+            float distance = Vector3.Distance(transform.position, enemy.transform.position);
             if (distance < minDistance && distance <= finisherRange)
             {
                 minDistance = distance;
@@ -81,56 +73,76 @@ public class FinisherSystem : MonoBehaviour
         }
 
         canFinish = targetEnemy != null;
-
-        if (canFinish)
-        {
-            Debug.Log($"Ближайший враг: {targetEnemy.name}");
-        }
-        else
-        {
-            Debug.Log("Врагов поблизости нет!");
-        }
-
         if (finisherUI != null)
             finisherUI.SetActive(canFinish);
     }
 
-
-
     void TryStartFinisher(InputAction.CallbackContext ctx)
     {
-        if (!canFinish || targetEnemy == null) 
-        {
-            Debug.LogError("1");
-            return;
-        }
+        if (!canFinish || targetEnemy == null || isFinishing) return;
 
         OnFinisherStarted?.Invoke(targetEnemy);
-        StartFinisher(targetEnemy);
+        StartCoroutine(StartFinisher(targetEnemy));
     }
 
-    void StartFinisher(Transform enemy)
+    IEnumerator StartFinisher(Transform enemy)
     {
-        Debug.LogError("2");
+        isFinishing = true;
+        if (playerController != null)
+            playerController.enabled = false;
+
+        finisherUI.SetActive(false);
+
+        float stopDistance = 0.5f;
+        Vector3 enemyPos = enemy.position;
+
+        while (Vector3.Distance(transform.position, enemyPos) > stopDistance)
+        {
+            Vector3 direction = (enemyPos - transform.position).normalized;
+            transform.position += direction * 5f * Time.deltaTime;
+            transform.LookAt(enemyPos);
+            yield return null;
+        }
+
+        transform.LookAt(enemyPos);
+        yield return new WaitForSeconds(0.1f);
         gun.SetActive(false);
         sword.SetActive(true);
-        Debug.LogError("3");
-        transform.position = enemy.position - enemy.forward * 1.5f;
-        transform.LookAt(enemy);
+        yield return new WaitForSeconds(0.1f);
         animator.SetTrigger("Finisher");
-        isFinishing = true;
-        Debug.LogError("4");
+
+        while (animator.GetCurrentAnimatorStateInfo(0).IsName("Finisher") &&
+               animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+        {
+            yield return null;
+        }
+
         Enemy ragdoll = enemy.GetComponent<Enemy>();
         if (ragdoll != null)
         {
-            Debug.LogError("5");
             ragdoll.EnableRagdoll();
         }
 
-    }
-    void ChangeWeapon()
-    {
+        yield return new WaitForSeconds(1f);
+
         sword.SetActive(false);
         gun.SetActive(true);
+
+        if (playerController != null)
+            playerController.enabled = true;
+
+        isFinishing = false;
+        RemoveEnemy(ragdoll);
+        UpdateEnemies();
+    }
+    public void RemoveEnemy(Enemy enemy)
+    {
+        enemies = enemies.Where(e => e != null && e != enemy).ToArray();
+    }
+
+    public void UpdateEnemies()
+    {
+        enemies = FindObjectsOfType<Enemy>();
+        //Debug.Log($"Обновление списка: найдено {enemies.Length} врагов.");
     }
 }

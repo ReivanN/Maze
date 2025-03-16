@@ -77,13 +77,13 @@ public class TopDownCharacterController : MonoBehaviour
     }
     
     private void UpdateAnimations()
-{
-    Vector3 localMove = transform.InverseTransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
+    {
+        Vector3 localMove = transform.InverseTransformDirection(new Vector3(moveInput.x, 0, moveInput.y));
 
-    animator.SetFloat("VelocityX", localMove.x);
-    animator.SetFloat("VelocityY", localMove.z);
-    animator.SetFloat("Speed", moveInput.sqrMagnitude);
-}
+        animator.SetFloat("VelocityX", localMove.x);
+        animator.SetFloat("VelocityY", localMove.z);
+        animator.SetFloat("Speed", moveInput.sqrMagnitude);
+    }
 
     private void MoveCamera()
     {
@@ -134,14 +134,17 @@ public class TopDownCharacterController : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                Vector3 direction = (hit.point - firePoint.position).normalized;
+
+                Vector3 direction = new Vector3(hit.point.x - firePoint.position.x, 0, hit.point.z - firePoint.position.z).normalized;
                 GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
-                Rigidbody rb = bullet.GetComponent<Rigidbody>();
-                if (rb != null)
+
+                Bullet bulletScript = bullet.GetComponent<Bullet>();
+                if (bulletScript != null)
                 {
-                    rb.linearVelocity = direction * bulletSpeed;
+                    bulletScript.Initialize(direction, bulletSpeed);
                 }
             }
         }
     }
+
 }

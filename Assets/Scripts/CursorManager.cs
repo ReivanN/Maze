@@ -5,7 +5,7 @@ public class CursorManager : MonoBehaviour
     public Texture2D cursorTexture;
     public Vector2 hotspot = Vector2.zero;
     public CursorMode cursorMode = CursorMode.Auto;
-    public int cursorSize = 8; // Новый размер курсора
+    public int cursorSize = 8;
 
     void Start()
     {

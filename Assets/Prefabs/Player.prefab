@@ -124,11 +124,11 @@ Transform:
   m_GameObject: {fileID: 5357759567362765645}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0124, y: 0.0033, z: -0.0005}
+  m_LocalPosition: {x: 0, y: 0.0172, z: 0.0153}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6970703272670071170}
+  m_Father: {fileID: 7557706199888465590}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5487342543756821880
 PrefabInstance:
@@ -299,12 +299,12 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 150444349643224766}
     - targetCorrespondingSourceObject: {fileID: 1140551396920451295, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5452818482854814355}
-    - targetCorrespondingSourceObject: {fileID: 1140551396920451295, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 150444349643224766}
     - targetCorrespondingSourceObject: {fileID: 1140551396920451295, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8760033781008389605}
@@ -517,7 +517,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8d65c13d99838a4d8229cf392ad7aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  finisherRange: 1
+  finisherRange: 2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -525,6 +525,7 @@ MonoBehaviour:
   animator: {fileID: 4468258487169930444}
   gun: {fileID: 4676879539841710121}
   sword: {fileID: 2909052797948871610}
+  playerController: {fileID: 3517014236759297012}
   OnFinisherStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -545,3 +546,8 @@ MonoBehaviour:
       m_Action: Finisher
       m_Flags: 0
     m_Flags: 0
+--- !u!4 &7557706199888465590 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
+  m_PrefabInstance: {fileID: 8027917859535710557}
+  m_PrefabAsset: {fileID: 0}

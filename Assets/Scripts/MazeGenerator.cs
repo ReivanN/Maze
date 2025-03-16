@@ -124,7 +124,6 @@ public class MazeGenerator : MonoBehaviour
 
     System.Random rand = new System.Random();
 
-    // Спавн бомб (ловушек)
     for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
     {
         int index = rand.Next(possiblePositions.Count);
@@ -133,8 +132,6 @@ public class MazeGenerator : MonoBehaviour
 
         maze[trapPos.x, trapPos.y] = 2;
     }
-
-    // Спавн врагов
     for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
     {
         int index = rand.Next(possiblePositions.Count);
@@ -174,20 +171,16 @@ Vector2Int FindFarthestExit(Vector2Int start)
         {
             Vector2Int next = current + dir;
 
-            // Проверяем, что точка находится в пределах лабиринта
             if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2)|| maze[next.x, next.y]== 3)
             {
-                // Проходим ТОЛЬКО по полу (1), избегая бомб (2) и врагов (3)
                 if (!visited.Contains(next))
                 {
                     distances[next] = currentDistance + 1;
                     queue.Enqueue(next);
                     visited.Add(next);
 
-                    // Рассчитываем евклидово расстояние от старта
                     float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2, height - 2));
 
-                    // Проверяем, что точка дальше как по BFS-расстоянию, так и географически
                     if (distances[next] > maxDistance || 
                        (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
                     {
@@ -229,7 +222,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
                 else if (maze[x, y] == 3)
                 {
                     InstantiateFromPool(floorPool, position);
-                    InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
+                    InstantiateFromPool(enemyPool, position);
                 }
             }
         }

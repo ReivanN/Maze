@@ -6,8 +6,14 @@ using static UnityEngine.Timeline.DirectorControlPlayable;
 public class PauseManager : MonoBehaviour
 {
     [SerializeField] private GameObject pause;
+    [SerializeField] private GameObject tutorial;
+    [SerializeField] private GameObject main;
     [SerializeField]private InputAction action;
     private bool isPaused = false;
+    private void Start()
+    {
+        Time.timeScale = 1f;
+    }
     void OnEnable()
     {
         action.Enable();
@@ -22,8 +28,10 @@ public class PauseManager : MonoBehaviour
 
     private void OnPause(InputAction.CallbackContext context)
     {
-        if (isPaused)
+        if (isPaused && main.activeInHierarchy)
             Resume();
+        else if (isPaused && tutorial.activeInHierarchy)
+            CloseTutorial();
         else
             Pause();
     }
@@ -33,6 +41,17 @@ public class PauseManager : MonoBehaviour
         pause.SetActive(true);
         Time.timeScale = 0f;
         isPaused = true;
+    }
+    public void OpenTutorial() 
+    {
+        tutorial.SetActive(true);
+        main.SetActive(false);
+    }
+
+    void CloseTutorial() 
+    {
+        tutorial.SetActive(false);
+        main.SetActive(true);
     }
 
     void Resume()

@@ -311,9 +311,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2438493800660897407}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 3517014236759297012}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
@@ -321,6 +318,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7131640822310172110}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2438493800660897407}
   m_SourcePrefab: {fileID: 100100000, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
 --- !u!95 &4468258487169930444 stripped
 Animator:
@@ -337,27 +337,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
   m_PrefabInstance: {fileID: 8027917859535710557}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2438493800660897407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7181426195906352140}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 066cda5842a769f42832cc9ff8b11a36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 2
-  cameraTransform: {fileID: 0}
-  cameraSmoothSpeed: 5
-  gravity: 9.81
-  maxHealth: 100
-  bulletPrefab: {fileID: 8028388825308528277, guid: 0f2152b750d0340d7b40d8f60bf1adcf, type: 3}
-  firePoint: {fileID: 150444349643224766}
-  fireRate: 2
-  bulletSpeed: 10
 --- !u!143 &3517014236759297012
 CharacterController:
   m_ObjectHideFlags: 0
@@ -376,13 +355,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.04
-  m_Radius: 0.01
+  m_Height: 0.035
+  m_Radius: 0.005
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.02, z: 0}
+  m_Center: {x: 0, y: 0.018, z: 0}
 --- !u!114 &2063390997153029788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,6 +479,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: c399710b-0ff1-4d18-88b4-31ffd563e78b
     m_ActionName: 'Player/Reload[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: da277a87-f1d8-4e52-87ae-e19e214f33b9
+    m_ActionName: 'Player/OnPause[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -546,6 +529,27 @@ MonoBehaviour:
       m_Action: Finisher
       m_Flags: 0
     m_Flags: 0
+--- !u!114 &2438493800660897407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181426195906352140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066cda5842a769f42832cc9ff8b11a36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+  cameraTransform: {fileID: 0}
+  cameraSmoothSpeed: 5
+  gravity: 9.81
+  maxHealth: 100
+  bulletPrefab: {fileID: 8028388825308528277, guid: 0f2152b750d0340d7b40d8f60bf1adcf, type: 3}
+  firePoint: {fileID: 150444349643224766}
+  fireRate: 2
+  bulletSpeed: 10
 --- !u!4 &7557706199888465590 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}

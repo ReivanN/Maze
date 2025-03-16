@@ -7,6 +7,10 @@ public class EndLabirint : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
+            if(MazeManager.Instance.savedMaze != null) 
+            {
+                MazeManager.Instance.savedMaze = null;
+            }
             SceneManager.LoadScene("MazeScene");
         }
     }

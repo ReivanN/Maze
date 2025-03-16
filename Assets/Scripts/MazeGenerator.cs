@@ -12,7 +12,7 @@ public class MazeGenerator : MonoBehaviour
 
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject floorPrefab;
-    [SerializeField] private GameObject trapPrefab;
+    [SerializeField] private GameObject[] trapPrefab;
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject startPointPrefab;
@@ -21,7 +21,7 @@ public class MazeGenerator : MonoBehaviour
     private ObjectPool wallPool;
     private ObjectPool floorPool;
     private ObjectPool enemyPool;
-    private ObjectPool bombPool;
+    private List<ObjectPool> bombPools;
 
 
     private Vector2Int startPosition ;
@@ -32,18 +32,36 @@ public class MazeGenerator : MonoBehaviour
         wallPool = new ObjectPool(wallPrefab, 250, transform);
         floorPool = new ObjectPool(floorPrefab, 200, transform);
         enemyPool = new ObjectPool(enemyPrefab, 5, transform);
-        bombPool = new ObjectPool(trapPrefab, 5, transform);
-        StartCoroutine(GenerateAndSpawn());
+
+        bombPools = new List<ObjectPool>();
+        foreach (var trap in trapPrefab)
+        {
+            bombPools.Add(new ObjectPool(trap, 10, transform));
+        }
+
+        if (MazeManager.Instance.savedMaze != null)
+        {
+            maze = MazeManager.Instance.savedMaze;
+            DefineStartAndExit();
+            SpawnEntities();
+            SpawnPlayer();
+        }
+        else
+        {
+            StartCoroutine(GenerateAndSpawn());
+        }
     }
+
 
     IEnumerator GenerateAndSpawn()
     {
         yield return StartCoroutine(GenerateMazeCoroutine());
 
-        PlaceEnemiesAndTraps(5,5);
+        PlaceEnemiesAndTraps(5,8);
         DefineStartAndExit();
         SpawnEntities();
         SpawnPlayer();
+        MazeManager.Instance.SaveMaze(maze);
     }
 
     IEnumerator GenerateMazeCoroutine()
@@ -217,7 +235,8 @@ Vector2Int FindFarthestExit(Vector2Int start)
                 else if (maze[x, y] == 2)
                 {
                     InstantiateFromPool(floorPool, position);
-                    InstantiateFromPool(bombPool, position + Vector3.up * 0.5f);
+                    int randomTrapIndex = rand.Next(bombPools.Count);
+                    InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
                 }
                 else if (maze[x, y] == 3)
                 {

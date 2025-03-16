@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CursorManager : MonoBehaviour
 {
@@ -9,7 +11,7 @@ public class CursorManager : MonoBehaviour
 
     void Start()
     {
-        if (cursorTexture != null)
+        if (cursorTexture != null && SceneManager.GetActiveScene().name == "MazeScene")
         {
             Texture2D resizedCursor = ResizeTexture(cursorTexture, cursorSize, cursorSize);
             Cursor.SetCursor(resizedCursor, hotspot, cursorMode);

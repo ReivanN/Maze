@@ -4,7 +4,7 @@ using UnityEngine;
 public class ObjectPool
 {
     private Queue<GameObject> pool = new Queue<GameObject>();
-    private GameObject prefab;
+    public GameObject prefab;
     private Transform parent;
 
     public ObjectPool(GameObject prefab, int initialSize, Transform parent = null)
@@ -22,6 +22,7 @@ public class ObjectPool
     private GameObject CreateNewObject()
     {
         GameObject obj = Object.Instantiate(prefab, parent);
+        obj.name = prefab.name + "_Pooled";
         obj.SetActive(false);
         return obj;
     }

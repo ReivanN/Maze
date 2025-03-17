@@ -12,7 +12,7 @@ public class MazeGenerator : MonoBehaviour
 
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject floorPrefab;
-    [SerializeField] private GameObject trapPrefab;
+    [SerializeField] private GameObject[] trapPrefab;
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject startPointPrefab;
@@ -21,7 +21,10 @@ public class MazeGenerator : MonoBehaviour
     private ObjectPool wallPool;
     private ObjectPool floorPool;
     private ObjectPool enemyPool;
-    private ObjectPool bombPool;
+    private List<ObjectPool> bombPools;
+    private ObjectPool playerPool;
+    private ObjectPool startPointPool;
+    private ObjectPool exitPointPool;
 
 
     private Vector2Int startPosition ;
@@ -32,8 +35,26 @@ public class MazeGenerator : MonoBehaviour
         wallPool = new ObjectPool(wallPrefab, 250, transform);
         floorPool = new ObjectPool(floorPrefab, 200, transform);
         enemyPool = new ObjectPool(enemyPrefab, 5, transform);
-        bombPool = new ObjectPool(trapPrefab, 5, transform);
-        GenerateAndSpawn();
+        playerPool = new ObjectPool(playerPrefab, 1, transform);
+        startPointPool = new ObjectPool(startPointPrefab, 1, transform);
+        exitPointPool = new ObjectPool(exitPointPrefab, 1, transform);
+        bombPools = new List<ObjectPool>();
+        foreach (var trap in trapPrefab)
+        {
+            bombPools.Add(new ObjectPool(trap, 10, transform));
+        }
+
+        if (MazeManager.Instance.savedMaze != null)
+        {
+            maze = MazeManager.Instance.savedMaze;
+            DefineStartAndExit();
+            SpawnEntities();
+            SpawnPlayer();
+        }
+        else
+        {
+            GenerateAndSpawn();
+        }
     }
     void Update()
     {
@@ -50,6 +71,7 @@ public class MazeGenerator : MonoBehaviour
         DefineStartAndExit();
         SpawnEntities();
         SpawnPlayer();
+        MazeManager.Instance.SaveMaze(maze);
     }
 
     public void GenerateMazeCoroutine()
@@ -203,42 +225,45 @@ Vector2Int FindFarthestExit(Vector2Int start)
 
 
     void SpawnEntities()
+{
+    for (int x = 0; x < width; x++)
     {
-        for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
         {
-            for (int y = 0; y < height; y++)
+            Vector3 position = new Vector3(x, 0, y);
+            Vector3 wallPosition = new Vector3(x, 0.5f, y);
+            
+            if (maze[x, y] == 0)
             {
-                Vector3 position = new Vector3(x, 0, y);
-                Vector3 wallPosition = new Vector3(x, 0.5f, y);
-                
-                if (maze[x, y] == 0)
-                {
-                    InstantiateFromPool(wallPool, wallPosition);
-                }
-                else if (maze[x, y] == 1)
-                {
-                    InstantiateFromPool(floorPool, position);
-                }
-                else if (maze[x, y] == 2)
-                {
-                    InstantiateFromPool(floorPool, position);
-                    InstantiateFromPool(bombPool, position + Vector3.up * 0.5f);
-                }
-                else if (maze[x, y] == 3)
-                {
-                    InstantiateFromPool(floorPool, position);
-                    InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
-                }
+                InstantiateFromPool(wallPool, wallPosition);
+            }
+            else if (maze[x, y] == 1)
+            {
+                InstantiateFromPool(floorPool, position);
+            }
+            else if (maze[x, y] == 2)
+            {
+                InstantiateFromPool(floorPool, position);
+                int randomTrapIndex = rand.Next(bombPools.Count);
+                InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
+            }
+            else if (maze[x, y] == 3)
+            {
+                InstantiateFromPool(floorPool, position);
+                InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
             }
         }
-        Instantiate(startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
-        Instantiate(exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
     }
+
+    InstantiateFromPool(startPointPool, new Vector3(startPosition.x, 0.01f, startPosition.y));
+    InstantiateFromPool(exitPointPool, new Vector3(exitPosition.x, 0.01f, exitPosition.y));
+}
+
 
     void SpawnPlayer()
     {
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
-        Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+        InstantiateFromPool(playerPool, spawnPosition);
     }
 
     private void InstantiateFromPool(ObjectPool pool, Vector3 position)
@@ -248,51 +273,53 @@ Vector2Int FindFarthestExit(Vector2Int start)
         //obj.gameObject.SetActive(true);
     }
     private void ClearMaze()
-{
-    foreach (Transform child in transform)
     {
-        if (child.gameObject.activeInHierarchy)
+        foreach (Transform child in transform)
         {
-            ObjectPool pool = GetPoolForObject(child.gameObject);
-            if (pool != null)
+            if (child.gameObject.activeInHierarchy)
             {
-                pool.Return(child.gameObject);
-            }
-            else
-            {
-                //child.gameObject.SetActive(false);
+                ObjectPool pool = GetPoolForObject(child.gameObject);
+                if (pool != null)
+                {
+                    pool.Return(child.gameObject);
+                }
+                else
+                {
+                    Destroy(child.gameObject);
+                }
             }
         }
     }
-}
-private ObjectPool GetPoolForObject(GameObject obj)
-{
-    if (obj.name.Contains(wallPrefab.name))
+
+    private ObjectPool GetPoolForObject(GameObject obj)
     {
-        return wallPool;
+        if (obj.name.Contains(wallPrefab.name))
+            return wallPool;
+        if (obj.name.Contains(floorPrefab.name))
+            return floorPool;
+        if (obj.name.Contains(enemyPrefab.name))
+            return enemyPool;
+
+        // Поиск по списку ловушек
+        foreach (var pool in bombPools)
+        {
+            if (obj.name.Contains(pool.prefab.name))
+                return pool;
+        }
+
+        if (obj.name.Contains(playerPrefab.name))
+            return playerPool;
+        if (obj.name.Contains(startPointPrefab.name))
+            return startPointPool;
+        if (obj.name.Contains(exitPointPrefab.name))
+            return exitPointPool;
+
+        return null;
     }
-    else if (obj.name.Contains(floorPrefab.name))
-    {
-        return floorPool;
-    }
-    else if (obj.name.Contains(enemyPrefab.name))
-    {
-        return enemyPool;
-    }
-    else if (obj.name.Contains(trapPrefab.name))
-    {
-        return bombPool;
-    }
-    return null;
-}
+
     public void RegenerateMaze()
     {
         ClearMaze();
-        wallPool.Return(wallPrefab);
-        floorPool.Return(floorPrefab);
-        enemyPool.Return(enemyPrefab);
-        bombPool.Return(trapPrefab);
-
         GenerateAndSpawn();
     }
 }

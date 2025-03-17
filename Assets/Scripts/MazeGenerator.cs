@@ -250,7 +250,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
             else if (maze[x, y] == 3)
             {
                 InstantiateFromPool(floorPool, position);
-                InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
+                InstantiateFromPool(enemyPool, position);
             }
         }
     }

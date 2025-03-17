@@ -51,6 +51,7 @@ public class FinisherSystem : MonoBehaviour
     void Update()
     {
         FindClosestEnemy();
+        CheckTargetWithForwardRaycast();
     }
 
     void FindClosestEnemy()
@@ -143,6 +144,41 @@ public class FinisherSystem : MonoBehaviour
     public void UpdateEnemies()
     {
         enemies = FindObjectsOfType<Enemy>();
-        //Debug.Log($"Обновление списка: найдено {enemies.Length} врагов.");
     }
+
+
+    void CheckTargetWithForwardRaycast()
+    {
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.3f;
+        Vector3 direction = transform.forward;
+
+        if (Physics.Raycast(rayOrigin, direction, out RaycastHit hit, finisherRange, ~0))
+        {
+            Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
+            if (enemy != null && enemy.isAlive && ((1 << hit.collider.gameObject.layer) & enemyLayer) != 0)
+            {
+                targetEnemy = enemy.transform;
+                canFinish = true;
+                if (finisherUI != null)
+                    finisherUI.SetActive(true);
+                Debug.DrawRay(rayOrigin, direction * hit.distance, Color.red);
+                return;
+            }
+            else
+            {
+                targetEnemy = null;
+                canFinish = false;
+                if (finisherUI != null)
+                    finisherUI.SetActive(false);
+                Debug.DrawRay(rayOrigin, direction * hit.distance, Color.yellow);
+                return;
+            }
+        }
+        targetEnemy = null;
+        canFinish = false;
+        if (finisherUI != null)
+            finisherUI.SetActive(false);
+        Debug.DrawRay(rayOrigin, direction * finisherRange, Color.green);
+    }
+
 }

@@ -84,7 +84,7 @@ public class MazeGenerator : MonoBehaviour
         PlaceEnemiesAndTraps(5,5);
         DefineStartAndExit();
         SpawnEntities();
-        SpawnPlayer();
+        StartCoroutine(DelayedSpawnPlayer());
         MazeManager.Instance.SaveMaze(maze);
     }
 
@@ -264,7 +264,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
             else if (maze[x, y] == 3)
             {
                 InstantiateFromPool(floorPool, position);
-                InstantiateFromPool(enemyPool, position + Vector3.up * 0.5f);
+                InstantiateFromPool(enemyPool, position);
             }
         }
     }
@@ -278,6 +278,11 @@ Vector2Int FindFarthestExit(Vector2Int start)
     {
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
         InstantiateFromPool(playerPool, spawnPosition);
+    }
+    IEnumerator DelayedSpawnPlayer()
+    {
+        yield return null; // ждем 1 кадр
+        SpawnPlayer();
     }
 
     private void InstantiateFromPool(ObjectPool pool, Vector3 position)
@@ -322,7 +327,6 @@ Vector2Int FindFarthestExit(Vector2Int start)
         if (obj.name.Contains(enemyPrefab.name))
             return enemyPool;
 
-        // Поиск по списку ловушек
         foreach (var pool in bombPools)
         {
             if (obj.name.Contains(pool.prefab.name))
@@ -331,6 +335,10 @@ Vector2Int FindFarthestExit(Vector2Int start)
 
         if (obj.name.Contains(playerPrefab.name))
             return playerPool;
+        else if (obj.name.Contains(playerPrefab.name))
+        {
+            return playerPool;
+        }
         if (obj.name.Contains(startPointPrefab.name))
             return startPointPool;
         if (obj.name.Contains(exitPointPrefab.name))
@@ -352,7 +360,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
             Debug.LogError("Первый пошел 1.3");
             SpawnEntities();
             Debug.LogError("Первый пошел 1.4");
-            SpawnPlayer();
+            StartCoroutine(DelayedSpawnPlayer());
             Debug.LogError("Первый пошел 1.5");
         }
         else

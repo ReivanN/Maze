@@ -11,7 +11,7 @@ public class EndLabirint : MonoBehaviour
             {
                 MazeManager.Instance.savedMaze = null;
             }
-            SceneManager.LoadScene("MazeScene");
+            MazeManager.Instance.NewMaze();
         }
     }
 }

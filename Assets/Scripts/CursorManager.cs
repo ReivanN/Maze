@@ -1,15 +1,17 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CursorManager : MonoBehaviour
 {
     public Texture2D cursorTexture;
     public Vector2 hotspot = Vector2.zero;
     public CursorMode cursorMode = CursorMode.Auto;
-    public int cursorSize = 8; // Новый размер курсора
+    public int cursorSize = 8;
 
     void Start()
     {
-        if (cursorTexture != null)
+        if (cursorTexture != null && SceneManager.GetActiveScene().name == "MazeScene")
         {
             Texture2D resizedCursor = ResizeTexture(cursorTexture, cursorSize, cursorSize);
             Cursor.SetCursor(resizedCursor, hotspot, cursorMode);

@@ -18,7 +18,7 @@ public class FinisherSystem : MonoBehaviour
     [SerializeField] private CharacterController playerController;
 
     [Header("Events")]
-    public UnityEvent<Transform> OnFinisherStarted;
+    [HideInInspector]public UnityEvent<Transform> OnFinisherStarted;
 
     private Transform targetEnemy;
     private bool canFinish = false;

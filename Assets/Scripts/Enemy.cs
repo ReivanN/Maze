@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour
     private Animator animator;
     public InputAction reloadAction;
     [HideInInspector]public UnityAction EnemyDeath;
-    public bool isAlive = true;
+    [HideInInspector]public bool isAlive = true;
 
     void Start()
     {

@@ -30,6 +30,19 @@ public class MazeGenerator : MonoBehaviour
     private Vector2Int startPosition ;
     private Vector2Int exitPosition;
 
+    public static MazeGenerator Instance;
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         wallPool = new ObjectPool(wallPrefab, 250, transform);
@@ -60,6 +73,7 @@ public class MazeGenerator : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
+            MazeManager.Instance.savedMaze = null;
             RegenerateMaze();
         }
     }
@@ -289,6 +303,14 @@ Vector2Int FindFarthestExit(Vector2Int start)
                 }
             }
         }
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            ObjectPool pool = GetPoolForObject(player);
+            if (pool != null)
+                pool.Return(player);
+        }
     }
 
     private ObjectPool GetPoolForObject(GameObject obj)
@@ -316,10 +338,28 @@ Vector2Int FindFarthestExit(Vector2Int start)
 
         return null;
     }
-
+    
     public void RegenerateMaze()
     {
         ClearMaze();
-        GenerateAndSpawn();
+        Debug.LogError("Первый пошел 1");
+        if (MazeManager.Instance.savedMaze != null)
+        {
+            Debug.LogError("Первый пошел 1.1");
+            maze = MazeManager.Instance.savedMaze;
+            Debug.LogError("Первый пошел 1.2");
+            DefineStartAndExit();
+            Debug.LogError("Первый пошел 1.3");
+            SpawnEntities();
+            Debug.LogError("Первый пошел 1.4");
+            SpawnPlayer();
+            Debug.LogError("Первый пошел 1.5");
+        }
+        else
+        {
+            GenerateAndSpawn();
+            Debug.LogError("Первый пошел 2");
+        }
+        //GenerateAndSpawn();
     }
 }

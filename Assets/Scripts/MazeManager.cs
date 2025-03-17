@@ -28,12 +28,12 @@ public class MazeManager : MonoBehaviour
 
     public void SameMaze()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        MazeGenerator.Instance.RegenerateMaze();
     }
 
     public void NewMaze()
     {
         savedMaze = null;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        MazeGenerator.Instance.RegenerateMaze();
     }
 }

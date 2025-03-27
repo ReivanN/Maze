@@ -4,7 +4,7 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
-    [SerializeField] private GameDifficulty[] difficultyPresets; // Список пресетов сложности
+    [SerializeField] private GameDifficulty[] difficultyPresets;
     private int completedLevels = 0;
     private GameDifficulty currentDifficulty;
 
@@ -28,6 +28,7 @@ public class LevelManager : MonoBehaviour
     public void LevelCompleted()
     {
         completedLevels++;
+        Debug.Log("Was Completed Level " + completedLevels);
         SaveProgress();
         UpdateDifficulty();
     }

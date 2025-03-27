@@ -6,7 +6,6 @@ using UnityEngine;
 public class MazeGenerator : MonoBehaviour
 {
     [SerializeField] private MazeSettings mazeSettings;
-    [SerializeField] private GameDifficulty difficultySettings;
 
     private int[,] maze;
     private System.Random rand = new System.Random();
@@ -44,13 +43,12 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-
     IEnumerator GenerateAndSpawn()
     {
         yield return StartCoroutine(GenerateMazeCoroutine());
 
-        int enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * difficultySettings.spawnRateMultiplier);
-        int trapCount = Mathf.RoundToInt(mazeSettings.trapCount * difficultySettings.spawnRateMultiplier);
+        int enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
+        int trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
 
         PlaceEnemiesAndTraps(enemyCount, trapCount);
         DefineStartAndExit();
@@ -108,7 +106,7 @@ public class MazeGenerator : MonoBehaviour
         foreach (Vector2Int dir in directions)
         {
             Vector2Int neighbor = pos + dir;
-            if (neighbor.x > 0 && neighbor.x < mazeSettings.width - 1 && neighbor.y > 0 && neighbor.y < mazeSettings.   height - 1)
+            if (neighbor.x > 0 && neighbor.x < mazeSettings.width - 1 && neighbor.y > 0 && neighbor.y < mazeSettings.height - 1)
             {
                 if (maze[neighbor.x, neighbor.y] == 0)
                 {
@@ -119,96 +117,96 @@ public class MazeGenerator : MonoBehaviour
         return neighbors;
     }
 
-    void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
-{
-    List<Vector2Int> possiblePositions = new List<Vector2Int>();
-
-    for (int x = 1; x < mazeSettings.width; x += 2)
-    {
-        for (int y = 1; y < mazeSettings.height; y += 2)
-        {
-            Vector2Int pos = new Vector2Int(x, y);
-            if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
-            {
-                possiblePositions.Add(pos);
-            }
-        }
-    }
-
-    System.Random rand = new System.Random();
-
-    for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
-    {
-        int index = rand.Next(possiblePositions.Count);
-        Vector2Int trapPos = possiblePositions[index];
-        possiblePositions.RemoveAt(index);
-
-        maze[trapPos.x, trapPos.y] = 2;
-    }
-    for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
-    {
-        int index = rand.Next(possiblePositions.Count);
-        Vector2Int enemyPos = possiblePositions[index];
-        possiblePositions.RemoveAt(index);
-
-        maze[enemyPos.x, enemyPos.y] = 3;
-    }
-}
-
     void DefineStartAndExit()
     {
         startPosition = new Vector2Int(1, 1);
         exitPosition = FindFarthestExit(startPosition);
     }
 
-Vector2Int FindFarthestExit(Vector2Int start)
-{
-    Queue<Vector2Int> queue = new Queue<Vector2Int>();
-    Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
-    HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-
-    queue.Enqueue(start);
-    distances[start] = 0;
-    visited.Add(start);
-
-    Vector2Int farthestPoint = start;
-    int maxDistance = 0;
-    float maxEuclideanDist = 0;
-
-    while (queue.Count > 0)
+    Vector2Int FindFarthestExit(Vector2Int start)
     {
-        Vector2Int current = queue.Dequeue();
-        int currentDistance = distances[current];
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
-        foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+        queue.Enqueue(start);
+        distances[start] = 0;
+        visited.Add(start);
+
+        Vector2Int farthestPoint = start;
+        int maxDistance = 0;
+        float maxEuclideanDist = 0;
+
+        while (queue.Count > 0)
         {
-            Vector2Int next = current + dir;
+            Vector2Int current = queue.Dequeue();
+            int currentDistance = distances[current];
 
-            if (next.x > 0 && next.y > 0 && next.x < mazeSettings.width - 1 && next.y < mazeSettings.height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2)|| maze[next.x, next.y]== 3)
+            foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
             {
-                if (!visited.Contains(next))
+                Vector2Int next = current + dir;
+
+                if (next.x > 0 && next.y > 0 && next.x < mazeSettings.width - 1 && next.y < mazeSettings.height - 1 &&
+                   (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2 || maze[next.x, next.y] == 3))
                 {
-                    distances[next] = currentDistance + 1;
-                    queue.Enqueue(next);
-                    visited.Add(next);
-
-                    float euclideanDist = Vector2Int.Distance(next, new Vector2Int(mazeSettings.width - 2, mazeSettings.height - 2));
-
-                    if (distances[next] > maxDistance || 
-                       (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
+                    if (!visited.Contains(next))
                     {
-                        maxDistance = distances[next];
-                        maxEuclideanDist = euclideanDist;
-                        farthestPoint = next;
+                        distances[next] = currentDistance + 1;
+                        queue.Enqueue(next);
+                        visited.Add(next);
+
+                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(mazeSettings.width - 2, mazeSettings.height - 2));
+
+                        if (distances[next] > maxDistance ||
+                           (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
+                        {
+                            maxDistance = distances[next];
+                            maxEuclideanDist = euclideanDist;
+                            farthestPoint = next;
+                        }
                     }
                 }
             }
         }
+
+        return farthestPoint;
     }
 
-    return farthestPoint;
-}
+    void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
+    {
+        List<Vector2Int> possiblePositions = new List<Vector2Int>();
 
+        for (int x = 1; x < mazeSettings.width; x += 2)
+        {
+            for (int y = 1; y < mazeSettings.height; y += 2)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
+                {
+                    possiblePositions.Add(pos);
+                }
+            }
+        }
+
+        System.Random rand = new System.Random();
+
+        for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
+        {
+            int index = rand.Next(possiblePositions.Count);
+            Vector2Int trapPos = possiblePositions[index];
+            possiblePositions.RemoveAt(index);
+
+            maze[trapPos.x, trapPos.y] = 2;
+        }
+        for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
+        {
+            int index = rand.Next(possiblePositions.Count);
+            Vector2Int enemyPos = possiblePositions[index];
+            possiblePositions.RemoveAt(index);
+
+            maze[enemyPos.x, enemyPos.y] = 3;
+        }
+    }
 
     void SpawnEntities()
     {
@@ -218,7 +216,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
             {
                 Vector3 position = new Vector3(x, 0, y);
                 Vector3 wallPosition = new Vector3(x, 0.5f, y);
-                
+
                 if (maze[x, y] == 0)
                 {
                     InstantiateFromPool(wallPool, wallPosition);
@@ -250,7 +248,7 @@ Vector2Int FindFarthestExit(Vector2Int start)
         Instantiate(mazeSettings.playerPrefab, spawnPosition, Quaternion.identity);
     }
 
-    private void InstantiateFromPool(ObjectPool pool, Vector3 position)
+    void InstantiateFromPool(ObjectPool pool, Vector3 position)
     {
         GameObject obj = pool.Get();
         obj.transform.position = position;

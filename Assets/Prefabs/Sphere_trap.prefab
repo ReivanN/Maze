@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2175992241263363492}
   - component: {fileID: 5195826333762863239}
   - component: {fileID: 1251146655550357419}
-  - component: {fileID: 3312098237418024040}
+  - component: {fileID: 6594949914198211345}
   m_Layer: 0
   m_Name: Sphere_trap
   m_TagString: Untagged
@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6efba9e7c4ca6f349aafffb8c1daf604, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trapType: 0
+  trapData: {fileID: 11400000, guid: aca69de7b140d334bb3d1ed2c09bdf10, type: 2}
 --- !u!54 &1251146655550357419
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -151,7 +151,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3312098237418024040
+--- !u!114 &6594949914198211345
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -160,6 +160,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1801227894431083789}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95c128c27fbfc1c45883f00f54b1848d, type: 3}
+  m_Script: {fileID: 11500000, guid: 5bf91d20ecae4fe4fbf63ad64f4c01b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

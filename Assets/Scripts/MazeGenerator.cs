@@ -54,6 +54,7 @@ public class MazeGenerator : MonoBehaviour
         DefineStartAndExit();
         SpawnEntities();
         SpawnPlayer();
+        NavMeshBaker.Instance.BakeNavMesh();
         MazeManager.Instance.SaveMaze(maze);
     }
 

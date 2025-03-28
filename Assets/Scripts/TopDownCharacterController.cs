@@ -3,21 +3,22 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class TopDownCharacterController : MonoBehaviour
+public class TopDownCharacterController : MonoBehaviour, IDamageable
 {
-    public float moveSpeed = 5f;
+    [Header("PLayerStat")]
+    public PlayerData playerData;
     private Vector2 moveInput;
     private CharacterController characterController;
     private Animator animator;
     public Transform cameraTransform;
     public float cameraSmoothSpeed = 5f;
-    public float gravity = 9.81f;
+    private float gravity = 9.81f;
     private Vector3 velocity;
-    
-    public int maxHealth = 3;
+    [SerializeField] private HealthUI healthUI;
     private int currentHealth;
     public  event Action<int> onTakeDamage;
 
+    [Header("FireStat")]
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float fireRate = 2f;
@@ -26,16 +27,23 @@ public class TopDownCharacterController : MonoBehaviour
 
     void Awake()
     {
+        healthUI = FindAnyObjectByType<HealthUI>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        currentHealth = maxHealth;
+        currentHealth = playerData.health;
         
         if (cameraTransform == null && Camera.main != null)
         {
             cameraTransform = Camera.main.transform;
         }
     }
-    
+
+    private void Start()
+    {
+        currentHealth = playerData.health;
+        healthUI.UpdateHealth(currentHealth);
+    }
+
     void Update()
     {
         RotateTowardsMouse();
@@ -52,7 +60,7 @@ public class TopDownCharacterController : MonoBehaviour
 
     private void Move()
     {
-        Vector3 moveVector = new Vector3(moveInput.x, 0, moveInput.y) * moveSpeed;
+        Vector3 moveVector = new Vector3(moveInput.x, 0, moveInput.y) * playerData.moveSpeed;
         
         if (!characterController.isGrounded)
         {
@@ -94,19 +102,19 @@ public class TopDownCharacterController : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, TrapType trapType)
     {
         currentHealth -= damage;
         onTakeDamage?.Invoke(currentHealth);
-        if (currentHealth <= 0)
+        healthUI.UpdateHealth(currentHealth);
+        if (currentHealth <= 0 && trapType == TrapType.SaveMaze)
         {
-            Die();
+            MazeManager.Instance.SameMaze();
         }
-    }
-
-    private void Die()
-    {
-        Debug.Log("Player Died");
+        else if (currentHealth <= 0 && trapType == TrapType.NewMaze)
+        {
+            MazeManager.Instance.NewMaze();
+        }
     }
 
     public void OnFire(InputAction.CallbackContext context)

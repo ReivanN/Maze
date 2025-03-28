@@ -541,11 +541,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 066cda5842a769f42832cc9ff8b11a36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
+  playerData: {fileID: 11400000, guid: b933b10015a1bb04da298065a08c62e4, type: 2}
   cameraTransform: {fileID: 0}
   cameraSmoothSpeed: 5
-  gravity: 9.81
-  maxHealth: 100
   bulletPrefab: {fileID: 8028388825308528277, guid: 0f2152b750d0340d7b40d8f60bf1adcf, type: 3}
   firePoint: {fileID: 150444349643224766}
   fireRate: 2

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Blue : MonoBehaviour
+public class BlueTrap : MonoBehaviour
 {
     void OnCollisionEnter(Collision collision)
     {
@@ -15,6 +15,11 @@ public class Blue : MonoBehaviour
                 float pushForce = 5f;
                 rb.AddForce(hitDirection * pushForce, ForceMode.Impulse);
             }
+        }
+
+        if (collision.gameObject.CompareTag("Player")) 
+        {
+            Destroy(this.gameObject);
         }
     }
 }

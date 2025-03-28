@@ -1,42 +1,109 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.AI;
 
 public class Bomb : MonoBehaviour
 {
-    [SerializeField] GameObject particles;
-    [SerializeField] MeshRenderer renderers;
+    [SerializeField] private GameObject particles;
+    [SerializeField] private MeshRenderer renderers;
+    [SerializeField] private float detectionRadius = 5f;
+    [SerializeField] private float moveSpeed = 2f;
+
+    private Transform player;
+    private bool isActivated = false;
+    private NavMeshAgent agent;
+
+    private void Start()
+    {
+        renderers.enabled = false;
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = moveSpeed;
+    }
+
+    private void Update()
+    {
+        if (!isActivated)
+        {
+            DetectPlayer();
+        }
+        else
+        {
+            ChasePlayer();
+        }
+    }
+
+    private void DetectPlayer()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag("Player") && CanSeePlayer(hitCollider.transform))
+            {
+                player = hitCollider.transform;
+                ActivateBomb();
+                break;
+            }
+        }
+    }
+
+    private bool CanSeePlayer(Transform target)
+    {
+        Vector3 direction = (target.position - transform.position).normalized;
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, direction, out hit, detectionRadius))
+        {
+            return hit.collider.CompareTag("Player");
+        }
+        return false;
+    }
+
+    private void ActivateBomb()
+    {
+        isActivated = true;
+        renderers.enabled = true;
+        agent.isStopped = false;
+    }
+
+    private void ChasePlayer()
+    {
+        if (player != null)
+        {
+            agent.SetDestination(player.position);
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            StartBombEffect();
+            Explode();
         }
-
-        if (other.gameObject.CompareTag("Bullet"))
+        else if (other.CompareTag("Bullet"))
         {
-            Instantiate(particles, transform.position, Quaternion.identity);
             Destroy(other.gameObject);
-            Destroy(this.gameObject);
+            Explode();
         }
     }
 
-    private void StartBombEffect()
+    private void Explode()
     {
-        GameObject particleEffect = Instantiate(particles, transform.position, Quaternion.identity);
-
-        ParticleSystem particleSystem = particleEffect.GetComponent<ParticleSystem>();
-        particleSystem.Play();
-        particleSystem.GetComponent<ParticleSystem>().Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        StartCoroutine(WaitForParticlesToFinish(particleSystem));
-
-        renderers.enabled = false;
+        Instantiate(particles, transform.position, Quaternion.identity);
+        Destroy(gameObject);
     }
 
-    IEnumerator WaitForParticlesToFinish(ParticleSystem particleSystem)
+    private void OnDrawGizmos()
     {
-        yield return new WaitUntil(() => !particleSystem.isPlaying);
-        SceneManager.LoadScene("MazeScene");
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
+
+        if (player != null && isActivated)
+        {
+            // Направление и длина Raycast
+            Vector3 direction = (player.position - transform.position).normalized;
+            float rayLength = detectionRadius; // длина луча равна радиусу детекции
+
+            Gizmos.color = Color.green; // Цвет для Raycast
+            Gizmos.DrawLine(transform.position, transform.position + direction * rayLength); // Линия от бомбы к игроку
+        }
     }
 }

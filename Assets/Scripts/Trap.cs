@@ -2,20 +2,15 @@ using UnityEngine;
 
 public class Trap : MonoBehaviour
 {
-    public TrapType trapType;
+    
+    public TrapData trapData;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            if (trapType == TrapType.SaveMaze)
-            {
-                MazeManager.Instance.SameMaze();
-            }
-            else if (trapType == TrapType.NewMaze)
-            {
-                MazeManager.Instance.NewMaze();
-            }
+            IDamageable damageable = other.GetComponent<IDamageable>();
+            damageable.TakeDamage(trapData.damage, trapData.trapType);
         }
     }
 
@@ -24,14 +19,8 @@ public class Trap : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (trapType == TrapType.SaveMaze)
-            {
-                MazeManager.Instance.SameMaze();
-            }
-            else if (trapType == TrapType.NewMaze)
-            {
-                MazeManager.Instance.NewMaze();
-            }
+            IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
+            damageable.TakeDamage(trapData.damage, trapData.trapType);
         }
     }
 }

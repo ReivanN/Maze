@@ -5,41 +5,27 @@ using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
 {
-    [SerializeField] public int width = 21;
-    [SerializeField] public int height = 21;
+    [SerializeField] private MazeSettings mazeSettings;
+
     private int[,] maze;
     private System.Random rand = new System.Random();
-
-    [SerializeField] private GameObject wallPrefab;
-    [SerializeField] private GameObject floorPrefab;
-    [SerializeField] private GameObject[] trapPrefab;
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject startPointPrefab;
-    [SerializeField] private GameObject exitPointPrefab;
 
     private ObjectPool wallPool;
     private ObjectPool floorPool;
     private ObjectPool enemyPool;
     private List<ObjectPool> bombPools;
-    private ObjectPool playerPool;
-    private ObjectPool startPointPool;
-    private ObjectPool exitPointPool;
 
-
-    private Vector2Int startPosition ;
+    private Vector2Int startPosition;
     private Vector2Int exitPosition;
 
     void Start()
     {
-        wallPool = new ObjectPool(wallPrefab, 250, transform);
-        floorPool = new ObjectPool(floorPrefab, 200, transform);
-        enemyPool = new ObjectPool(enemyPrefab, 5, transform);
-        playerPool = new ObjectPool(playerPrefab, 1, transform);
-        startPointPool = new ObjectPool(startPointPrefab, 1, transform);
-        exitPointPool = new ObjectPool(exitPointPrefab, 1, transform);
+        wallPool = new ObjectPool(mazeSettings.wallPrefab, 250, transform);
+        floorPool = new ObjectPool(mazeSettings.floorPrefab, 200, transform);
+        enemyPool = new ObjectPool(mazeSettings.enemyPrefab, 5, transform);
+
         bombPools = new List<ObjectPool>();
-        foreach (var trap in trapPrefab)
+        foreach (var trap in mazeSettings.trapPrefabs)
         {
             bombPools.Add(new ObjectPool(trap, 10, transform));
         }
@@ -53,33 +39,30 @@ public class MazeGenerator : MonoBehaviour
         }
         else
         {
-            GenerateAndSpawn();
+            StartCoroutine(GenerateAndSpawn());
         }
     }
-    void Update()
+
+    IEnumerator GenerateAndSpawn()
     {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RegenerateMaze();
-        }
-    }
-    
-    public void GenerateAndSpawn()
-    {
-        GenerateMazeCoroutine();
-        PlaceEnemiesAndTraps(5,5);
+        yield return StartCoroutine(GenerateMazeCoroutine());
+
+        int enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
+        int trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
+
+        PlaceEnemiesAndTraps(enemyCount, trapCount);
         DefineStartAndExit();
         SpawnEntities();
         SpawnPlayer();
         MazeManager.Instance.SaveMaze(maze);
     }
 
-    public void GenerateMazeCoroutine()
+    IEnumerator GenerateMazeCoroutine()
     {
-        maze = new int[width, height];
-        
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
+        maze = new int[mazeSettings.width, mazeSettings.height];
+
+        for (int x = 0; x < mazeSettings.width; x++)
+            for (int y = 0; y < mazeSettings.height; y++)
                 maze[x, y] = 0;
 
         int startX = 1, startY = 1;
@@ -107,6 +90,7 @@ public class MazeGenerator : MonoBehaviour
                 stack.Pop();
             }
 
+            yield return null;
         }
     }
 
@@ -122,7 +106,7 @@ public class MazeGenerator : MonoBehaviour
         foreach (Vector2Int dir in directions)
         {
             Vector2Int neighbor = pos + dir;
-            if (neighbor.x > 0 && neighbor.x < width - 1 && neighbor.y > 0 && neighbor.y < height - 1)
+            if (neighbor.x > 0 && neighbor.x < mazeSettings.width - 1 && neighbor.y > 0 && neighbor.y < mazeSettings.height - 1)
             {
                 if (maze[neighbor.x, neighbor.y] == 0)
                 {
@@ -133,193 +117,140 @@ public class MazeGenerator : MonoBehaviour
         return neighbors;
     }
 
-    void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
-{
-    List<Vector2Int> possiblePositions = new List<Vector2Int>();
-
-    for (int x = 1; x < width; x += 2)
-    {
-        for (int y = 1; y < height; y += 2)
-        {
-            Vector2Int pos = new Vector2Int(x, y);
-            if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
-            {
-                possiblePositions.Add(pos);
-            }
-        }
-    }
-
-    System.Random rand = new System.Random();
-
-    for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
-    {
-        int index = rand.Next(possiblePositions.Count);
-        Vector2Int trapPos = possiblePositions[index];
-        possiblePositions.RemoveAt(index);
-
-        maze[trapPos.x, trapPos.y] = 2;
-    }
-
-    for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
-    {
-        int index = rand.Next(possiblePositions.Count);
-        Vector2Int enemyPos = possiblePositions[index];
-        possiblePositions.RemoveAt(index);
-
-        maze[enemyPos.x, enemyPos.y] = 3;
-    }
-}
-
     void DefineStartAndExit()
     {
         startPosition = new Vector2Int(1, 1);
         exitPosition = FindFarthestExit(startPosition);
     }
 
-Vector2Int FindFarthestExit(Vector2Int start)
-{
-    Queue<Vector2Int> queue = new Queue<Vector2Int>();
-    Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
-    HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-
-    queue.Enqueue(start);
-    distances[start] = 0;
-    visited.Add(start);
-
-    Vector2Int farthestPoint = start;
-    int maxDistance = 0;
-    float maxEuclideanDist = 0;
-
-    while (queue.Count > 0)
+    Vector2Int FindFarthestExit(Vector2Int start)
     {
-        Vector2Int current = queue.Dequeue();
-        int currentDistance = distances[current];
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
-        foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+        queue.Enqueue(start);
+        distances[start] = 0;
+        visited.Add(start);
+
+        Vector2Int farthestPoint = start;
+        int maxDistance = 0;
+        float maxEuclideanDist = 0;
+
+        while (queue.Count > 0)
         {
-            Vector2Int next = current + dir;
-            if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 && (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2)|| maze[next.x, next.y]== 3)
+            Vector2Int current = queue.Dequeue();
+            int currentDistance = distances[current];
+
+            foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
             {
-                if (!visited.Contains(next))
+                Vector2Int next = current + dir;
+
+                if (next.x > 0 && next.y > 0 && next.x < mazeSettings.width - 1 && next.y < mazeSettings.height - 1 &&
+                   (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2 || maze[next.x, next.y] == 3))
                 {
-                    distances[next] = currentDistance + 1;
-                    queue.Enqueue(next);
-                    visited.Add(next);
-
-                    float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2, height - 2));
-
-                    if (distances[next] > maxDistance || 
-                       (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
+                    if (!visited.Contains(next))
                     {
-                        maxDistance = distances[next];
-                        maxEuclideanDist = euclideanDist;
-                        farthestPoint = next;
+                        distances[next] = currentDistance + 1;
+                        queue.Enqueue(next);
+                        visited.Add(next);
+
+                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(mazeSettings.width - 2, mazeSettings.height - 2));
+
+                        if (distances[next] > maxDistance ||
+                           (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
+                        {
+                            maxDistance = distances[next];
+                            maxEuclideanDist = euclideanDist;
+                            farthestPoint = next;
+                        }
                     }
                 }
             }
         }
+
+        return farthestPoint;
     }
 
-    return farthestPoint;
-}
-
-
-    void SpawnEntities()
-{
-    for (int x = 0; x < width; x++)
+    void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
     {
-        for (int y = 0; y < height; y++)
+        List<Vector2Int> possiblePositions = new List<Vector2Int>();
+
+        for (int x = 1; x < mazeSettings.width; x += 2)
         {
-            Vector3 position = new Vector3(x, 0, y);
-            Vector3 wallPosition = new Vector3(x, 0.5f, y);
-            
-            if (maze[x, y] == 0)
+            for (int y = 1; y < mazeSettings.height; y += 2)
             {
-                InstantiateFromPool(wallPool, wallPosition);
+                Vector2Int pos = new Vector2Int(x, y);
+                if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
+                {
+                    possiblePositions.Add(pos);
+                }
             }
-            else if (maze[x, y] == 1)
-            {
-                InstantiateFromPool(floorPool, position);
-            }
-            else if (maze[x, y] == 2)
-            {
-                InstantiateFromPool(floorPool, position);
-                int randomTrapIndex = rand.Next(bombPools.Count);
-                InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
-            }
-            else if (maze[x, y] == 3)
-            {
-                InstantiateFromPool(floorPool, position);
-                InstantiateFromPool(enemyPool, position);
-            }
+        }
+
+        System.Random rand = new System.Random();
+
+        for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
+        {
+            int index = rand.Next(possiblePositions.Count);
+            Vector2Int trapPos = possiblePositions[index];
+            possiblePositions.RemoveAt(index);
+
+            maze[trapPos.x, trapPos.y] = 2;
+        }
+        for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
+        {
+            int index = rand.Next(possiblePositions.Count);
+            Vector2Int enemyPos = possiblePositions[index];
+            possiblePositions.RemoveAt(index);
+
+            maze[enemyPos.x, enemyPos.y] = 3;
         }
     }
 
-    InstantiateFromPool(startPointPool, new Vector3(startPosition.x, 0.01f, startPosition.y));
-    InstantiateFromPool(exitPointPool, new Vector3(exitPosition.x, 0.01f, exitPosition.y));
-}
+    void SpawnEntities()
+    {
+        for (int x = 0; x < mazeSettings.width; x++)
+        {
+            for (int y = 0; y < mazeSettings.height; y++)
+            {
+                Vector3 position = new Vector3(x, 0, y);
+                Vector3 wallPosition = new Vector3(x, 0.5f, y);
 
+                if (maze[x, y] == 0)
+                {
+                    InstantiateFromPool(wallPool, wallPosition);
+                }
+                else if (maze[x, y] == 1)
+                {
+                    InstantiateFromPool(floorPool, position);
+                }
+                else if (maze[x, y] == 2)
+                {
+                    InstantiateFromPool(floorPool, position);
+                    int randomTrapIndex = rand.Next(bombPools.Count);
+                    InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
+                }
+                else if (maze[x, y] == 3)
+                {
+                    InstantiateFromPool(floorPool, position);
+                    InstantiateFromPool(enemyPool, position);
+                }
+            }
+        }
+        Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
+        Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
+    }
 
     void SpawnPlayer()
     {
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
-        InstantiateFromPool(playerPool, spawnPosition);
+        Instantiate(mazeSettings.playerPrefab, spawnPosition, Quaternion.identity);
     }
 
-    private void InstantiateFromPool(ObjectPool pool, Vector3 position)
+    void InstantiateFromPool(ObjectPool pool, Vector3 position)
     {
         GameObject obj = pool.Get();
         obj.transform.position = position;
-        //obj.gameObject.SetActive(true);
-    }
-    private void ClearMaze()
-    {
-        foreach (Transform child in transform)
-        {
-            if (child.gameObject.activeInHierarchy)
-            {
-                ObjectPool pool = GetPoolForObject(child.gameObject);
-                if (pool != null)
-                {
-                    pool.Return(child.gameObject);
-                }
-                else
-                {
-                    Destroy(child.gameObject);
-                }
-            }
-        }
-    }
-
-    private ObjectPool GetPoolForObject(GameObject obj)
-    {
-        if (obj.name.Contains(wallPrefab.name))
-            return wallPool;
-        if (obj.name.Contains(floorPrefab.name))
-            return floorPool;
-        if (obj.name.Contains(enemyPrefab.name))
-            return enemyPool;
-
-        // Поиск по списку ловушек
-        foreach (var pool in bombPools)
-        {
-            if (obj.name.Contains(pool.prefab.name))
-                return pool;
-        }
-
-        if (obj.name.Contains(playerPrefab.name))
-            return playerPool;
-        if (obj.name.Contains(startPointPrefab.name))
-            return startPointPool;
-        if (obj.name.Contains(exitPointPrefab.name))
-            return exitPointPool;
-
-        return null;
-    }
-
-    public void RegenerateMaze()
-    {
-        ClearMaze();
-        GenerateAndSpawn();
     }
 }

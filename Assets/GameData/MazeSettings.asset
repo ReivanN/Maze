@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f43fa370342f99943af14c364334ae80, type: 3}
+  m_Name: MazeSettings
+  m_EditorClassIdentifier: 
+  width: 21
+  height: 21
+  enemyCount: 10
+  trapCount: 10
+  wallPrefab: {fileID: 7965052463596878992, guid: ca6ccd3a2099cc14ead86cdc1eb506c7, type: 3}
+  floorPrefab: {fileID: 680236845878297783, guid: 6a02dd6813e25424888caac4aa7640bf, type: 3}
+  trapPrefabs:
+  - {fileID: 1801227894431083789, guid: 18af93b6d6545c344bc2bda16e88f428, type: 3}
+  - {fileID: 1772684110708517589, guid: 2de09b7e9ab8cf14a9191ba1b9321a28, type: 3}
+  enemyPrefab: {fileID: 7718154780804771419, guid: feaccdc489b1d634181a47b5b77d9438, type: 3}
+  playerPrefab: {fileID: 7181426195906352140, guid: dcd1286545e77224d8c242ca516cd87c, type: 3}
+  startPointPrefab: {fileID: 9091674112727050998, guid: cfa41e90f69222a49a64b1ebbb386845, type: 3}
+  exitPointPrefab: {fileID: 8234590230774685726, guid: cdaa9c49d78ac4a4a91072ff55bb789a, type: 3}

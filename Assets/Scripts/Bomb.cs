@@ -11,13 +11,15 @@ public class Bomb : MonoBehaviour
     private Transform player;
     private bool isActivated = false;
     private NavMeshAgent agent;
+    NavMeshHit hit;
 
     private void Start()
     {
         renderers.enabled = false;
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = moveSpeed;
+        
     }
+
+
 
     private void Update()
     {
@@ -33,6 +35,8 @@ public class Bomb : MonoBehaviour
 
     private void DetectPlayer()
     {
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = moveSpeed;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hitCollider in hitColliders)
         {

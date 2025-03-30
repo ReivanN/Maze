@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -25,6 +26,9 @@ public class FinisherSystem : MonoBehaviour
     [SerializeField] private InputAction finisherAction;
     private Enemy[] enemies;
     private bool isFinishing = false;
+
+    public event Action<int> OnKillCountChanged;
+    private int KillCount = 0;
 
     private void Start()
     {
@@ -134,6 +138,8 @@ public class FinisherSystem : MonoBehaviour
 
         isFinishing = false;
         RemoveEnemy(ragdoll);
+        KillCount++;
+        OnKillCountChanged?.Invoke(KillCount);
         UpdateEnemies();
     }
     public void RemoveEnemy(Enemy enemy)

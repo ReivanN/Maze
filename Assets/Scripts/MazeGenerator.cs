@@ -50,13 +50,45 @@ public class MazeGenerator : MonoBehaviour
         int enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
         int trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
 
-        PlaceEnemiesAndTraps(enemyCount, trapCount);
-        DefineStartAndExit();
-        SpawnEntities();
-        SpawnPlayer();
-        NavMeshBaker.Instance.BakeNavMesh();
+        yield return StartCoroutine(PlaceEnemiesAndTrapsCoroutine(enemyCount, trapCount));
+        yield return StartCoroutine(DefineStartAndExitCoroutine());
+        yield return StartCoroutine(SpawnEntitiesCoroutine());
+        yield return StartCoroutine(SpawnPlayerCoroutine());
+        yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
+        yield return StartCoroutine(SpawnEnemiesCourutine());
         MazeManager.Instance.SaveMaze(maze);
     }
+
+    IEnumerator PlaceEnemiesAndTrapsCoroutine(int enemyCount, int trapCount)
+    {
+        PlaceEnemiesAndTraps(enemyCount, trapCount);
+        yield return null;
+    }
+
+    IEnumerator DefineStartAndExitCoroutine()
+    {
+        DefineStartAndExit();
+        yield return null;
+    }
+
+    IEnumerator SpawnEntitiesCoroutine()
+    {
+        SpawnEntities();
+        yield return null;
+    }
+    IEnumerator SpawnEnemiesCourutine() 
+    {
+        SpawnEnemies();
+        yield return null;
+    }
+
+
+    IEnumerator SpawnPlayerCoroutine()
+    {
+        SpawnPlayer();
+        yield return null;
+    }
+
 
     IEnumerator GenerateMazeCoroutine()
     {
@@ -226,12 +258,6 @@ public class MazeGenerator : MonoBehaviour
                 {
                     InstantiateFromPool(floorPool, position);
                 }
-                else if (maze[x, y] == 2)
-                {
-                    InstantiateFromPool(floorPool, position);
-                    int randomTrapIndex = rand.Next(bombPools.Count);
-                    InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
-                }
                 else if (maze[x, y] == 3)
                 {
                     InstantiateFromPool(floorPool, position);
@@ -239,9 +265,29 @@ public class MazeGenerator : MonoBehaviour
                 }
             }
         }
+
         Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
         Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
     }
+
+    void SpawnEnemies()
+    {
+        for (int x = 0; x < mazeSettings.width; x++)
+        {
+            for (int y = 0; y < mazeSettings.height; y++)
+            {
+                Vector3 position = new Vector3(x, 0, y);
+
+                if (maze[x, y] == 2)
+                {
+                    InstantiateFromPool(floorPool, position);
+                    int randomTrapIndex = rand.Next(bombPools.Count);
+                    InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
+                }
+            }
+        }
+    }
+
 
     void SpawnPlayer()
     {

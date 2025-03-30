@@ -1,11 +1,13 @@
+using System.Collections;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public class NavMeshBaker : MonoBehaviour
 {
     private static NavMeshBaker instance;
-    public NavMeshSurface navMeshSurface;
+    private NavMeshSurface navMeshSurface;
 
     public static NavMeshBaker Instance
     {
@@ -13,7 +15,7 @@ public class NavMeshBaker : MonoBehaviour
         {
             if (instance == null)
             {
-                instance = FindObjectOfType<NavMeshBaker>();
+                instance = FindAnyObjectByType<NavMeshBaker>();
                 if (instance == null)
                 {
                     GameObject singletonObject = new GameObject("NavMeshBaker");
@@ -35,14 +37,44 @@ public class NavMeshBaker : MonoBehaviour
         else if (instance != this)
         {
             Destroy(gameObject);
+            return;
         }
 
-        navMeshSurface = GetComponent<NavMeshSurface>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindNavMeshSurface(); // Ищем NavMeshSurface в новой сцене
+        StartCoroutine(BakeNavMeshCoroutine()); // Перебейкаем
+    }
+
+    private void FindNavMeshSurface()
+    {
+        navMeshSurface = FindAnyObjectByType<NavMeshSurface>();
+
+        if (navMeshSurface == null)
+        {
+            Debug.LogError("NavMeshSurface не найден в сцене! Проверьте, что он есть в Hierarchy.");
+        }
     }
 
     public void BakeNavMesh()
     {
-        navMeshSurface.BuildNavMesh();
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
+        else
+        {
+            Debug.LogError("Невозможно запечь NavMesh! NavMeshSurface не найден.");
+        }
+    }
+
+    public IEnumerator BakeNavMeshCoroutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        BakeNavMesh();
     }
 
     private void Update()
@@ -51,5 +83,10 @@ public class NavMeshBaker : MonoBehaviour
         {
             BakeNavMesh();
         }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

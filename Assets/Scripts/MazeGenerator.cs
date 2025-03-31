@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MazeGenerator : MonoBehaviour
 {
@@ -13,7 +14,6 @@ public class MazeGenerator : MonoBehaviour
     private ObjectPool wallPool;
     private ObjectPool floorPool;
     private ObjectPool enemyPool;
-    private List<ObjectPool> bombPools;
 
     private Vector2Int startPosition;
     private Vector2Int exitPosition;
@@ -24,18 +24,9 @@ public class MazeGenerator : MonoBehaviour
         floorPool = new ObjectPool(mazeSettings.floorPrefab, 200, transform);
         enemyPool = new ObjectPool(mazeSettings.enemyPrefab, 5, transform);
 
-        bombPools = new List<ObjectPool>();
-        foreach (var trap in mazeSettings.trapPrefabs)
-        {
-            bombPools.Add(new ObjectPool(trap, 10, transform));
-        }
-
         if (MazeManager.Instance.savedMaze != null)
         {
-            maze = MazeManager.Instance.savedMaze;
-            DefineStartAndExit();
-            SpawnEntities();
-            SpawnPlayer();
+            StartCoroutine(SpawnSave());
         }
         else
         {
@@ -55,8 +46,18 @@ public class MazeGenerator : MonoBehaviour
         yield return StartCoroutine(SpawnEntitiesCoroutine());
         yield return StartCoroutine(SpawnPlayerCoroutine());
         yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
-        yield return StartCoroutine(SpawnEnemiesCourutine());
+        yield return StartCoroutine(SpawnEnemiesCoroutine());
+        
         MazeManager.Instance.SaveMaze(maze);
+    }
+
+    IEnumerator SpawnSave()
+    {
+        maze = MazeManager.Instance.savedMaze;
+        yield return StartCoroutine(SpawnEntitiesCoroutine());
+        yield return StartCoroutine(SpawnPlayerCoroutine());
+        yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
+        yield return StartCoroutine(SpawnEnemiesCoroutine());
     }
 
     IEnumerator PlaceEnemiesAndTrapsCoroutine(int enemyCount, int trapCount)
@@ -76,19 +77,18 @@ public class MazeGenerator : MonoBehaviour
         SpawnEntities();
         yield return null;
     }
-    IEnumerator SpawnEnemiesCourutine() 
+
+    IEnumerator SpawnEnemiesCoroutine()
     {
         SpawnEnemies();
         yield return null;
     }
-
 
     IEnumerator SpawnPlayerCoroutine()
     {
         SpawnPlayer();
         yield return null;
     }
-
 
     IEnumerator GenerateMazeCoroutine()
     {
@@ -221,8 +221,6 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        System.Random rand = new System.Random();
-
         for (int i = 0; i < trapCount && possiblePositions.Count > 0; i++)
         {
             int index = rand.Next(possiblePositions.Count);
@@ -231,6 +229,7 @@ public class MazeGenerator : MonoBehaviour
 
             maze[trapPos.x, trapPos.y] = 2;
         }
+
         for (int i = 0; i < enemyCount && possiblePositions.Count > 0; i++)
         {
             int index = rand.Next(possiblePositions.Count);
@@ -258,6 +257,11 @@ public class MazeGenerator : MonoBehaviour
                 {
                     InstantiateFromPool(floorPool, position);
                 }
+                else if (maze[x, y] == 2)
+                {
+                    // Здесь создаём только пол, ловушки будем инстанцировать отдельно
+                    InstantiateFromPool(floorPool, position);
+                }
                 else if (maze[x, y] == 3)
                 {
                     InstantiateFromPool(floorPool, position);
@@ -276,15 +280,51 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int y = 0; y < mazeSettings.height; y++)
             {
-                Vector3 position = new Vector3(x, 0, y);
-
-                if (maze[x, y] == 2)
+                if (maze[x, y] == 2) // 2 - бомба
                 {
-                    InstantiateFromPool(floorPool, position);
-                    int randomTrapIndex = rand.Next(bombPools.Count);
-                    InstantiateFromPool(bombPools[randomTrapIndex], position + Vector3.up * 0.5f);
+                    Vector3 trapPosition = new Vector3(x, 0.5f, y);
+
+                    // Проверяем, есть ли рядом NavMesh
+                    if (NavMesh.SamplePosition(trapPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+                    {
+                        trapPosition = hit.position; // Перемещаем точку на NavMesh
+                        Debug.Log($"Бомба скорректирована и спавнится на NavMesh в {trapPosition}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"Не удалось найти ближайший NavMesh для бомбы в позиции {trapPosition}!");
+                        continue; // Пропускаем спавн, если нет доступного NavMesh
+                    }
+
+                    // Спавним бомбу
+                    GameObject bomb = Instantiate(
+                        mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)],
+                        trapPosition,
+                        Quaternion.identity
+                    );
+
+                    // Проверяем, действительно ли объект на NavMesh
+                    NavMeshAgent agent = bomb.GetComponent<NavMeshAgent>();
+                    if (agent != null)
+                    {
+                        StartCoroutine(WaitForNavMesh(agent));
+                    }
                 }
             }
+        }
+    }
+
+    private IEnumerator WaitForNavMesh(NavMeshAgent agent)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (!agent.isOnNavMesh)
+        {
+            Debug.LogError($"Бомба {agent.gameObject.name} заспавнилась вне NavMesh!");
+        }
+        else
+        {
+            Debug.Log($"Бомба {agent.gameObject.name} успешно на NavMesh.");
         }
     }
 

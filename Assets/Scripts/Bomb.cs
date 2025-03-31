@@ -3,23 +3,37 @@ using UnityEngine.AI;
 
 public class Bomb : MonoBehaviour
 {
-    [SerializeField] private GameObject particles;
-    [SerializeField] private MeshRenderer renderers;
+    [SerializeField] private GameObject explosionEffect;
+    [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private float detectionRadius = 5f;
     [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private LayerMask obstaclesMask; // Маска препятствий
 
     private Transform player;
     private bool isActivated = false;
     private NavMeshAgent agent;
-    NavMeshHit hit;
+
+    private void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = moveSpeed;
+        meshRenderer.enabled = false;
+        agent.enabled = false;
+    }
 
     private void Start()
     {
-        renderers.enabled = false;
-        
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+            agent.enabled = true;
+        }
+        else
+        {
+            Debug.LogError("Бомба не найдена на NavMesh! Переместите её вручную.");
+            agent.enabled = false;
+        }
     }
-
-
 
     private void Update()
     {
@@ -29,14 +43,19 @@ public class Bomb : MonoBehaviour
         }
         else
         {
-            ChasePlayer();
+            if (player == null || !IsPlayerStillVisible())
+            {
+                DeactivateBomb();
+            }
+            else
+            {
+                ChasePlayer();
+            }
         }
     }
 
     private void DetectPlayer()
     {
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = moveSpeed;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hitCollider in hitColliders)
         {
@@ -44,7 +63,7 @@ public class Bomb : MonoBehaviour
             {
                 player = hitCollider.transform;
                 ActivateBomb();
-                break;
+                return;
             }
         }
     }
@@ -52,25 +71,41 @@ public class Bomb : MonoBehaviour
     private bool CanSeePlayer(Transform target)
     {
         Vector3 direction = (target.position - transform.position).normalized;
-        RaycastHit hit;
+        float distance = Vector3.Distance(transform.position, target.position);
 
-        if (Physics.Raycast(transform.position, direction, out hit, detectionRadius))
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, distance, obstaclesMask))
         {
-            return hit.collider.CompareTag("Player");
+            return false; // Перед игроком есть препятствие
         }
-        return false;
+
+        return true; // Игрок виден
+    }
+
+    private bool IsPlayerStillVisible()
+    {
+        if (player == null) return false;
+
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        return distanceToPlayer <= detectionRadius && CanSeePlayer(player);
     }
 
     private void ActivateBomb()
     {
         isActivated = true;
-        renderers.enabled = true;
+        meshRenderer.enabled = true;
         agent.isStopped = false;
+    }
+
+    private void DeactivateBomb()
+    {
+        isActivated = false;
+        player = null;
+        agent.ResetPath();
     }
 
     private void ChasePlayer()
     {
-        if (player != null)
+        if (player != null && agent.enabled)
         {
             agent.SetDestination(player.position);
         }
@@ -78,20 +113,19 @@ public class Bomb : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") || other.CompareTag("Bullet"))
         {
-            Explode();
-        }
-        else if (other.CompareTag("Bullet"))
-        {
-            Destroy(other.gameObject);
+            if (other.CompareTag("Bullet"))
+            {
+                Destroy(other.gameObject);
+            }
             Explode();
         }
     }
 
     private void Explode()
     {
-        Instantiate(particles, transform.position, Quaternion.identity);
+        Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 
@@ -102,12 +136,8 @@ public class Bomb : MonoBehaviour
 
         if (player != null && isActivated)
         {
-            // Направление и длина Raycast
-            Vector3 direction = (player.position - transform.position).normalized;
-            float rayLength = detectionRadius; // длина луча равна радиусу детекции
-
-            Gizmos.color = Color.green; // Цвет для Raycast
-            Gizmos.DrawLine(transform.position, transform.position + direction * rayLength); // Линия от бомбы к игроку
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, player.position);
         }
     }
 }

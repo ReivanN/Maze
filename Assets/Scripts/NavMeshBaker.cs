@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class NavMeshBaker : MonoBehaviour
 {
     private static NavMeshBaker instance;
-    private NavMeshSurface navMeshSurface;
+    public NavMeshSurface navMeshSurface;
 
     public static NavMeshBaker Instance
     {
@@ -45,8 +45,8 @@ public class NavMeshBaker : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        FindNavMeshSurface(); // Ищем NavMeshSurface в новой сцене
-        StartCoroutine(BakeNavMeshCoroutine()); // Перебейкаем
+        FindNavMeshSurface();
+        StartCoroutine(BakeNavMeshCoroutine());
     }
 
     private void FindNavMeshSurface()

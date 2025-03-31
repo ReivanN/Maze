@@ -140,6 +140,7 @@ public class FinisherSystem : MonoBehaviour
         RemoveEnemy(ragdoll);
         KillCount++;
         OnKillCountChanged?.Invoke(KillCount);
+        PlayerPrefs.SetInt("Kills" + KillCount, KillCount);
         UpdateEnemies();
     }
     public void RemoveEnemy(Enemy enemy)

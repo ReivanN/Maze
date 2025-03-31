@@ -6,10 +6,22 @@ public class KillsUI : MonoBehaviour
     public TextMeshProUGUI killscount;
     private FinisherSystem finisherSystem;
 
+
+    private void Start()
+    {
+        if(PlayerPrefs.GetInt("Kills") > 0) 
+        {
+            CountText(PlayerPrefs.GetInt("Kills"));
+        }
+        else 
+        {
+            CountText(0);
+        }
+    }
     private void OnEnable()
     {
         TryFindFinisherSystem();
-        InvokeRepeating(nameof(TryFindFinisherSystem), 0f, 1f); // Проверка каждую секунду
+        InvokeRepeating(nameof(TryFindFinisherSystem), 0f, 1f);
     }
 
     private void OnDisable()
@@ -31,7 +43,8 @@ public class KillsUI : MonoBehaviour
             {
                 finisherSystem.OnKillCountChanged += CountText;
                 Debug.Log("FinisherSystem найден и подписан!");
-                CancelInvoke(nameof(TryFindFinisherSystem)); // Останавливаем поиск после нахождения
+                CancelInvoke(nameof(TryFindFinisherSystem));
+                CountText(0);
             }
         }
     }

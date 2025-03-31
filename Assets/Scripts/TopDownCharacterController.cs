@@ -21,7 +21,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [Header("FireStat")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireRate = 2f;
+    public float fireRate = 0.5f;
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
 
@@ -51,6 +51,12 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         MoveCamera();
         Move();
         HandleShooting();
+
+        if (isFiring && Time.time >= nextFireTime)
+        {
+            Shoot();
+            nextFireTime = Time.time + fireRate;
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -77,6 +83,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private void RotateTowardsMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (Time.timeScale == 0f) return;
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             Vector3 lookPos = new Vector3(hit.point.x, transform.position.y, hit.point.z);
@@ -115,14 +122,22 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         {
             MazeManager.Instance.NewMaze();
         }
+        else if (currentHealth <= 0) 
+        {
+
+        }
     }
+    private bool isFiring; 
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        if (context.performed && Time.time >= nextFireTime)
+        if (context.started)
         {
-            Shoot();
-            nextFireTime = Time.time + fireRate;
+            isFiring = true; // Начинаем стрельбу
+        }
+        else if (context.canceled)
+        {
+            isFiring = false; // Останавливаем стрельбу
         }
     }
 
@@ -155,4 +170,23 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         }
     }
 
+
+    private void OnDrawGizmos()
+    {
+        if (firePoint == null || Camera.main == null) return;
+
+        Gizmos.color = Color.red;
+
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            Gizmos.DrawLine(firePoint.position, hit.point);
+            Gizmos.DrawSphere(hit.point, 0.1f);
+        }
+        else
+        {
+            Vector3 endPoint = ray.origin + ray.direction * 100f;
+            Gizmos.DrawLine(firePoint.position, endPoint);
+        }
+    }
 }

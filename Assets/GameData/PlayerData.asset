@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2403e05e0ac0324f91c0db2c6f02b9c, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: 
-  health: 3
+  health: 100
   damage: 1
-  moveSpeed: 3
+  moveSpeed: 2.5

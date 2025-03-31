@@ -75,10 +75,10 @@ public class Bomb : MonoBehaviour
 
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, distance, obstaclesMask))
         {
-            return false; // Перед игроком есть препятствие
+            return false;
         }
 
-        return true; // Игрок виден
+        return true; 
     }
 
     private bool IsPlayerStillVisible()
@@ -86,7 +86,7 @@ public class Bomb : MonoBehaviour
         if (player == null) return false;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        return distanceToPlayer <= detectionRadius && CanSeePlayer(player);
+        return distanceToPlayer <= detectionRadius;
     }
 
     private void ActivateBomb()

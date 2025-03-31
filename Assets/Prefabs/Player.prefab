@@ -544,9 +544,10 @@ MonoBehaviour:
   playerData: {fileID: 11400000, guid: b933b10015a1bb04da298065a08c62e4, type: 2}
   cameraTransform: {fileID: 0}
   cameraSmoothSpeed: 5
+  healthUI: {fileID: 0}
   bulletPrefab: {fileID: 8028388825308528277, guid: 0f2152b750d0340d7b40d8f60bf1adcf, type: 3}
   firePoint: {fileID: 150444349643224766}
-  fireRate: 2
+  fireRate: 0.2
   bulletSpeed: 10
 --- !u!4 &7557706199888465590 stripped
 Transform:

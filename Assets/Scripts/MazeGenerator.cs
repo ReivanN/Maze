@@ -18,6 +18,8 @@ public class MazeGenerator : MonoBehaviour
     private Vector2Int startPosition;
     private Vector2Int exitPosition;
 
+
+
     void Start()
     {
         wallPool = new ObjectPool(mazeSettings.wallPrefab, 250, transform);

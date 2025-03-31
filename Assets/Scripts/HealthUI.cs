@@ -1,13 +1,22 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HealthUI : MonoBehaviour
 {
-    [SerializeField] private GameObject[] healthIcons;
+    [SerializeField] private TextMeshProUGUI healthText;
+    [SerializeField] private Image healthBar;  
+    [SerializeField] private int maxHealth = 100; 
+
+    private void Start()
+    {
+        UpdateHealth(maxHealth);
+    }
+
     public void UpdateHealth(int currentHealth)
     {
-        for (int i = 0; i < healthIcons.Length; i++)
-        {
-            healthIcons[i].SetActive(i < currentHealth);
-        }
+        healthText.text = $"{currentHealth} / {maxHealth}";
+        float healthPercentage = Mathf.Clamp01((float)currentHealth / maxHealth);
+        healthBar.fillAmount = healthPercentage;
     }
 }

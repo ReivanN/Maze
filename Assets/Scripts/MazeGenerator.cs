@@ -18,10 +18,11 @@ public class MazeGenerator : MonoBehaviour
     private Vector2Int startPosition;
     private Vector2Int exitPosition;
 
-
+    public static bool IsDone = false;
 
     void Start()
     {
+        IsDone = false;
         wallPool = new ObjectPool(mazeSettings.wallPrefab, 250, transform);
         floorPool = new ObjectPool(mazeSettings.floorPrefab, 200, transform);
         enemyPool = new ObjectPool(mazeSettings.enemyPrefab, 5, transform);
@@ -51,6 +52,7 @@ public class MazeGenerator : MonoBehaviour
         yield return StartCoroutine(SpawnEnemiesCoroutine());
         
         MazeManager.Instance.SaveMaze(maze);
+        IsDone = true;
     }
 
     IEnumerator SpawnSave()
@@ -60,6 +62,7 @@ public class MazeGenerator : MonoBehaviour
         yield return StartCoroutine(SpawnPlayerCoroutine());
         yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
         yield return StartCoroutine(SpawnEnemiesCoroutine());
+        IsDone = true;
     }
 
     IEnumerator PlaceEnemiesAndTrapsCoroutine(int enemyCount, int trapCount)
@@ -92,12 +95,15 @@ public class MazeGenerator : MonoBehaviour
         yield return null;
     }
 
+    int width = LevelManager.Instance.CurrentDifficulty.width;
+    int height = LevelManager.Instance.CurrentDifficulty.height;
     IEnumerator GenerateMazeCoroutine()
     {
-        maze = new int[mazeSettings.width, mazeSettings.height];
+        
+        maze = new int[width, height];
 
-        for (int x = 0; x < mazeSettings.width; x++)
-            for (int y = 0; y < mazeSettings.height; y++)
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
                 maze[x, y] = 0;
 
         int startX = 1, startY = 1;
@@ -109,7 +115,7 @@ public class MazeGenerator : MonoBehaviour
         while (stack.Count > 0)
         {
             Vector2Int current = stack.Peek();
-            List<Vector2Int> neighbors = GetUnvisitedNeighbors(current);
+            List<Vector2Int> neighbors = GetUnvisitedNeighbors(current, width, height);
 
             if (neighbors.Count > 0)
             {
@@ -129,19 +135,20 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-    List<Vector2Int> GetUnvisitedNeighbors(Vector2Int pos)
+
+    List<Vector2Int> GetUnvisitedNeighbors(Vector2Int pos, int width, int height)
     {
         List<Vector2Int> neighbors = new List<Vector2Int>();
 
         Vector2Int[] directions = {
-            new Vector2Int(2, 0), new Vector2Int(-2, 0),
-            new Vector2Int(0, 2), new Vector2Int(0, -2)
-        };
+        new Vector2Int(2, 0), new Vector2Int(-2, 0),
+        new Vector2Int(0, 2), new Vector2Int(0, -2)
+    };
 
         foreach (Vector2Int dir in directions)
         {
             Vector2Int neighbor = pos + dir;
-            if (neighbor.x > 0 && neighbor.x < mazeSettings.width - 1 && neighbor.y > 0 && neighbor.y < mazeSettings.height - 1)
+            if (neighbor.x > 0 && neighbor.x < width - 1 && neighbor.y > 0 && neighbor.y < height - 1)
             {
                 if (maze[neighbor.x, neighbor.y] == 0)
                 {
@@ -151,6 +158,7 @@ public class MazeGenerator : MonoBehaviour
         }
         return neighbors;
     }
+
 
     void DefineStartAndExit()
     {
@@ -181,7 +189,7 @@ public class MazeGenerator : MonoBehaviour
             {
                 Vector2Int next = current + dir;
 
-                if (next.x > 0 && next.y > 0 && next.x < mazeSettings.width - 1 && next.y < mazeSettings.height - 1 &&
+                if (next.x > 0 && next.y > 0 && next.x < width - 1 && next.y < height - 1 &&
                    (maze[next.x, next.y] == 1 || maze[next.x, next.y] == 2 || maze[next.x, next.y] == 3))
                 {
                     if (!visited.Contains(next))
@@ -190,7 +198,7 @@ public class MazeGenerator : MonoBehaviour
                         queue.Enqueue(next);
                         visited.Add(next);
 
-                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(mazeSettings.width - 2, mazeSettings.height - 2));
+                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2,height - 2));
 
                         if (distances[next] > maxDistance ||
                            (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
@@ -211,9 +219,9 @@ public class MazeGenerator : MonoBehaviour
     {
         List<Vector2Int> possiblePositions = new List<Vector2Int>();
 
-        for (int x = 1; x < mazeSettings.width; x += 2)
+        for (int x = 1; x < width; x += 2)
         {
-            for (int y = 1; y < mazeSettings.height; y += 2)
+            for (int y = 1; y < height; y += 2)
             {
                 Vector2Int pos = new Vector2Int(x, y);
                 if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
@@ -244,9 +252,9 @@ public class MazeGenerator : MonoBehaviour
 
     void SpawnEntities()
     {
-        for (int x = 0; x < mazeSettings.width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < mazeSettings.height; y++)
+            for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
                 Vector3 wallPosition = new Vector3(x, 0.5f, y);
@@ -278,9 +286,9 @@ public class MazeGenerator : MonoBehaviour
 
     void SpawnEnemies()
     {
-        for (int x = 0; x < mazeSettings.width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < mazeSettings.height; y++)
+            for (int y = 0; y < height; y++)
             {
                 if (maze[x, y] == 2) // 2 - бомба
                 {
@@ -290,11 +298,11 @@ public class MazeGenerator : MonoBehaviour
                     if (NavMesh.SamplePosition(trapPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
                     {
                         trapPosition = hit.position; // Перемещаем точку на NavMesh
-                        Debug.Log($"Бомба скорректирована и спавнится на NavMesh в {trapPosition}");
+                        //Debug.Log($"Бомба скорректирована и спавнится на NavMesh в {trapPosition}");
                     }
                     else
                     {
-                        Debug.LogError($"Не удалось найти ближайший NavMesh для бомбы в позиции {trapPosition}!");
+                        //Debug.LogError($"Не удалось найти ближайший NavMesh для бомбы в позиции {trapPosition}!");
                         continue; // Пропускаем спавн, если нет доступного NavMesh
                     }
 

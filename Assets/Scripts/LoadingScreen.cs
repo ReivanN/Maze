@@ -6,7 +6,7 @@ public class LoadingScreen : MonoBehaviour
 {
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private TextMeshProUGUI loadingText;
-    [SerializeField] private GameObject player;
+
     private bool isLoading = true;
     void Start()
     {
@@ -15,14 +15,14 @@ public class LoadingScreen : MonoBehaviour
 
     void Update()
     {
-        if(player == null) 
+        if(MazeGenerator.IsDone == false) 
         {
-            player = GameObject.FindGameObjectWithTag("Player");
+            loadingScreen.SetActive(true);
         }
         else 
         {
-                loadingScreen.SetActive(false);
-                this.enabled = false;
+            loadingScreen.SetActive(false);
+            this.enabled = false;
         }
 
     }

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: PlayerData
   m_EditorClassIdentifier: 
   health: 100
-  damage: 1
+  damage: 10
   moveSpeed: 2.5

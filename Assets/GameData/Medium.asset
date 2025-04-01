@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Medium
   m_EditorClassIdentifier: 
   difficultyName: Medium
-  enemyHealthMultiplier: 2
-  enemyDamageMultiplier: 2
+  width: 21
+  height: 21
   spawnRateMultiplier: 2

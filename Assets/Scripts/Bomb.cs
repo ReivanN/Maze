@@ -1,17 +1,22 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Bomb : MonoBehaviour
+public class Bomb : MonoBehaviour, IDamageable
 {
     [SerializeField] private GameObject explosionEffect;
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private float detectionRadius = 5f;
     [SerializeField] private float moveSpeed = 2f;
-    [SerializeField] private LayerMask obstaclesMask; // Маска препятствий
+    [SerializeField] private LayerMask obstaclesMask;
+    [SerializeField] private float HP = 50f;
+    [SerializeField] private float currentHP;
 
     private Transform player;
     private bool isActivated = false;
     private NavMeshAgent agent;
+
+    private IHealthBar healthBar;
+
 
     private void Awake()
     {
@@ -19,10 +24,12 @@ public class Bomb : MonoBehaviour
         agent.speed = moveSpeed;
         meshRenderer.enabled = false;
         agent.enabled = false;
+        healthBar = GetComponentInChildren<IHealthBar>();
     }
 
     private void Start()
     {
+        currentHP = HP;
         if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
         {
             transform.position = hit.position;
@@ -113,13 +120,21 @@ public class Bomb : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") || other.CompareTag("Bullet"))
+        if (other.CompareTag("Player"))
         {
-            if (other.CompareTag("Bullet"))
-            {
-                Destroy(other.gameObject);
-            }
+            TakeDamage(50, TrapType.SaveMaze);
             Explode();
+            
+            
+        }
+        else if (other.CompareTag("Bullet"))
+        {
+            TakeDamage(10, TrapType.NewMaze);
+            if(currentHP <= 0) 
+            {
+                Explode();
+            }
+            Destroy(other.gameObject);
         }
     }
 
@@ -127,6 +142,17 @@ public class Bomb : MonoBehaviour
     {
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
+    }
+
+    public void TakeDamage(int damage, TrapType trapType) 
+    {
+        currentHP -= damage;
+        healthBar?.UpdateHealthBar(currentHP, HP);
+
+        if (currentHP <= 0)
+        {
+            Explode();
+        }
     }
 
     private void OnDrawGizmos()

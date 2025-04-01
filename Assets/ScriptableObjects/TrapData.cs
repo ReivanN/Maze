@@ -5,4 +5,5 @@ public class TrapData : ScriptableObject
 {
     public TrapType trapType;
     public int damage;
+    public float health;
 }

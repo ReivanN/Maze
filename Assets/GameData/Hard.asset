@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Hard
   m_EditorClassIdentifier: 
   difficultyName: Hard
-  enemyHealthMultiplier: 3
-  enemyDamageMultiplier: 3
+  width: 31
+  height: 31
   spawnRateMultiplier: 3

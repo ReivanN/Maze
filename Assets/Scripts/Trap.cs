@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Trap : MonoBehaviour
 {
-    
+
     public TrapData trapData;
 
     private void OnTriggerEnter(Collider other)

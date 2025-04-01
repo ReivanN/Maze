@@ -30,7 +30,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         healthUI = FindAnyObjectByType<HealthUI>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        currentHealth = playerData.health;
         
         if (cameraTransform == null && Camera.main != null)
         {
@@ -40,9 +39,25 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        currentHealth = playerData.health;
+        bool hasCompletedLevels = PlayerPrefs.HasKey("CompletedLevels") && PlayerPrefs.GetInt("CompletedLevels") > 0;
+        bool hasSavedHealth = PlayerPrefs.HasKey("HP");
+
+        Debug.Log($"CompletedLevels: {PlayerPrefs.GetInt("CompletedLevels", -1)}, HP Exists: {hasSavedHealth}, HP Value: {PlayerPrefs.GetInt("HP", -1)}");
+
+        if (hasSavedHealth)
+        {
+            currentHealth = PlayerPrefs.GetInt("HP");
+            Debug.Log($"Загрузил сохранённое HP: {currentHealth}");
+        }
+        else if (!hasSavedHealth)
+        {
+            currentHealth = playerData.health;
+            Debug.Log($"Начинаю с {currentHealth} HP");
+        }
+
         healthUI.UpdateHealth(currentHealth);
     }
+
 
     void Update()
     {
@@ -114,17 +129,19 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         currentHealth -= damage;
         onTakeDamage?.Invoke(currentHealth);
         healthUI.UpdateHealth(currentHealth);
+        PlayerPrefs.SetInt("HP", currentHealth);
+        PlayerPrefs.Save();
         if (currentHealth <= 0 && trapType == TrapType.SaveMaze)
         {
+            PlayerPrefs.DeleteKey("HP");
+            LevelManager.Instance.ResetProgress();
             MazeManager.Instance.SameMaze();
         }
         else if (currentHealth <= 0 && trapType == TrapType.NewMaze)
         {
+            PlayerPrefs.DeleteKey("HP");
+            LevelManager.Instance.ResetProgress();
             MazeManager.Instance.NewMaze();
-        }
-        else if (currentHealth <= 0) 
-        {
-
         }
     }
     private bool isFiring; 

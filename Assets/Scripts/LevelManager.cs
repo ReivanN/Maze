@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -5,6 +6,7 @@ public class LevelManager : MonoBehaviour
     public static LevelManager Instance { get; private set; }
 
     [SerializeField] private GameDifficulty[] difficultyPresets;
+    private int currentLevel = 1;
     private int completedLevels = 0;
     private GameDifficulty currentDifficulty;
 
@@ -18,19 +20,27 @@ public class LevelManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             LoadProgress();
+            currentLevel = 1;
         }
         else
         {
             Destroy(gameObject);
         }
     }
-
+    public void LevelStarted() 
+    {
+        Debug.Log("Was Started Level " + completedLevels);
+    }
+    public void LevelUI(TextMeshProUGUI textMeshProUGUI) 
+    {
+        textMeshProUGUI.text = "Level " + currentLevel;
+    }
     public void LevelCompleted()
     {
+        currentLevel++;
         completedLevels++;
-        Debug.Log("Was Completed Level " + completedLevels);
         SaveProgress();
-        UpdateDifficulty();
+        Debug.Log("Was Completed Level " + completedLevels);
     }
 
     private void UpdateDifficulty()
@@ -43,18 +53,23 @@ public class LevelManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("CompletedLevels", completedLevels);
         PlayerPrefs.Save();
+        PlayerPrefs.SetInt("currentLevel", currentLevel);
+        PlayerPrefs.Save();
     }
 
     private void LoadProgress()
     {
-        completedLevels = PlayerPrefs.GetInt("CompletedLevels", 0);
+        completedLevels = PlayerPrefs.GetInt("CompletedLevels");
+        currentLevel = PlayerPrefs.GetInt("currentLevel");
         UpdateDifficulty();
     }
 
     public void ResetProgress()
     {
         PlayerPrefs.DeleteKey("CompletedLevels");
+        PlayerPrefs.DeleteKey("currentLevel");
         completedLevels = 0;
+        currentLevel = 1;
         UpdateDifficulty();
     }
 }

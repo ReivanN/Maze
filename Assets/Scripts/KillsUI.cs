@@ -9,9 +9,10 @@ public class KillsUI : MonoBehaviour
 
     private void Start()
     {
-        if(PlayerPrefs.GetInt("Kills") > 0) 
+        int count = PlayerPrefs.GetInt("Kills");
+        if(count > 0) 
         {
-            CountText(PlayerPrefs.GetInt("Kills"));
+            CountText(count);
         }
         else 
         {

@@ -12,7 +12,7 @@ public class EndLabirint : MonoBehaviour
                 MazeManager.Instance.savedMaze = null;
             }
             LevelManager.Instance.LevelCompleted();
-            SceneManager.LoadScene("MazeScene");
+            MazeManager.Instance.NewMaze();
         }
     }
 }

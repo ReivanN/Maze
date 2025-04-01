@@ -12,7 +12,7 @@ public class HealthUI : MonoBehaviour
 
     private void Start()
     {
-        UpdateHealth(maxHealth, instant: true);
+        //UpdateHealth(maxHealth, instant: true);
     }
 
     public void UpdateHealth(int currentHealth, bool instant = false)

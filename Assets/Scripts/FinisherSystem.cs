@@ -38,6 +38,7 @@ public class FinisherSystem : MonoBehaviour
             finisherUI.SetActive(false);
 
         UpdateEnemies();
+        KillCount = PlayerPrefs.GetInt("Kills");
     }
 
     private void OnEnable()

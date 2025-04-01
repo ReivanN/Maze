@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamageable
 {
     private Rigidbody[] ragdollBodies;
     private Animator animator;
@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     private Transform player;
 
     [SerializeField] private float health = 100f;
+    [SerializeField] private float currenthealth;
     [SerializeField] private float speed = 3.5f;
     [SerializeField] private float stoppingDistance = 1.5f;
     [SerializeField] private float detectionRadius = 10f;
@@ -19,13 +20,15 @@ public class Enemy : MonoBehaviour
     [HideInInspector] public bool isAlive = true;
     private bool isActivated = false;
 
+    private IHealthBar healthBar;
+
     void Start()
     {
         ragdollBodies = GetComponentsInChildren<Rigidbody>();
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
-
+        healthBar = GetComponentInChildren<IHealthBar>();
         DisableRagdoll();
         agent.speed = speed;
         agent.stoppingDistance = stoppingDistance;
@@ -106,11 +109,12 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(int damage, TrapType trapType)
     {
         if (!isAlive) return;
 
         health -= damage;
+        healthBar?.UpdateHealthBar(currenthealth, health);
         if (health <= 0)
         {
             Die();
@@ -140,6 +144,14 @@ public class Enemy : MonoBehaviour
         foreach (var rb in ragdollBodies)
         {
             rb.isKinematic = true;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Bullet")) 
+        {
+            TakeDamage(10, TrapType.SaveMaze);
         }
     }
 

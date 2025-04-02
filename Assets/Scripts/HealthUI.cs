@@ -7,7 +7,6 @@ public class HealthUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private Image healthBar;
-    [SerializeField] private int maxHealth = 100;
     [SerializeField] private float animationDuration = 0.5f;
 
     private void Start()
@@ -15,7 +14,7 @@ public class HealthUI : MonoBehaviour
         //UpdateHealth(maxHealth, instant: true);
     }
 
-    public void UpdateHealth(int currentHealth, bool instant = false)
+    public void UpdateHealth(float currentHealth,float maxHealth ,bool instant = false)
     {
         healthText.text = $"{currentHealth} / {maxHealth}";
         float healthPercentage = Mathf.Clamp01((float)currentHealth / maxHealth);

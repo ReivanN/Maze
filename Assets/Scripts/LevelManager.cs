@@ -51,16 +51,17 @@ public class LevelManager : MonoBehaviour
 
     private void SaveProgress()
     {
-        PlayerPrefs.SetInt("CompletedLevels", completedLevels);
-        PlayerPrefs.Save();
-        PlayerPrefs.SetInt("currentLevel", currentLevel);
-        PlayerPrefs.Save();
+        GameData gameData = new() { level = currentLevel };
+        SaveManager.Instance.Save(gameData);
     }
 
     private void LoadProgress()
     {
-        completedLevels = PlayerPrefs.GetInt("CompletedLevels");
-        currentLevel = PlayerPrefs.GetInt("currentLevel");
+        GameData data = SaveManager.Instance.Load();
+        if (data != null) 
+        {
+            currentLevel = data.level;
+        }
         UpdateDifficulty();
     }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 public class BlueTrap : MonoBehaviour
 {
     private IHealthBar healthBar;
-    private float HP = 100;
+    private float HP = 50;
     private float currentHP;
     private void Awake()
     {
@@ -20,7 +20,7 @@ public class BlueTrap : MonoBehaviour
                 Vector3 bulletPosition = collision.transform.position;
                 Vector3 hitDirection = (transform.position - bulletPosition).normalized;
                 Rigidbody bulletRb = collision.gameObject.GetComponent<Rigidbody>();
-                float pushForce = 5f;
+                float pushForce = 1f;
                 rb.AddForce(hitDirection * pushForce, ForceMode.Impulse);
                 TakeDamage(10, TrapType.NewMaze);
             }

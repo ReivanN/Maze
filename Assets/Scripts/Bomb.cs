@@ -8,7 +8,7 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private float detectionRadius = 5f;
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private LayerMask obstaclesMask;
-    [SerializeField] private float HP = 50f;
+    [SerializeField] private float HP = 20f;
     [SerializeField] private float currentHP;
 
     private Transform player;

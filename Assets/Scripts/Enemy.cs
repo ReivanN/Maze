@@ -12,7 +12,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private float health = 100f;
     [SerializeField] private float currenthealth;
     [SerializeField] private float speed = 3.5f;
-    [SerializeField] private float stoppingDistance = 1.5f;
+    [SerializeField] private float stoppingDistance = 2f;
     [SerializeField] private float detectionRadius = 10f;
     [SerializeField] private LayerMask obstaclesMask;
 
@@ -22,16 +22,25 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private IHealthBar healthBar;
 
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Bullet"))
+        {
+            TakeDamage(10, TrapType.NewMaze);
+        }
+    }
+
     void Start()
     {
         ragdollBodies = GetComponentsInChildren<Rigidbody>();
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
         healthBar = GetComponentInChildren<IHealthBar>();
         DisableRagdoll();
         agent.speed = speed;
         agent.stoppingDistance = stoppingDistance;
+        currenthealth = health;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void Update()
@@ -58,7 +67,7 @@ public class Enemy : MonoBehaviour, IDamageable
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hitCollider in hitColliders)
         {
-            if (hitCollider.CompareTag("Player") && CanSeePlayer(hitCollider.transform))
+            if (hitCollider.CompareTag("Player"))
             {
                 player = hitCollider.transform;
                 ActivateEnemy();
@@ -111,11 +120,11 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage, TrapType trapType)
     {
-        if (!isAlive) return;
+        //if (!isAlive) return;
 
-        health -= damage;
+        currenthealth -= damage;
         healthBar?.UpdateHealthBar(currenthealth, health);
-        if (health <= 0)
+        if (currenthealth <= 0)
         {
             Die();
         }
@@ -123,7 +132,9 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        healthBar.HideHealthBar();
         isAlive = false;
+        GetComponent<Collider>().enabled = false;
         EnableRagdoll();
         agent.enabled = false;
         EnemyDeath?.Invoke();
@@ -147,13 +158,7 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Bullet")) 
-        {
-            TakeDamage(10, TrapType.SaveMaze);
-        }
-    }
+    
 
     private void OnDrawGizmos()
     {

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class TopDownCharacterController : MonoBehaviour, IDamageable
 {
@@ -15,8 +16,9 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float gravity = 9.81f;
     private Vector3 velocity;
     [SerializeField] private HealthUI healthUI;
-    private int currentHealth;
-    public  event Action<int> onTakeDamage;
+    private float currentHealth;
+    private float MAXHealth;
+    public  event Action<float> onTakeDamage;
 
     [Header("FireStat")]
     public GameObject bulletPrefab;
@@ -25,6 +27,32 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
 
+
+
+    private void LoadPlayerData()
+    {
+        GameData data = SaveManager.Instance.Load();
+        if (data != null)
+        {
+            currentHealth = data.health;
+            MAXHealth = data.maxHealth;
+            healthUI.UpdateHealth(currentHealth, MAXHealth);
+            Debug.LogError(currentHealth);
+            Debug.LogError(MAXHealth);
+        }
+    }
+
+    public void SavePlayerData()
+    {
+        GameData data = new() { health = currentHealth, maxHealth = MAXHealth };
+        SaveManager.Instance.Save(data);
+        Debug.LogError("SAVE HP " + data.health);
+    }
+
+    public void DeletePlayerData()
+    {
+        SaveManager.Instance.DeleteSave();
+    }
     void Awake()
     {
         healthUI = FindAnyObjectByType<HealthUI>();
@@ -39,23 +67,25 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        bool hasCompletedLevels = PlayerPrefs.HasKey("CompletedLevels") && PlayerPrefs.GetInt("CompletedLevels") > 0;
-        bool hasSavedHealth = PlayerPrefs.HasKey("HP");
-
-        Debug.Log($"CompletedLevels: {PlayerPrefs.GetInt("CompletedLevels", -1)}, HP Exists: {hasSavedHealth}, HP Value: {PlayerPrefs.GetInt("HP", -1)}");
-
-        if (hasSavedHealth)
+        if (SaveManager.Instance != null)
         {
-            currentHealth = PlayerPrefs.GetInt("HP");
-            Debug.Log($"Загрузил сохранённое HP: {currentHealth}");
+            LoadPlayerData();
+            /*GameData loadedData = SaveManager.Instance.Load();
+            if (loadedData != null)
+            {
+                MAXHealth = playerData.health;
+                currentHealth = loadedData.health;
+                healthUI.UpdateHealth(currentHealth, MAXHealth);
+                Debug.Log("Продолжаем игру");
+            }
+            else
+            {
+                MAXHealth = playerData.health;
+                currentHealth = playerData.health;
+                healthUI.UpdateHealth(currentHealth, MAXHealth);
+                Debug.Log("Начинаем новую игру");
+            }*/
         }
-        else if (!hasSavedHealth)
-        {
-            currentHealth = playerData.health;
-            Debug.Log($"Начинаю с {currentHealth} HP");
-        }
-
-        healthUI.UpdateHealth(currentHealth);
     }
 
 
@@ -71,6 +101,24 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         {
             Shoot();
             nextFireTime = Time.time + fireRate;
+        }
+    }
+
+    public void ApplyUpgrade(Upgrade upgrade)
+    {
+        switch (upgrade.type)
+        {
+            case UpgradeType.HealthBoost:
+                MAXHealth *= upgrade.value;
+                healthUI.UpdateHealth(currentHealth, MAXHealth);
+                SavePlayerData();
+                break;
+            case UpgradeType.DamageIncrease:
+                playerData.damage *= upgrade.value;
+                break;
+            case UpgradeType.SpeedBoost:
+                playerData.moveSpeed *= upgrade.value;
+                break;
         }
     }
 
@@ -128,18 +176,15 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         currentHealth -= damage;
         onTakeDamage?.Invoke(currentHealth);
-        healthUI.UpdateHealth(currentHealth);
-        PlayerPrefs.SetInt("HP", currentHealth);
-        PlayerPrefs.Save();
+        healthUI.UpdateHealth(currentHealth, MAXHealth);
+        SavePlayerData();
         if (currentHealth <= 0 && trapType == TrapType.SaveMaze)
         {
-            PlayerPrefs.DeleteKey("HP");
             LevelManager.Instance.ResetProgress();
             MazeManager.Instance.SameMaze();
         }
         else if (currentHealth <= 0 && trapType == TrapType.NewMaze)
         {
-            PlayerPrefs.DeleteKey("HP");
             LevelManager.Instance.ResetProgress();
             MazeManager.Instance.NewMaze();
         }
@@ -195,15 +240,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         Gizmos.color = Color.red;
 
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            Gizmos.DrawLine(firePoint.position, hit.point);
-            Gizmos.DrawSphere(hit.point, 0.1f);
-        }
-        else
-        {
-            Vector3 endPoint = ray.origin + ray.direction * 100f;
-            Gizmos.DrawLine(firePoint.position, endPoint);
-        }
+        
     }
 }

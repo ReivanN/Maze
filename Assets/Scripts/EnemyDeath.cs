@@ -21,7 +21,7 @@ public class EnemyDeath : MonoBehaviour
     }
     IEnumerator Died()
     {
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(2);
         Destroy(this.gameObject);
     }
 }

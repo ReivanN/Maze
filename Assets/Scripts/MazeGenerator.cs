@@ -47,10 +47,9 @@ public class MazeGenerator : MonoBehaviour
         yield return StartCoroutine(PlaceEnemiesAndTrapsCoroutine(enemyCount, trapCount));
         yield return StartCoroutine(DefineStartAndExitCoroutine());
         yield return StartCoroutine(SpawnEntitiesCoroutine());
-        yield return StartCoroutine(SpawnPlayerCoroutine());
         yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
         yield return StartCoroutine(SpawnEnemiesCoroutine());
-        
+        StartCoroutine(SpawnPlayerCoroutine());
         MazeManager.Instance.SaveMaze(maze);
         IsDone = true;
     }
@@ -59,9 +58,9 @@ public class MazeGenerator : MonoBehaviour
     {
         maze = MazeManager.Instance.savedMaze;
         yield return StartCoroutine(SpawnEntitiesCoroutine());
-        yield return StartCoroutine(SpawnPlayerCoroutine());
         yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
         yield return StartCoroutine(SpawnEnemiesCoroutine());
+        StartCoroutine(SpawnPlayerCoroutine());
         IsDone = true;
     }
 

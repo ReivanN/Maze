@@ -39,7 +39,7 @@ public class LevelManager : MonoBehaviour
     {
         currentLevel++;
         completedLevels++;
-        SaveProgress();
+        //SaveProgress();
         Debug.Log("Was Completed Level " + completedLevels);
     }
 

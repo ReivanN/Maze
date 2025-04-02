@@ -61,16 +61,7 @@ public class SaveManager : MonoBehaviour
 }
 
 
-[System.Serializable]
-public class GameData
-{
 
-    public int level = 1;
-    public float health;
-    public float maxHealth;
-
-    public List<string> appliedUpgrades = new List<string>();
-}
 
 
 

@@ -31,23 +31,34 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void LoadPlayerData()
     {
-        GameData data = SaveManager.Instance.Load();
-        if (data != null)
+        if (!SaveManager.Instance.SaveExists())
         {
-            currentHealth = data.health;
-            MAXHealth = data.maxHealth;
-            healthUI.UpdateHealth(currentHealth, MAXHealth);
-            Debug.LogError(currentHealth);
-            Debug.LogError(MAXHealth);
+            Debug.LogWarning("Файл сохранения отсутствует. Устанавливаем значения по умолчанию.");
+            currentHealth = playerData.health;
+            MAXHealth = playerData.health;
+            return;
         }
+
+        GameData data = SaveManager.Instance.Load();
+        Debug.Log($"ЗАГРУЗКА: HP = {data.health}, Max HP = {data.maxHealth}");
+
+        currentHealth = data.health;
+        MAXHealth = data.maxHealth;
+        healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
+
+
 
     public void SavePlayerData()
     {
-        GameData data = new() { health = currentHealth, maxHealth = MAXHealth };
+        GameData data = SaveManager.Instance.Load();
+        data.health = currentHealth;
+        data.maxHealth = MAXHealth;
+
         SaveManager.Instance.Save(data);
         Debug.LogError("SAVE HP " + data.health);
     }
+
 
     public void DeletePlayerData()
     {
@@ -70,23 +81,10 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (SaveManager.Instance != null)
         {
             LoadPlayerData();
-            /*GameData loadedData = SaveManager.Instance.Load();
-            if (loadedData != null)
-            {
-                MAXHealth = playerData.health;
-                currentHealth = loadedData.health;
-                healthUI.UpdateHealth(currentHealth, MAXHealth);
-                Debug.Log("Продолжаем игру");
-            }
-            else
-            {
-                MAXHealth = playerData.health;
-                currentHealth = playerData.health;
-                healthUI.UpdateHealth(currentHealth, MAXHealth);
-                Debug.Log("Начинаем новую игру");
-            }*/
+            Debug.Log($"Загруженные данные: HP = {currentHealth}, Max HP = {MAXHealth}");
         }
     }
+
 
 
     void Update()
@@ -106,12 +104,13 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     public void ApplyUpgrade(Upgrade upgrade)
     {
+        GameData data = SaveManager.Instance.Load();
+
         switch (upgrade.type)
         {
             case UpgradeType.HealthBoost:
                 MAXHealth *= upgrade.value;
-                healthUI.UpdateHealth(currentHealth, MAXHealth);
-                SavePlayerData();
+                //currentHealth = MAXHealth;
                 break;
             case UpgradeType.DamageIncrease:
                 playerData.damage *= upgrade.value;
@@ -120,7 +119,14 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 playerData.moveSpeed *= upgrade.value;
                 break;
         }
+
+        data.maxHealth = MAXHealth;
+        data.health = currentHealth;
+        data.appliedUpgrades.Add(upgrade.name); // Запоминаем примененное улучшение
+        SaveManager.Instance.Save(data);
+        healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
+
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -176,19 +182,24 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         currentHealth -= damage;
         onTakeDamage?.Invoke(currentHealth);
-        healthUI.UpdateHealth(currentHealth, MAXHealth);
-        SavePlayerData();
-        if (currentHealth <= 0 && trapType == TrapType.SaveMaze)
+
+        if (currentHealth > 0)
         {
-            LevelManager.Instance.ResetProgress();
-            MazeManager.Instance.SameMaze();
+            SavePlayerData();
+            healthUI.UpdateHealth(currentHealth, MAXHealth);
         }
-        else if (currentHealth <= 0 && trapType == TrapType.NewMaze)
+
+        if (currentHealth <= 0)
         {
             LevelManager.Instance.ResetProgress();
-            MazeManager.Instance.NewMaze();
+
+            if (trapType == TrapType.SaveMaze)
+                MazeManager.Instance.SameMaze();
+            else if (trapType == TrapType.NewMaze)
+                MazeManager.Instance.NewMaze();
         }
     }
+
     private bool isFiring; 
 
     public void OnFire(InputAction.CallbackContext context)

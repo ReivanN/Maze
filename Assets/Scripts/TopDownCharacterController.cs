@@ -16,6 +16,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float gravity = 9.81f;
     private Vector3 velocity;
     [SerializeField] private HealthUI healthUI;
+    [SerializeField] private DeadUI deadUI;
     private float currentHealth;
     private float MAXHealth;
     public  event Action<float> onTakeDamage;
@@ -67,6 +68,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     void Awake()
     {
         healthUI = FindAnyObjectByType<HealthUI>();
+        deadUI = FindAnyObjectByType<DeadUI>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         
@@ -191,13 +193,14 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
         if (currentHealth <= 0)
         {
-            LevelManager.Instance.ResetProgress();
-
-            if (trapType == TrapType.SaveMaze)
-                MazeManager.Instance.SameMaze();
-            else if (trapType == TrapType.NewMaze)
-                MazeManager.Instance.NewMaze();
+            DeletePlayerData();
+            Die();
         }
+    }
+
+    public void Die() 
+    {
+        deadUI.Activate();
     }
 
     private bool isFiring; 

@@ -39,7 +39,7 @@ public class LevelManager : MonoBehaviour
     {
         currentLevel++;
         completedLevels++;
-        //SaveProgress();
+        SaveProgress();
         Debug.Log("Was Completed Level " + completedLevels);
     }
 
@@ -51,9 +51,11 @@ public class LevelManager : MonoBehaviour
 
     private void SaveProgress()
     {
-        GameData gameData = new() { level = currentLevel };
+        GameData gameData = SaveManager.Instance.Load();
+        gameData.level = currentLevel;
         SaveManager.Instance.Save(gameData);
     }
+
 
     private void LoadProgress()
     {
@@ -67,10 +69,8 @@ public class LevelManager : MonoBehaviour
 
     public void ResetProgress()
     {
-        PlayerPrefs.DeleteKey("CompletedLevels");
-        PlayerPrefs.DeleteKey("currentLevel");
+        SaveManager.Instance.DeleteSave();
         completedLevels = 0;
-        currentLevel = 1;
         UpdateDifficulty();
     }
 }

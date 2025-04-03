@@ -5,7 +5,7 @@ public class MazeSettings : ScriptableObject
 {
     [Header("Count Objects")]
     public int enemyCount = 5;
-    public int trapCount = 8;
+    public int trapCount = 5;
 
     [Header("Prefabs Objects")]
     public GameObject wallPrefab;

@@ -1754,6 +1754,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   isAlive: 1
+  HPBonus: {fileID: 3180190772059161819, guid: acc591f3f3af45842beb61b22a2ee1c0, type: 3}
 --- !u!114 &3548371263764172012
 MonoBehaviour:
   m_ObjectHideFlags: 0

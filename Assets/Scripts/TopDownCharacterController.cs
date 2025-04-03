@@ -180,6 +180,13 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         }
     }
 
+    public void IncreaseHealth(float amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, MAXHealth);
+        Debug.Log($"Текущее HP: {currentHealth}");
+        healthUI.UpdateHealth(currentHealth, MAXHealth);
+    }
+
     public void TakeDamage(int damage, TrapType trapType)
     {
         currentHealth -= damage;

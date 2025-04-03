@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -19,6 +20,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [HideInInspector] public UnityAction EnemyDeath;
     [HideInInspector] public bool isAlive = true;
     private bool isActivated = false;
+    [SerializeField] private GameObject HPBonus;
 
     private IHealthBar healthBar;
 
@@ -138,6 +140,26 @@ public class Enemy : MonoBehaviour, IDamageable
         EnableRagdoll();
         agent.enabled = false;
         EnemyDeath?.Invoke();
+        Vector3 HPPosition = new Vector3(this.transform.position.x, 0.5f, this.transform.position.z);
+        GameObject bonus = Instantiate(HPBonus, HPPosition, Quaternion.identity);
+        AnimateBonusDrop(bonus);
+    }
+
+    private void AnimateBonusDrop(GameObject bonus)
+    {
+        float jumpHeight = 2f;
+        float jumpDuration = 0.5f;
+        float fallDuration = 0.3f;
+
+        Vector3 targetPosition = bonus.transform.position + new Vector3(Random.Range(0f, 0f), 0, Random.Range(0f, 0f));
+
+        bonus.transform.DOMoveY(bonus.transform.position.y + jumpHeight, jumpDuration)
+            .SetEase(Ease.OutQuad)
+            .OnComplete(() =>
+            {
+                bonus.transform.DOMove(targetPosition, fallDuration)
+                    .SetEase(Ease.InQuad);
+            });
     }
 
     public void EnableRagdoll()

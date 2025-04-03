@@ -267,7 +267,7 @@ public class MazeGenerator : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
-                Vector3 wallPosition = new Vector3(x, 0.5f, y);
+                Vector3 wallPosition = new Vector3(x, 2.5f, y);
 
                 if (maze[x, y] == 0)
                 {

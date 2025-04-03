@@ -168,6 +168,7 @@ MonoBehaviour:
     m_Bits: 128
   HP: 20
   currentHP: 0
+  activationSound: {fileID: 8300000, guid: 262d140e56a7cec409dc39dcf17c381b, type: 3}
 --- !u!1 &6871376383392002633
 GameObject:
   m_ObjectHideFlags: 0

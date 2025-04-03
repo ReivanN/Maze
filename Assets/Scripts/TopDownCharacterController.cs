@@ -31,6 +31,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [Header("Stats")]
     private float currentDamage;
     private float currentFireRate;
+    public Light light;
 
 
 

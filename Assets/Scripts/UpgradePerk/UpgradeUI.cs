@@ -28,7 +28,8 @@ public class UpgradeUI : MonoBehaviour
         for (int i = 0; i < buttons.Length; i++)
         {
             int index = i;
-            buttons[i].GetComponentInChildren<TextMeshProUGUI>().text = currentUpgrades[i].name;
+            TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
+            textComponent.text = $"{currentUpgrades[i].name}\n\n{currentUpgrades[i].description}";
             buttons[i].onClick.AddListener(() => ApplyUpgrade(index));
         }
         yield return null;

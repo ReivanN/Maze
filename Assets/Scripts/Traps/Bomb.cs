@@ -10,13 +10,13 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private float HP = 20f;
     [SerializeField] private float currentHP;
+    [SerializeField] private AudioClip activationSound; // Добавляем звук активации
 
     private Transform player;
     private bool isActivated = false;
     private NavMeshAgent agent;
-
     private IHealthBar healthBar;
-
+    private AudioSource audioSource; // Добавляем источник звука
 
     private void Awake()
     {
@@ -25,6 +25,7 @@ public class Bomb : MonoBehaviour, IDamageable
         meshRenderer.enabled = false;
         agent.enabled = false;
         healthBar = GetComponentInChildren<IHealthBar>();
+        audioSource = gameObject.AddComponent<AudioSource>(); // Добавляем компонент AudioSource
     }
 
     private void Start()
@@ -85,7 +86,7 @@ public class Bomb : MonoBehaviour, IDamageable
             return false;
         }
 
-        return true; 
+        return true;
     }
 
     private bool IsPlayerStillVisible()
@@ -101,6 +102,12 @@ public class Bomb : MonoBehaviour, IDamageable
         isActivated = true;
         meshRenderer.enabled = true;
         agent.isStopped = false;
+
+        // Воспроизведение звука активации
+        if (activationSound != null)
+        {
+            audioSource.PlayOneShot(activationSound);
+        }
     }
 
     private void DeactivateBomb()
@@ -124,13 +131,11 @@ public class Bomb : MonoBehaviour, IDamageable
         {
             TakeDamage(50, TrapType.SaveMaze);
             Explode();
-            
-            
         }
         else if (other.CompareTag("Bullet"))
         {
             TakeDamage(10, TrapType.NewMaze);
-            if(currentHP <= 0) 
+            if (currentHP <= 0)
             {
                 Explode();
             }
@@ -144,7 +149,7 @@ public class Bomb : MonoBehaviour, IDamageable
         Destroy(gameObject);
     }
 
-    public void TakeDamage(int damage, TrapType trapType) 
+    public void TakeDamage(int damage, TrapType trapType)
     {
         currentHP -= damage;
         healthBar?.UpdateHealthBar(currentHP, HP);

@@ -9,8 +9,6 @@ public class LevelManager : MonoBehaviour
     private int currentLevel = 1;
     private int completedLevels = 0;
     private GameDifficulty currentDifficulty;
-
-    public int CompletedLevels => completedLevels;
     public GameDifficulty CurrentDifficulty => currentDifficulty;
 
     private void Awake()
@@ -18,20 +16,22 @@ public class LevelManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            UpdateDifficulty();
             LoadProgress();
-            currentLevel = 1;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
     }
+    
     public void LevelStarted() 
     {
+        UpdateDifficulty();
         Debug.Log("Was Started Level " + completedLevels);
     }
-    public void LevelUI(TextMeshProUGUI textMeshProUGUI) 
+    public void LevelUI(TextMeshProUGUI textMeshProUGUI)
     {
         textMeshProUGUI.text = "Level " + currentLevel;
     }
@@ -39,6 +39,7 @@ public class LevelManager : MonoBehaviour
     {
         currentLevel++;
         completedLevels++;
+        UpdateDifficulty();
         SaveProgress();
         Debug.Log("Was Completed Level " + completedLevels);
     }
@@ -53,16 +54,24 @@ public class LevelManager : MonoBehaviour
     {
         GameData gameData = SaveManager.Instance.Load();
         gameData.level = currentLevel;
+        gameData.completedlevel = completedLevels;
+
         SaveManager.Instance.Save(gameData);
     }
 
 
-    private void LoadProgress()
+    public void LoadProgress()
     {
         GameData data = SaveManager.Instance.Load();
-        if (data != null) 
+        if (data != null)
         {
             currentLevel = data.level;
+            completedLevels = data.completedlevel;
+        }
+        else
+        {
+            currentLevel = 1;
+            completedLevels = 0;
         }
         UpdateDifficulty();
     }
@@ -71,6 +80,7 @@ public class LevelManager : MonoBehaviour
     {
         SaveManager.Instance.DeleteSave();
         completedLevels = 0;
+        currentLevel = 1;
         UpdateDifficulty();
     }
 }

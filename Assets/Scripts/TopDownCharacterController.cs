@@ -24,9 +24,13 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [Header("FireStat")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireRate = 0.5f;
+    public float fireRate = 1f;
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
+
+    [Header("Stats")]
+    private float currentDamage;
+    private float currentFireRate;
 
 
 
@@ -37,6 +41,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             Debug.LogWarning("Файл сохранения отсутствует. Устанавливаем значения по умолчанию.");
             currentHealth = playerData.health;
             MAXHealth = playerData.health;
+            currentDamage = playerData.damage;
+            currentFireRate = fireRate;
             return;
         }
 
@@ -45,6 +51,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
         currentHealth = data.health;
         MAXHealth = data.maxHealth;
+        currentFireRate = data.fireRate;
+        currentDamage = data.damage;
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
 
@@ -55,6 +63,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         GameData data = SaveManager.Instance.Load();
         data.health = currentHealth;
         data.maxHealth = MAXHealth;
+        data.fireRate = currentFireRate;
+        data.damage = currentDamage;
 
         SaveManager.Instance.Save(data);
         Debug.LogError("SAVE HP " + data.health);
@@ -115,16 +125,21 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 //currentHealth = MAXHealth;
                 break;
             case UpgradeType.DamageIncrease:
-                playerData.damage *= upgrade.value;
+                currentDamage *= upgrade.value;
                 break;
-            case UpgradeType.SpeedBoost:
-                playerData.moveSpeed *= upgrade.value;
+            case UpgradeType.HpPlus:
+                currentHealth = Mathf.Min(currentHealth + upgrade.value, MAXHealth);
+                break;
+            case UpgradeType.FireRate:
+                currentFireRate *= upgrade.value;
                 break;
         }
 
         data.maxHealth = MAXHealth;
         data.health = currentHealth;
-        data.appliedUpgrades.Add(upgrade.name); // Запоминаем примененное улучшение
+        data.damage = currentDamage;
+        data.fireRate = currentFireRate;
+        data.appliedUpgrades.Add(upgrade.name);
         SaveManager.Instance.Save(data);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }

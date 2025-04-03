@@ -13,12 +13,20 @@ public class SaveManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); 
+            DontDestroyOnLoad(gameObject);
+            DebugRef();
         }
         else
         {
             Destroy(gameObject); 
         }
+    }
+
+    public void DebugRef() 
+    {
+        GameData data = Load();
+        Debug.LogError("Level " + data.level);
+        Debug.LogError("Level " + data.completedlevel);
     }
     public void Save(GameData data)
     {
@@ -50,6 +58,7 @@ public class SaveManager : MonoBehaviour
         if (File.Exists(savePath))
         {
             File.Delete(savePath);
+            MazeManager.Instance.savedMaze = null;
             Debug.Log("Сохранение удалено!");
         }
         else

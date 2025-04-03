@@ -57,6 +57,7 @@ public class MazeGenerator : MonoBehaviour
     IEnumerator SpawnSave()
     {
         maze = MazeManager.Instance.savedMaze;
+        yield return StartCoroutine(DefineStartAndExitCoroutine());
         yield return StartCoroutine(SpawnEntitiesCoroutine());
         yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
         yield return StartCoroutine(SpawnEnemiesCoroutine());
@@ -162,10 +163,19 @@ public class MazeGenerator : MonoBehaviour
     void DefineStartAndExit()
     {
         startPosition = new Vector2Int(1, 1);
-        exitPosition = FindFarthestExit(startPosition);
+        Vector2Int? exit = FindFarthestExit(startPosition);
+
+        if (exit.HasValue)
+        {
+            exitPosition = exit.Value;
+        }
+        else
+        {
+            Debug.LogWarning("Не удалось найти подходящую точку для выхода!");
+        }
     }
 
-    Vector2Int FindFarthestExit(Vector2Int start)
+    Vector2Int? FindFarthestExit(Vector2Int start)
     {
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         Dictionary<Vector2Int, int> distances = new Dictionary<Vector2Int, int>();
@@ -175,7 +185,7 @@ public class MazeGenerator : MonoBehaviour
         distances[start] = 0;
         visited.Add(start);
 
-        Vector2Int farthestPoint = start;
+        Vector2Int? farthestPoint = null;
         int maxDistance = 0;
         float maxEuclideanDist = 0;
 
@@ -197,7 +207,7 @@ public class MazeGenerator : MonoBehaviour
                         queue.Enqueue(next);
                         visited.Add(next);
 
-                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2,height - 2));
+                        float euclideanDist = Vector2Int.Distance(next, new Vector2Int(width - 2, height - 2));
 
                         if (distances[next] > maxDistance ||
                            (distances[next] == maxDistance && euclideanDist > maxEuclideanDist))
@@ -213,6 +223,7 @@ public class MazeGenerator : MonoBehaviour
 
         return farthestPoint;
     }
+
 
     void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
     {

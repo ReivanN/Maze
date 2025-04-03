@@ -17,7 +17,8 @@ public class Upgrade
 
 public enum UpgradeType
 {
+    HpPlus,
     HealthBoost,
     DamageIncrease,
-    SpeedBoost
+    FireRate
 }

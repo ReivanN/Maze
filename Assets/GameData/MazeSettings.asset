@@ -12,14 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f43fa370342f99943af14c364334ae80, type: 3}
   m_Name: MazeSettings
   m_EditorClassIdentifier: 
-  width: 21
-  height: 21
   enemyCount: 10
   trapCount: 10
   wallPrefab: {fileID: 7965052463596878992, guid: ca6ccd3a2099cc14ead86cdc1eb506c7, type: 3}
   floorPrefab: {fileID: 680236845878297783, guid: 6a02dd6813e25424888caac4aa7640bf, type: 3}
   trapPrefabs:
-  - {fileID: 1801227894431083789, guid: 18af93b6d6545c344bc2bda16e88f428, type: 3}
   - {fileID: 1772684110708517589, guid: 2de09b7e9ab8cf14a9191ba1b9321a28, type: 3}
   enemyPrefab: {fileID: 7718154780804771419, guid: feaccdc489b1d634181a47b5b77d9438, type: 3}
   playerPrefab: {fileID: 7181426195906352140, guid: dcd1286545e77224d8c242ca516cd87c, type: 3}

@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyDeath : MonoBehaviour
 {
     [SerializeField] private Enemy enemy;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip audioClip;
 
     private void OnEnable() 
     {
@@ -21,6 +23,7 @@ public class EnemyDeath : MonoBehaviour
     }
     IEnumerator Died()
     {
+        audioSource.PlayOneShot(audioClip);
         yield return new WaitForSeconds(2);
         Destroy(this.gameObject);
     }

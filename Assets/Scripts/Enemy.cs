@@ -2,6 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class Enemy : MonoBehaviour, IDamageable
 {
@@ -11,26 +12,22 @@ public class Enemy : MonoBehaviour, IDamageable
     private Transform player;
 
     [SerializeField] private float health = 100f;
-    [SerializeField] private float currenthealth;
+    [SerializeField] private float currentHealth;
     [SerializeField] private float speed = 3.5f;
     [SerializeField] private float stoppingDistance = 2f;
     [SerializeField] private float detectionRadius = 10f;
     [SerializeField] private LayerMask obstaclesMask;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private float bulletSpeed = 10f;
+    [SerializeField] private float fireRate = 1f;
+    private float nextFireTime;
 
     [HideInInspector] public UnityAction EnemyDeath;
     [HideInInspector] public bool isAlive = true;
     private bool isActivated = false;
     [SerializeField] private GameObject HPBonus;
-
     private IHealthBar healthBar;
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Bullet"))
-        {
-            TakeDamage(10, TrapType.NewMaze);
-        }
-    }
 
     void Start()
     {
@@ -41,7 +38,7 @@ public class Enemy : MonoBehaviour, IDamageable
         DisableRagdoll();
         agent.speed = speed;
         agent.stoppingDistance = stoppingDistance;
-        currenthealth = health;
+        currentHealth = health;
         player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
@@ -60,6 +57,11 @@ public class Enemy : MonoBehaviour, IDamageable
             else
             {
                 ChasePlayer();
+                if (Time.time >= nextFireTime && CanSeePlayer(player))
+                {
+                    Shoot();
+                    nextFireTime = Time.time + 1f / fireRate;
+                }
             }
         }
     }
@@ -73,6 +75,7 @@ public class Enemy : MonoBehaviour, IDamageable
             {
                 player = hitCollider.transform;
                 ActivateEnemy();
+                RotateTowardsPlayer();
                 return;
             }
         }
@@ -87,16 +90,13 @@ public class Enemy : MonoBehaviour, IDamageable
         {
             return false;
         }
-
         return true;
     }
 
     private bool IsPlayerStillVisible()
     {
         if (player == null) return false;
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        return distanceToPlayer <= detectionRadius && CanSeePlayer(player);
+        return Vector3.Distance(transform.position, player.position) <= detectionRadius && CanSeePlayer(player);
     }
 
     private void ActivateEnemy()
@@ -120,13 +120,39 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int damage, TrapType trapType)
+    private void RotateTowardsPlayer()
     {
-        //if (!isAlive) return;
+        if (player != null)
+        {
+            Vector3 direction = (player.position - transform.position).normalized;
+            direction.y = 0;
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+        }
+    }
 
-        currenthealth -= damage;
-        healthBar?.UpdateHealthBar(currenthealth, health);
-        if (currenthealth <= 0)
+    private void Shoot()
+    {
+        if (bulletPrefab != null && firePoint != null)
+        {
+            Vector3 direction = (player.position - firePoint.position).normalized;
+            direction.y = 0;
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
+
+            BulletEnemy bulletScript = bullet.GetComponent<BulletEnemy>();
+            if (bulletScript != null)
+            {
+                bulletScript.Initialize(direction, bulletSpeed);
+                bulletScript.SetDamages(10f);
+            }
+        }
+    }
+
+    public void TakeDamage(float damage, TrapType trapType)
+    {
+        currentHealth -= damage;
+        healthBar?.UpdateHealthBar(currentHealth, health);
+        if (currentHealth <= 0)
         {
             Die();
         }
@@ -160,9 +186,9 @@ public class Enemy : MonoBehaviour, IDamageable
                 bonus.transform.DOMove(targetPosition, fallDuration)
                     .SetEase(Ease.InQuad);
             });
-    }
 
-    public void EnableRagdoll()
+    }
+        public void EnableRagdoll()
     {
         animator.enabled = false;
         foreach (var rb in ragdollBodies)
@@ -179,8 +205,6 @@ public class Enemy : MonoBehaviour, IDamageable
             rb.isKinematic = true;
         }
     }
-
-    
 
     private void OnDrawGizmos()
     {

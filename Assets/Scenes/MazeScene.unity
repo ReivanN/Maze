@@ -2952,6 +2952,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1216978671}
   m_CullTransparentMesh: 1
+--- !u!1 &1241032068
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1241032070}
+  - component: {fileID: 1241032069}
+  m_Layer: 0
+  m_Name: CursorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1241032069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241032068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da0c0d41a77654d659ecfc9e71b75f45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cursorTexture: {fileID: 2800000, guid: 5568062fbe1eb4fee8801bd7cdbc3f05, type: 3}
+  defaultCursorTexture: {fileID: 2800000, guid: 4e0b723e1ea440d449ebe2237c0134fe, type: 3}
+  cursorMode: 0
+  cursorSize: 512
+  pauseObject: {fileID: 660201522}
+--- !u!4 &1241032070
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241032068}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 643.49243, y: 169.9827, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1355029309
 GameObject:
   m_ObjectHideFlags: 0
@@ -3824,9 +3873,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cursorTexture: {fileID: 2800000, guid: 869af75a76130e94abc3a82061c5cc50, type: 3}
-  hotspot: {x: 0, y: 0}
+  defaultCursorTexture: {fileID: 0}
   cursorMode: 0
   cursorSize: 100
+  pauseObject: {fileID: 0}
 --- !u!4 &1648407259
 Transform:
   m_ObjectHideFlags: 0
@@ -5399,3 +5449,4 @@ SceneRoots:
   - {fileID: 835269710}
   - {fileID: 330585546}
   - {fileID: 838016777}
+  - {fileID: 1241032070}

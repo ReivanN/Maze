@@ -1,20 +1,26 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CursorManager : MonoBehaviour
 {
     public Texture2D cursorTexture;
-    [HideInInspector]public Vector2 hotspot = Vector2.zero;
+    public Texture2D defaultCursorTexture;
     public CursorMode cursorMode = CursorMode.Auto;
-    public int cursorSize = 8;
+    public int cursorSize = 512;
+    public GameObject pauseObject;
 
-    void Start()
+    void Update()
     {
-        if (cursorTexture != null && SceneManager.GetActiveScene().name == "MazeScene")
+        if (cursorTexture != null && SceneManager.GetActiveScene().name == "MazeScene" && !pauseObject.activeInHierarchy)
         {
             Texture2D resizedCursor = ResizeTexture(cursorTexture, cursorSize, cursorSize);
+            Vector2 hotspot = new Vector2(resizedCursor.width / 2, resizedCursor.height / 2);
             Cursor.SetCursor(resizedCursor, hotspot, cursorMode);
+        }
+        else 
+        {
+            Vector2 hotspot = Vector2.zero;
+            Cursor.SetCursor(defaultCursorTexture, hotspot, cursorMode);
         }
     }
 

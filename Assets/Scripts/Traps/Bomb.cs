@@ -58,6 +58,10 @@ public class Bomb : MonoBehaviour, IDamageable
             else
             {
                 ChasePlayer();
+                if (Vector3.Distance(transform.position, player.position) <= agent.stoppingDistance)
+                {
+                    Explode();
+                }
             }
         }
     }
@@ -127,29 +131,24 @@ public class Bomb : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        Debug.LogError("Я коснулся его");
+        IDamageable damageable = other.gameObject.GetComponent<IDamageable>();
+        if (other.gameObject.CompareTag("Player") && damageable != null)
         {
-            TakeDamage(50, TrapType.SaveMaze);
+            Debug.LogError("Я коснулся его 1");
+            TakeDamage(20, TrapType.SaveMaze);
             Explode();
-        }
-        else if (other.CompareTag("Bullet"))
-        {
-            TakeDamage(10, TrapType.NewMaze);
-            if (currentHP <= 0)
-            {
-                Explode();
-            }
-            Destroy(other.gameObject);
         }
     }
 
     private void Explode()
     {
+        isActivated = false;
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 
-    public void TakeDamage(int damage, TrapType trapType)
+    public void TakeDamage(float damage, TrapType trapType)
     {
         currentHP -= damage;
         healthBar?.UpdateHealthBar(currentHP, HP);

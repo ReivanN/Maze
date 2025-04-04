@@ -20,6 +20,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float currentHealth;
     private float MAXHealth;
     public  event Action<float> onTakeDamage;
+    [SerializeField] ParticleSystem[] myparticleSystem;
 
     [Header("FireStat")]
     public GameObject bulletPrefab;
@@ -29,11 +30,16 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     public float bulletSpeed = 10f;
 
     [Header("Stats")]
-    private float currentDamage;
+    public float currentDamage;
     private float currentFireRate;
-    public Light light;
+    public Light mylight;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource myaudioSource;
+    [SerializeField] private AudioClip gunShot;
+    [SerializeField] private AudioClip pickUp;
 
+    public float GetDamage() => currentDamage;
 
     private void LoadPlayerData()
     {
@@ -198,12 +204,25 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     public void IncreaseHealth(float amount)
     {
+        myaudioSource.PlayOneShot(pickUp);
+        PlayAllParticles();
         currentHealth = Mathf.Min(currentHealth + amount, MAXHealth);
         Debug.Log($"Текущее HP: {currentHealth}");
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
 
-    public void TakeDamage(int damage, TrapType trapType)
+    public void PlayAllParticles()
+    {
+        foreach (ParticleSystem ps in myparticleSystem)
+        {
+            if (ps != null) 
+            {
+                ps.Play();
+            }
+        }
+    }
+
+    public void TakeDamage(float damage, TrapType trapType)
     {
         currentHealth -= damage;
         onTakeDamage?.Invoke(currentHealth);
@@ -264,6 +283,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 if (bulletScript != null)
                 {
                     bulletScript.Initialize(direction, bulletSpeed);
+                    bulletScript.SetDamage(GetDamage());
+                    myaudioSource.PlayOneShot(gunShot);
                 }
             }
         }

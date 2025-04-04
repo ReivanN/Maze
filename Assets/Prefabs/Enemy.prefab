@@ -1796,6 +1796,8 @@ MonoBehaviour:
   fireRate: 1
   isAlive: 1
   HPBonus: {fileID: 3180190772059161819, guid: acc591f3f3af45842beb61b22a2ee1c0, type: 3}
+  audioSource: {fileID: 1040106989956083627}
+  clip: {fileID: 8300000, guid: 45a1cd23e81382445a8f0726ed0971e7, type: 3}
 --- !u!114 &3548371263764172012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1867,7 +1869,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0

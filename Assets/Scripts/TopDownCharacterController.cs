@@ -20,7 +20,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float currentHealth;
     private float MAXHealth;
     public  event Action<float> onTakeDamage;
-    [SerializeField] ParticleSystem[] myparticleSystem;
 
     [Header("FireStat")]
     public GameObject bulletPrefab;
@@ -205,22 +204,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     public void IncreaseHealth(float amount)
     {
         myaudioSource.PlayOneShot(pickUp);
-        PlayAllParticles();
         currentHealth = Mathf.Min(currentHealth + amount, MAXHealth);
         Debug.Log($"Текущее HP: {currentHealth}");
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
 
-    public void PlayAllParticles()
-    {
-        foreach (ParticleSystem ps in myparticleSystem)
-        {
-            if (ps != null) 
-            {
-                ps.Play();
-            }
-        }
-    }
 
     public void TakeDamage(float damage, TrapType trapType)
     {

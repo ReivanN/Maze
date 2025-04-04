@@ -14,10 +14,13 @@ public class HealthUI : MonoBehaviour
         //UpdateHealth(maxHealth, instant: true);
     }
 
-    public void UpdateHealth(float currentHealth,float maxHealth ,bool instant = false)
+    public void UpdateHealth(float currentHealth, float maxHealth, bool instant = false)
     {
-        healthText.text = $"{currentHealth} / {maxHealth}";
-        float healthPercentage = Mathf.Clamp01((float)currentHealth / maxHealth);
+        int current = Mathf.RoundToInt(currentHealth);
+        int max = Mathf.RoundToInt(maxHealth);
+
+        healthText.text = $"{current} / {max}";
+        float healthPercentage = Mathf.Clamp01((float)current / max);
 
         if (instant)
         {

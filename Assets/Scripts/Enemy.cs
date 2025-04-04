@@ -29,6 +29,9 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private GameObject HPBonus;
     private IHealthBar healthBar;
 
+    public AudioSource audioSource;
+    public AudioClip clip;
+
     void Start()
     {
         ragdollBodies = GetComponentsInChildren<Rigidbody>();
@@ -142,6 +145,7 @@ public class Enemy : MonoBehaviour, IDamageable
             BulletEnemy bulletScript = bullet.GetComponent<BulletEnemy>();
             if (bulletScript != null)
             {
+                audioSource.PlayOneShot(clip);
                 bulletScript.Initialize(direction, bulletSpeed);
                 bulletScript.SetDamages(10f);
             }

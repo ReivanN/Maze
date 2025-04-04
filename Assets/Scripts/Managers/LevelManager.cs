@@ -25,6 +25,8 @@ public class LevelManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+
     
     public void LevelStarted() 
     {

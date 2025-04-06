@@ -225,6 +225,14 @@ public class MazeGenerator : MonoBehaviour
         return farthestPoint;
     }
 
+    bool IsNearStart(Vector2Int position, int minDistance, int maxDistance)
+    {
+        int dx = Mathf.Abs(position.x - startPosition.x);
+        int dy = Mathf.Abs(position.y - startPosition.y);
+        float distance = Mathf.Sqrt(dx * dx + dy * dy);
+        return distance >= minDistance && distance <= maxDistance;
+    }
+
 
     void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
     {
@@ -235,7 +243,8 @@ public class MazeGenerator : MonoBehaviour
             for (int y = 1; y < height; y += 2)
             {
                 Vector2Int pos = new Vector2Int(x, y);
-                if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition)
+                if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition && !IsNearStart(pos, 3, 5))
+
                 {
                     possiblePositions.Add(pos);
                 }

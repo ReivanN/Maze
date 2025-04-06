@@ -99,8 +99,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (SaveManager.Instance != null)
         {
             LoadPlayerData();
-            Debug.Log($"Загруженные данные: HP = {currentHealth}, Max HP = {MAXHealth}");
         }
+        Debug.LogError("Current Fire Rate " + currentFireRate);
     }
 
 
@@ -137,7 +137,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 currentHealth = Mathf.Min(currentHealth + upgrade.value, MAXHealth);
                 break;
             case UpgradeType.FireRate:
-                currentFireRate *= upgrade.value;
+                currentFireRate *= (1f - upgrade.value);
+                Debug.LogError("Current Fire Rate " + currentFireRate);
                 break;
         }
 

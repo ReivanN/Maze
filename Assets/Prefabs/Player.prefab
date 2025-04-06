@@ -748,12 +748,9 @@ MonoBehaviour:
   cameraSmoothSpeed: 5
   healthUI: {fileID: 0}
   deadUI: {fileID: 0}
-  bulletPrefab: {fileID: 8028388825308528277, guid: 0f2152b750d0340d7b40d8f60bf1adcf, type: 3}
+  bulletPrefab: {fileID: 6460688272108921492, guid: 1dded13526e672b4eb3453a5cb15f1fa, type: 3}
   firePoint: {fileID: 150444349643224766}
-  fireRate: 0
   bulletSpeed: 10
-  currentDamage: 0
-  currentFireRate: 0
   mylight: {fileID: 8100615322637013340}
   myaudioSource: {fileID: 2905782489717234636}
   gunShot: {fileID: 8300000, guid: bb647f8d572f336468ba1305e0e6141e, type: 3}

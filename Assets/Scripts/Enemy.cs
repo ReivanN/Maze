@@ -60,6 +60,7 @@ public class Enemy : MonoBehaviour, IDamageable
             else
             {
                 ChasePlayer();
+                RotateTowardsPlayer();
                 if (Time.time >= nextFireTime && CanSeePlayer(player))
                 {
                     Shoot();
@@ -78,7 +79,6 @@ public class Enemy : MonoBehaviour, IDamageable
             {
                 player = hitCollider.transform;
                 ActivateEnemy();
-                RotateTowardsPlayer();
                 return;
             }
         }
@@ -192,7 +192,7 @@ public class Enemy : MonoBehaviour, IDamageable
             });
 
     }
-        public void EnableRagdoll()
+    public void EnableRagdoll()
     {
         animator.enabled = false;
         foreach (var rb in ragdollBodies)

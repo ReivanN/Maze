@@ -8,7 +8,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject pause;
     [SerializeField] private GameObject tutorial;
     [SerializeField] private GameObject main;
-    [SerializeField]private InputAction action;
+    [SerializeField] private InputAction action;
     private bool isPaused = false;
     private void Start()
     {

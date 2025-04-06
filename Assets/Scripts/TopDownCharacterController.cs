@@ -24,12 +24,12 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [Header("FireStat")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireRate = 1f;
+    private float fireRate = 1f;
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
 
     [Header("Stats")]
-    public float currentDamage;
+    private float currentDamage;
     private float currentFireRate;
     public Light mylight;
 
@@ -116,7 +116,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (isFiring && Time.time >= nextFireTime)
         {
             Shoot();
-            nextFireTime = Time.time + fireRate;
+            nextFireTime = Time.time + currentFireRate;
         }
     }
 
@@ -252,7 +252,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (Mouse.current.leftButton.isPressed && Time.time >= nextFireTime)
         {
             Shoot();
-            nextFireTime = Time.time + fireRate;
+            nextFireTime = Time.time + currentFireRate;
         }
     }
 

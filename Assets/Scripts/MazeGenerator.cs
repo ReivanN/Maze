@@ -18,14 +18,19 @@ public class MazeGenerator : MonoBehaviour
     private Vector2Int startPosition;
     private Vector2Int exitPosition;
 
+    private int enemyCount;
+    private int trapCount;
+
     public static bool IsDone = false;
 
     void Start()
     {
         IsDone = false;
+        enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
+        trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
         wallPool = new ObjectPool(mazeSettings.wallPrefab, 250, transform);
         floorPool = new ObjectPool(mazeSettings.floorPrefab, 200, transform);
-        enemyPool = new ObjectPool(mazeSettings.enemyPrefab, 5, transform);
+        enemyPool = new ObjectPool(mazeSettings.enemyPrefab, enemyCount, transform);
 
         if (MazeManager.Instance.savedMaze != null)
         {
@@ -40,10 +45,6 @@ public class MazeGenerator : MonoBehaviour
     IEnumerator GenerateAndSpawn()
     {
         yield return StartCoroutine(GenerateMazeCoroutine());
-
-        int enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
-        int trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
-
         yield return StartCoroutine(PlaceEnemiesAndTrapsCoroutine(enemyCount, trapCount));
         yield return StartCoroutine(DefineStartAndExitCoroutine());
         yield return StartCoroutine(SpawnEntitiesCoroutine());

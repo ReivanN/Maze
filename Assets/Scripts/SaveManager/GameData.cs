@@ -11,6 +11,7 @@ public class GameData
     public float maxHealth = 100;
     public float damage = 10;
     public float fireRate = 1f;
+    public int ricochets = 0;
 
     public List<string> appliedUpgrades = new List<string>();
 }

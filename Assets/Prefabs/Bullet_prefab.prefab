@@ -211,6 +211,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da571d4e5ed1a45d58934e4d710725e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxRicochets: 3
+  ricochetMask:
+    serializedVersion: 2
+    m_Bits: 704
+  impactEffect: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
 --- !u!65 &3827411659943122548
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -254,8 +259,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0

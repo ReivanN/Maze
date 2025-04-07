@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2151542369085362290}
   - component: {fileID: 4535911763830307228}
   - component: {fileID: 7622903278618222554}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 6364663461662765983}
   - component: {fileID: 6084778470437686778}
   - component: {fileID: 426320684629986958}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -254,7 +254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3242325488440007557}
   - component: {fileID: 7533097680480215975}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HPBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 8467411585702333376}
   - component: {fileID: 1778610195329785475}
   - component: {fileID: 8191836802268613461}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: HP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -379,7 +379,7 @@ GameObject:
   - component: {fileID: 1193411657803105112}
   - component: {fileID: 2012209559682279134}
   - component: {fileID: 2066240062242300525}
-  m_Layer: 5
+  m_Layer: 9
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}

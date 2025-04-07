@@ -27,6 +27,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float fireRate = 1f;
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
+    public int currentmRicochets;
 
     [Header("Stats")]
     private float currentDamage;
@@ -42,24 +43,27 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void LoadPlayerData()
     {
-        if (!SaveManager.Instance.SaveExists())
+        /*if (!SaveManager.Instance.SaveExists())
         {
             Debug.LogWarning("Файл сохранения отсутствует. Устанавливаем значения по умолчанию.");
             currentHealth = playerData.health;
             MAXHealth = playerData.health;
             currentDamage = playerData.damage;
             currentFireRate = fireRate;
+            currentmRicochets = 
             return;
-        }
+        }*/
 
         GameData data = SaveManager.Instance.Load();
-        Debug.Log($"ЗАГРУЗКА: HP = {data.health}, Max HP = {data.maxHealth}");
+        
 
         currentHealth = data.health;
         MAXHealth = data.maxHealth;
         currentFireRate = data.fireRate;
         currentDamage = data.damage;
+        currentmRicochets = data.ricochets;
         healthUI.UpdateHealth(currentHealth, MAXHealth);
+        Debug.Log($"ЗАГРУЗКА: HP = {data.health}, Max HP = {data.maxHealth}");
     }
 
 
@@ -271,13 +275,14 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 Bullet bulletScript = bullet.GetComponent<Bullet>();
                 if (bulletScript != null)
                 {
-                    bulletScript.Initialize(direction, bulletSpeed);
+                    bulletScript.Initialize(direction, bulletSpeed, currentDamage, currentmRicochets);
                     bulletScript.SetDamage(GetDamage());
                     myaudioSource.PlayOneShot(gunShot);
                 }
             }
         }
     }
+
 
 
     private void OnDrawGizmos()

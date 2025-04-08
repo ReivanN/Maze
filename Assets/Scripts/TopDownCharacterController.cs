@@ -149,7 +149,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         {
             case UpgradeType.HealthBoost:
                 MAXHealth *= upgrade.value;
-                //currentHealth = MAXHealth;
+                currentHealth = MAXHealth;
                 break;
             case UpgradeType.DamageIncrease:
                 currentDamage *= upgrade.value;
@@ -302,6 +302,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void AddCoin() 
     {
+            myaudioSource.PlayOneShot(pickUp);
             currentCoins += coinCount;
             OnCoinsChanged?.Invoke(currentCoins);
     }

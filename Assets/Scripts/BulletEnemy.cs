@@ -5,13 +5,12 @@ public class BulletEnemy : MonoBehaviour
     private Vector3 direction;
     private float speed;
 
-    private float lifetime = 5f;
+    private float lifetime = 500f;
     private float damage;
     public void Initialize(Vector3 bulletDirection, float bulletSpeed)
     {
         direction = bulletDirection;
         speed = bulletSpeed;
-        Destroy(gameObject, lifetime);
     }
 
     public void SetDamages(float newDamage)
@@ -25,12 +24,14 @@ public class BulletEnemy : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
-        if (damageable != null && collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            damageable.TakeDamage(damage, TrapType.NewMaze);
-            Destroy(gameObject);
-            Debug.LogError(damage);
+            IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
+            if (damageable != null) 
+            {
+                damageable.TakeDamage(damage, TrapType.NewMaze);
+                Destroy(gameObject);
+            }
         }
         else
         {
@@ -40,18 +41,19 @@ public class BulletEnemy : MonoBehaviour
 
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*private void OnTriggerEnter(Collider other)
     {
         IDamageable damageable = other.gameObject.GetComponent<IDamageable>();
         if (damageable != null && other.gameObject.CompareTag("Player"))
         {
             damageable.TakeDamage(damage, TrapType.NewMaze);
-            Destroy(gameObject);
             Debug.LogError(damage);
+            Destroy(gameObject);
+            
         }
         else
         {
             Destroy(gameObject);
         }
-    }
+    }*/
 }

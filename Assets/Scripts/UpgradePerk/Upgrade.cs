@@ -5,13 +5,15 @@ public class Upgrade
     public string description;
     public UpgradeType type;
     public float value;
+    public int cost;
 
-    public Upgrade(string name, string description, UpgradeType type, float value)
+    public Upgrade(string name, string description, UpgradeType type, float value, int cost)
     {
         this.name = name;
         this.description = description;
         this.type = type;
         this.value = value;
+        this.cost = cost;
     }
 }
 

@@ -39,6 +39,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField] private AudioClip gunShot;
     [SerializeField] private AudioClip pickUp;
 
+    [Header("Coin")]
+    public static Action<int> OnCoinsChanged;
+    private int coinCount = 1;
+    public int currentCoins;
+
     public float GetDamage() => currentDamage;
 
     private void LoadPlayerData()
@@ -62,6 +67,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         currentFireRate = data.fireRate;
         currentDamage = data.damage;
         currentmRicochets = data.ricochets;
+        currentCoins = data.coins;
+        OnCoinsChanged?.Invoke(currentCoins);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
         Debug.Log($"ЗАГРУЗКА: HP = {data.health}, Max HP = {data.maxHealth}");
     }
@@ -75,9 +82,10 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.maxHealth = MAXHealth;
         data.fireRate = currentFireRate;
         data.damage = currentDamage;
+        data.coins = currentCoins;
 
         SaveManager.Instance.Save(data);
-        Debug.LogError("SAVE HP " + data.health);
+        Debug.LogError("COINS" + currentCoins);
     }
 
 
@@ -91,7 +99,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         deadUI = FindAnyObjectByType<DeadUI>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        
         if (cameraTransform == null && Camera.main != null)
         {
             cameraTransform = Camera.main.transform;
@@ -127,6 +134,16 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     public void ApplyUpgrade(Upgrade upgrade)
     {
         GameData data = SaveManager.Instance.Load();
+
+        if (currentCoins < upgrade.cost)
+        {
+            Debug.LogWarning($"Недостаточно монет. Требуется: {upgrade.cost}, доступно: {currentCoins}");
+            return;
+        }
+
+        currentCoins -= upgrade.cost;
+        OnCoinsChanged?.Invoke(currentCoins);
+        data.coins = currentCoins;
 
         switch (upgrade.type)
         {
@@ -283,7 +300,21 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         }
     }
 
+    private void AddCoin() 
+    {
+            currentCoins += coinCount;
+            OnCoinsChanged?.Invoke(currentCoins);
+    }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Coin"))
+        {
+            AddCoin();
+            SavePlayerData();
+            Destroy(other.gameObject);
+        }
+    }
 
     private void OnDrawGizmos()
     {

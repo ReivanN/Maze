@@ -1883,12 +1883,15 @@ MonoBehaviour:
     m_Bits: 128
   bulletPrefab: {fileID: 9189996233017503357, guid: 3245236d60b207c40abebe35a945017d, type: 3}
   firePoint: {fileID: 6460857869785256769}
-  bulletSpeed: 5
+  bulletSpeed: 3
   fireRate: 2
   isAlive: 1
   HPBonus: {fileID: 3180190772059161819, guid: acc591f3f3af45842beb61b22a2ee1c0, type: 3}
   audioSource: {fileID: 1040106989956083627}
   clip: {fileID: 8300000, guid: 45a1cd23e81382445a8f0726ed0971e7, type: 3}
+  coinPrefab: {fileID: 8475623264655157560, guid: b554b94f7a9b8d34a8a5f052dbb57a47, type: 3}
+  spawnRadius: 0.5
+  spawnCenter: {fileID: 6942215597546124513}
 --- !u!114 &3548371263764172012
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -32,6 +32,11 @@ public class Enemy : MonoBehaviour, IDamageable
     public AudioSource audioSource;
     public AudioClip clip;
 
+    [Header("Coins")]
+    [SerializeField] private GameObject coinPrefab;
+    [SerializeField] private float spawnRadius = 0.25f;
+    [SerializeField] private Transform spawnCenter;
+
     void Start()
     {
         ragdollBodies = GetComponentsInChildren<Rigidbody>();
@@ -172,6 +177,7 @@ public class Enemy : MonoBehaviour, IDamageable
         EnemyDeath?.Invoke();
         Vector3 HPPosition = new Vector3(this.transform.position.x, 0.5f, this.transform.position.z);
         GameObject bonus = Instantiate(HPBonus, HPPosition, Quaternion.identity);
+        SpawnCoins();
         AnimateBonusDrop(bonus);
     }
 
@@ -207,6 +213,21 @@ public class Enemy : MonoBehaviour, IDamageable
         foreach (var rb in ragdollBodies)
         {
             rb.isKinematic = true;
+        }
+    }
+
+
+
+    private void SpawnCoins() 
+    {
+        int coinCount = Random.Range(1, 6);
+
+        for (int i = 0; i < coinCount; i++)
+        {
+            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+            Vector3 spawnPosition = spawnCenter.position + new Vector3(randomOffset.x, 0.5f, randomOffset.y);
+
+            Instantiate(coinPrefab, spawnPosition, Quaternion.identity);
         }
     }
 

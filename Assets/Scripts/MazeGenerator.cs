@@ -11,10 +11,6 @@ public class MazeGenerator : MonoBehaviour
     private int[,] maze;
     private System.Random rand = new System.Random();
 
-    private ObjectPool wallPool;
-    private ObjectPool floorPool;
-    private ObjectPool enemyPool;
-
     private Vector2Int startPosition;
     private Vector2Int exitPosition;
 
@@ -26,11 +22,9 @@ public class MazeGenerator : MonoBehaviour
     void Start()
     {
         IsDone = false;
-        enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
-        trapCount = Mathf.RoundToInt(mazeSettings.trapCount * LevelManager.Instance.CurrentDifficulty.spawnRateMultiplier);
-        wallPool = new ObjectPool(mazeSettings.wallPrefab, 250, transform);
-        floorPool = new ObjectPool(mazeSettings.floorPrefab, 200, transform);
-        enemyPool = new ObjectPool(mazeSettings.enemyPrefab, enemyCount, transform);
+        float spawnRateMultiplier = Mathf.Pow(1.15f, LevelManager.Instance.Level);
+        enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * spawnRateMultiplier);
+        trapCount = Mathf.RoundToInt(mazeSettings.trapCount * spawnRateMultiplier);
 
         if (MazeManager.Instance.savedMaze != null)
         {
@@ -98,9 +92,9 @@ public class MazeGenerator : MonoBehaviour
 
     int width = LevelManager.Instance.CurrentDifficulty.width;
     int height = LevelManager.Instance.CurrentDifficulty.height;
+
     IEnumerator GenerateMazeCoroutine()
     {
-        
         maze = new int[width, height];
 
         for (int x = 0; x < width; x++)
@@ -136,15 +130,13 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-
     List<Vector2Int> GetUnvisitedNeighbors(Vector2Int pos, int width, int height)
     {
         List<Vector2Int> neighbors = new List<Vector2Int>();
-
         Vector2Int[] directions = {
-        new Vector2Int(2, 0), new Vector2Int(-2, 0),
-        new Vector2Int(0, 2), new Vector2Int(0, -2)
-    };
+            new Vector2Int(2, 0), new Vector2Int(-2, 0),
+            new Vector2Int(0, 2), new Vector2Int(0, -2)
+        };
 
         foreach (Vector2Int dir in directions)
         {
@@ -159,7 +151,6 @@ public class MazeGenerator : MonoBehaviour
         }
         return neighbors;
     }
-
 
     void DefineStartAndExit()
     {
@@ -233,7 +224,6 @@ public class MazeGenerator : MonoBehaviour
         return distance >= minDistance && distance <= maxDistance;
     }
 
-
     void PlaceEnemiesAndTraps(int enemyCount, int trapCount)
     {
         List<Vector2Int> possiblePositions = new List<Vector2Int>();
@@ -244,7 +234,6 @@ public class MazeGenerator : MonoBehaviour
             {
                 Vector2Int pos = new Vector2Int(x, y);
                 if (maze[x, y] == 1 && pos != startPosition && pos != exitPosition && !IsNearStart(pos, 3, 5))
-
                 {
                     possiblePositions.Add(pos);
                 }
@@ -256,7 +245,6 @@ public class MazeGenerator : MonoBehaviour
             int index = rand.Next(possiblePositions.Count);
             Vector2Int trapPos = possiblePositions[index];
             possiblePositions.RemoveAt(index);
-
             maze[trapPos.x, trapPos.y] = 2;
         }
 
@@ -265,7 +253,6 @@ public class MazeGenerator : MonoBehaviour
             int index = rand.Next(possiblePositions.Count);
             Vector2Int enemyPos = possiblePositions[index];
             possiblePositions.RemoveAt(index);
-
             maze[enemyPos.x, enemyPos.y] = 3;
         }
     }
@@ -277,31 +264,27 @@ public class MazeGenerator : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
-                Vector3 wallPosition = new Vector3(x,1f, y);
+                Vector3 wallPosition = new Vector3(x, 1f, y);
 
                 if (maze[x, y] == 0)
                 {
-                    InstantiateFromPool(wallPool, wallPosition);
+                    Instantiate(mazeSettings.wallPrefab, wallPosition, Quaternion.identity, transform);
                 }
-                else if (maze[x, y] == 1)
+                else if (maze[x, y] == 1 || maze[x, y] == 2 || maze[x, y] == 3)
                 {
-                    InstantiateFromPool(floorPool, position);
+                    Instantiate(mazeSettings.floorPrefab, position, Quaternion.identity, transform);
                 }
-                else if (maze[x, y] == 2)
+
+                if (maze[x, y] == 3)
                 {
-                    // Здесь создаём только пол, ловушки будем инстанцировать отдельно
-                    InstantiateFromPool(floorPool, position);
-                }
-                else if (maze[x, y] == 3)
-                {
-                    InstantiateFromPool(floorPool, position);
-                    InstantiateFromPool(enemyPool, position);
+                    Instantiate(mazeSettings.enemyPrefab, position, Quaternion.identity, transform);
                 }
             }
         }
 
         Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
         Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
+        SpawnTrader();
     }
 
     void SpawnEnemies()
@@ -310,30 +293,25 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (maze[x, y] == 2) // 2 - бомба
+                if (maze[x, y] == 2)
                 {
                     Vector3 trapPosition = new Vector3(x, 0.5f, y);
 
-                    // Проверяем, есть ли рядом NavMesh
                     if (NavMesh.SamplePosition(trapPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
                     {
-                        trapPosition = hit.position; // Перемещаем точку на NavMesh
-                        //Debug.Log($"Бомба скорректирована и спавнится на NavMesh в {trapPosition}");
+                        trapPosition = hit.position;
                     }
                     else
                     {
-                        //Debug.LogError($"Не удалось найти ближайший NavMesh для бомбы в позиции {trapPosition}!");
-                        continue; // Пропускаем спавн, если нет доступного NavMesh
+                        continue;
                     }
 
-                    // Спавним бомбу
                     GameObject bomb = Instantiate(
                         mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)],
                         trapPosition,
                         Quaternion.identity
                     );
 
-                    // Проверяем, действительно ли объект на NavMesh
                     NavMeshAgent agent = bomb.GetComponent<NavMeshAgent>();
                     if (agent != null)
                     {
@@ -343,6 +321,68 @@ public class MazeGenerator : MonoBehaviour
             }
         }
     }
+
+    void SpawnTrader()
+    {
+        List<Vector2Int> deadEnds = new List<Vector2Int>();
+
+        // Проходим по всем ячейкам, чтобы найти тупики
+        for (int x = 1; x < width - 1; x += 2)
+        {
+            for (int y = 1; y < height - 1; y += 2)
+            {
+                if (maze[x, y] != 1) continue;
+
+                int openCount = 0;
+                List<Vector2Int> openDirections = new List<Vector2Int>();
+
+                // Проверяем соседей
+                foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                {
+                    Vector2Int neighbor = new Vector2Int(x + dir.x, y + dir.y);
+                    if (maze[neighbor.x, neighbor.y] == 1)
+                    {
+                        openCount++;
+                        openDirections.Add(dir);
+                    }
+                }
+
+                // Если есть только один проход, это тупик
+                if (openCount == 1 && new Vector2Int(x, y) != startPosition && new Vector2Int(x, y) != exitPosition)
+                {
+                    deadEnds.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        if (deadEnds.Count > 0)
+        {
+            Vector2Int traderPos = deadEnds[rand.Next(deadEnds.Count)];
+            GameObject trader = Instantiate(mazeSettings.Trader, new Vector3(traderPos.x, 0.01f, traderPos.y), Quaternion.identity);
+
+            // Определяем направление торговца
+            List<Vector2Int> possibleDirections = new List<Vector2Int>();
+
+            foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+            {
+                Vector2Int neighbor = traderPos + dir;
+                if (maze[neighbor.x, neighbor.y] == 1)
+                    possibleDirections.Add(dir);
+            }
+
+            // Если мы нашли проход, поворачиваем торговца
+            if (possibleDirections.Count == 1)
+            {
+                Vector2Int direction = possibleDirections[0];
+                trader.transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Не найдено подходящих тупиков для спавна торговца.");
+        }
+    }
+
 
     private IEnumerator WaitForNavMesh(NavMeshAgent agent)
     {
@@ -358,16 +398,9 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-
     void SpawnPlayer()
     {
         Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
         Instantiate(mazeSettings.playerPrefab, spawnPosition, Quaternion.identity);
-    }
-
-    void InstantiateFromPool(ObjectPool pool, Vector3 position)
-    {
-        GameObject obj = pool.Get();
-        obj.transform.position = position;
     }
 }

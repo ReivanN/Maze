@@ -10,6 +10,7 @@ public class LevelManager : MonoBehaviour
     private int completedLevels = 0;
     private GameDifficulty currentDifficulty;
     public GameDifficulty CurrentDifficulty => currentDifficulty;
+    public int Level => completedLevels;
 
     private void Awake()
     {

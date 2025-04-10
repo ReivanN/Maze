@@ -15,4 +15,5 @@ public class MazeSettings : ScriptableObject
     public GameObject playerPrefab;
     public GameObject startPointPrefab;
     public GameObject exitPointPrefab;
+    public GameObject Trader;
 }

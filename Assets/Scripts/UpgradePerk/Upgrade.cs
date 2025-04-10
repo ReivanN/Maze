@@ -22,5 +22,13 @@ public enum UpgradeType
     HpPlus,
     HealthBoost,
     DamageIncrease,
-    FireRate
+    FireRate,
+    SpeedBullets,
+    Ricoshet,
+    UpgradeShield,
+    ShieldRicoshet,
+    ShieldIncrease,
+    MoneyBoost,
+    Regen,
+    RaduisBomb
 }

@@ -8,4 +8,6 @@ public class UpgradeManager : MonoBehaviour
     {
         return UpgradeDatabase.allUpgrades.OrderBy(u => Random.value).Take(3).ToList();
     }
+
+
 }

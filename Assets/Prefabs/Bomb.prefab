@@ -169,6 +169,10 @@ MonoBehaviour:
   HP: 20
   currentHP: 0
   activationSound: {fileID: 8300000, guid: 262d140e56a7cec409dc39dcf17c381b, type: 3}
+  radius: 2
+  damageableLayers:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &6871376383392002633
 GameObject:
   m_ObjectHideFlags: 0

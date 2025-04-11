@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,13 +11,15 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private float HP = 20f;
     [SerializeField] private float currentHP;
-    [SerializeField] private AudioClip activationSound; // Добавляем звук активации
+    [SerializeField] private AudioClip activationSound;
 
     private Transform player;
     private bool isActivated = false;
     private NavMeshAgent agent;
     private IHealthBar healthBar;
-    private AudioSource audioSource; // Добавляем источник звука
+    private AudioSource audioSource;
+    [SerializeField] private float explosionDelay = 3f;
+    private Coroutine explosionCoroutine;
 
     private void Awake()
     {
@@ -25,7 +28,7 @@ public class Bomb : MonoBehaviour, IDamageable
         meshRenderer.enabled = false;
         agent.enabled = false;
         healthBar = GetComponentInChildren<IHealthBar>();
-        audioSource = gameObject.AddComponent<AudioSource>(); // Добавляем компонент AudioSource
+        audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     private void Start()
@@ -58,10 +61,10 @@ public class Bomb : MonoBehaviour, IDamageable
             else
             {
                 ChasePlayer();
-                if (Vector3.Distance(transform.position, player.position) <= agent.stoppingDistance)
+                /*if (Vector3.Distance(transform.position, player.position) <= agent.stoppingDistance)
                 {
                     Explode();
-                }
+                }*/
             }
         }
     }
@@ -107,10 +110,14 @@ public class Bomb : MonoBehaviour, IDamageable
         meshRenderer.enabled = true;
         agent.isStopped = false;
 
-        // Воспроизведение звука активации
         if (activationSound != null)
         {
             audioSource.PlayOneShot(activationSound);
+        }
+
+        if (explosionCoroutine == null)
+        {
+            explosionCoroutine = StartCoroutine(DelayedExplosion());
         }
     }
 
@@ -119,6 +126,11 @@ public class Bomb : MonoBehaviour, IDamageable
         isActivated = false;
         player = null;
         agent.ResetPath();
+        if (explosionCoroutine != null)
+        {
+            StopCoroutine(explosionCoroutine);
+            explosionCoroutine = null;
+        }
     }
 
     private void ChasePlayer()
@@ -131,22 +143,52 @@ public class Bomb : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.LogError("Я коснулся его");
+        /*Debug.LogError("Я коснулся его");
         IDamageable damageable = other.gameObject.GetComponent<IDamageable>();
         if (other.gameObject.CompareTag("Player") && damageable != null)
         {
             Debug.LogError("Я коснулся его 1");
             TakeDamage(20, TrapType.SaveMaze);
             Explode();
-        }
+        }*/
+    }
+
+    private IEnumerator DelayedExplosion()
+    {
+        yield return new WaitForSeconds(explosionDelay);
+        Explode();
     }
 
     private void Explode()
     {
+        if (!isActivated) return;
         isActivated = false;
+        if (explosionCoroutine != null)
+        {
+            StopCoroutine(explosionCoroutine);
+            explosionCoroutine = null;
+        }
+
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
+        DealAreaDamage(transform.position);
         Destroy(gameObject);
     }
+    public float radius = 2f;
+    public LayerMask damageableLayers;
+    public void DealAreaDamage(Vector3 center)
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(center, radius, damageableLayers);
+
+        foreach (Collider collider in hitColliders)
+        {
+            IDamageable damageable = collider.GetComponent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(20, TrapType.SaveMaze);
+            }
+        }
+    }
+
 
     public void TakeDamage(float damage, TrapType trapType)
     {

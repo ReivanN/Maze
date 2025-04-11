@@ -19,7 +19,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private float bulletSpeed = 10f;
+    [SerializeField] private float bulletSpeed = 2f;
     [SerializeField] private float fireRate = 1f;
     private float nextFireTime;
 
@@ -151,8 +151,8 @@ public class Enemy : MonoBehaviour, IDamageable
             if (bulletScript != null)
             {
                 audioSource.PlayOneShot(clip);
-                bulletScript.Initialize(direction, bulletSpeed);
-                bulletScript.SetDamages(10f);
+                bulletScript.Initialize(direction, bulletSpeed, 10, 0);
+                bulletScript.SetDamage(10f);
             }
         }
     }

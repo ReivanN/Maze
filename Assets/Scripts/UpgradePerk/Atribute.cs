@@ -5,19 +5,16 @@ public class Atribute
     public string name;
     public string description;
     public AtributeType type;
-    public float value;
+    //public string requiredAttributeName;
     public int cost;
 
-    public Atribute(string name, string description, AtributeType type, float value, int cost)
+    public Atribute(string name, string description, AtributeType type, int cost)
     {
         this.name = name;
         this.description = description;
         this.type = type;
-        this.value = value;
         this.cost = cost;
     }
-
-
 }
 
 public enum AtributeType

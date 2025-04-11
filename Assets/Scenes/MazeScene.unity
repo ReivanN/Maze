@@ -5521,6 +5521,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1687215031}
   - component: {fileID: 1687215032}
+  - component: {fileID: 1687215033}
   m_Layer: 5
   m_Name: Upgrade UI
   m_TagString: Untagged
@@ -5569,6 +5570,24 @@ MonoBehaviour:
   - {fileID: 1836948590}
   - {fileID: 493816781}
   - {fileID: 1216978673}
+  skipButton: {fileID: 274182452}
+  warningText: {fileID: 468372901}
+--- !u!114 &1687215033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1687215030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06767bb2df7d0c04097d5823d414dcc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttons:
+  - {fileID: 760977070}
+  - {fileID: 1442101684}
+  - {fileID: 1163946653}
   skipButton: {fileID: 274182452}
   warningText: {fileID: 468372901}
 --- !u!1 &1708160107

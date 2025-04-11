@@ -211,6 +211,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc58d048926f5cf40aec5e0211d10491, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ricochetMask:
+    serializedVersion: 2
+    m_Bits: 1152
+  impactEffect: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347, type: 3}
 --- !u!65 &2756160460465595836
 BoxCollider:
   m_ObjectHideFlags: 0

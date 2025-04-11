@@ -2,58 +2,71 @@ using UnityEngine;
 
 public class BulletEnemy : MonoBehaviour
 {
+    [Header("Stats")]
     private Vector3 direction;
     private float speed;
-
-    private float lifetime = 500f;
     private float damage;
-    public void Initialize(Vector3 bulletDirection, float bulletSpeed)
-    {
-        direction = bulletDirection;
-        speed = bulletSpeed;
-    }
 
-    public void SetDamages(float newDamage)
+    [Header("Ricochet")]
+    //public int maxRicochets = 3;
+    private int currentRicochets;
+    public LayerMask ricochetMask;
+    public GameObject impactEffect;
+
+    public void Initialize(Vector3 direction, float speed, float damage, int maxRicochets)
     {
-        damage = newDamage;
+        this.direction = direction.normalized;
+        this.speed = speed;
+        this.damage = damage;
+        this.currentRicochets = maxRicochets;
     }
 
     private void Update()
     {
-        transform.Translate(direction * speed * Time.deltaTime, Space.World);
-    }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
+        float moveDistance = speed * Time.deltaTime;
+
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, moveDistance, ricochetMask, QueryTriggerInteraction.Collide))
         {
-            IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
-            if (damageable != null) 
-            {
-                damageable.TakeDamage(damage, TrapType.NewMaze);
-                Destroy(gameObject);
-            }
+            HandleHit(hit);
         }
         else
         {
-            Destroy(gameObject);
+            transform.Translate(direction * moveDistance, Space.World);
         }
-
-
     }
 
-    /*private void OnTriggerEnter(Collider other)
+    private void HandleHit(RaycastHit hit)
     {
-        IDamageable damageable = other.gameObject.GetComponent<IDamageable>();
-        if (damageable != null && other.gameObject.CompareTag("Player"))
+        GameObject hitObject = hit.collider.gameObject;
+
+        if (impactEffect != null)
+        {
+            Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
+        }
+
+        IDamageable damageable = hitObject.GetComponent<IDamageable>();
+        if (damageable != null && !hitObject.CompareTag("Player"))
         {
             damageable.TakeDamage(damage, TrapType.NewMaze);
-            Debug.LogError(damage);
+            Debug.Log($"Damage applied: {damage} to {hitObject.name}");
             Destroy(gameObject);
-            
+            return;
+        }
+
+        if (currentRicochets > 0)
+        {
+            currentRicochets--;
+            direction = Vector3.Reflect(direction, hit.normal).normalized;
+            transform.position = hit.point + hit.normal * 0.01f;
         }
         else
         {
             Destroy(gameObject);
         }
-    }*/
+    }
+
+    public void SetDamage(float newDamage)
+    {
+        damage = newDamage;
+    }
 }

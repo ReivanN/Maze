@@ -173,6 +173,23 @@ public class Bomb : MonoBehaviour, IDamageable
         DealAreaDamage(transform.position);
         Destroy(gameObject);
     }
+
+
+    private void ExplodeDead()
+    {
+        if (!isActivated) return;
+        isActivated = false;
+        if (explosionCoroutine != null)
+        {
+            StopCoroutine(explosionCoroutine);
+            explosionCoroutine = null;
+        }
+
+        Instantiate(explosionEffect, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+    }
+
+
     public float radius = 2f;
     public LayerMask damageableLayers;
     public void DealAreaDamage(Vector3 center)
@@ -197,7 +214,7 @@ public class Bomb : MonoBehaviour, IDamageable
 
         if (currentHP <= 0)
         {
-            Explode();
+            ExplodeDead();
         }
     }
 

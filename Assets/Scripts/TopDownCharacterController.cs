@@ -172,6 +172,24 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
 
+    public void ApplyAtributes(Atribute atribute) 
+    {
+        GameData data = SaveManager.Instance.Load();
+        if(currentCoins < atribute.cost) 
+        {
+            return;
+        }
+        currentCoins -= atribute.cost;
+        OnCoinsChanged(currentCoins);
+        data.coins = currentCoins;
+        switch (atribute.type) 
+        {
+            case AtributeType.IceBullet:
+
+                break;
+        }
+    }
+
 
     public void OnMove(InputAction.CallbackContext context)
     {

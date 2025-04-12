@@ -3,24 +3,46 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using System.Collections;
+using DG.Tweening;
 
 public class UpgradeUI : MonoBehaviour
 {
     public Button[] buttons;
     public Button skipButton;
     public TextMeshProUGUI warningText;
+    public float animationDuration = 0.5f;
+    public float startYOffset = -800f;
 
     private List<Upgrade> currentUpgrades;
     private TopDownCharacterController topDownCharacterController;
+    private RectTransform rectTransform;
+    private bool wasActivated;
+
+    private void Awake()
+    {
+        UpgradeIcons.LoadIcons();
+    }
 
     void Start()
     {
-        StartCoroutine(InitializeWithDelay());
+        rectTransform = GetComponent<RectTransform>();
+        //StartCoroutine(InitializeWithDelay());
+        //Animation();
+    }
+
+    public void StartShop() 
+    {
+        rectTransform = GetComponent<RectTransform>();
+        if (wasActivated == false)
+            StartCoroutine(InitializeWithDelay());
+        PauseGameState.Pause();
+        Animation();
+        wasActivated = true;
     }
 
     private IEnumerator InitializeWithDelay()
     {
-
+        PauseGameState.Pause();
         while (topDownCharacterController == null)
         {
             topDownCharacterController = FindAnyObjectByType<TopDownCharacterController>();
@@ -28,17 +50,18 @@ public class UpgradeUI : MonoBehaviour
         }
 
         currentUpgrades = UpgradeManager.GetRandomUpgrades();
-
         for (int i = 0; i < buttons.Length; i++)
         {
             int index = i;
             Upgrade upgrade = currentUpgrades[i];
             TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-            textComponent.text = $"{upgrade.name}\n\n{upgrade.description}\nСтоимость: {upgrade.cost}";
-            if (topDownCharacterController.currentCoins < upgrade.cost)
+            textComponent.text = $"{upgrade.name}\n{upgrade.description}\nСтоимость: {upgrade.cost}";
+            Image iconImage = buttons[i].transform.Find("Icon")?.GetComponent<Image>();
+            if (iconImage != null)
             {
-                textComponent.text += "\n<color=red>Недостаточно монет</color>";
-            }
+                iconImage.sprite = upgrade.icon != null ? upgrade.icon : UpgradeIcons.GetIcon(upgrade.name);
+                iconImage.enabled = iconImage.sprite != null;
+            }   
 
             buttons[i].onClick.RemoveAllListeners();
             buttons[i].onClick.AddListener(() => ApplyUpgrade(index));
@@ -50,8 +73,13 @@ public class UpgradeUI : MonoBehaviour
             skipButton.onClick.AddListener(SkipUpgrade);
         }
 
-        yield return null;
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
+    }
+
+    public void Animation() 
+    {
+        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, startYOffset);
+        rectTransform.DOAnchorPosY(0f, animationDuration).SetEase(Ease.OutBack);
     }
 
     void ApplyUpgrade(int index)
@@ -76,17 +104,17 @@ public class UpgradeUI : MonoBehaviour
         SaveManager.Instance.SaveUpgrade(selectedUpgrade);
 
         gameObject.SetActive(false);
-        Time.timeScale = 1;
+        PauseGameState.Resume();
     }
 
     void SkipUpgrade()
     {
-
         if (warningText != null)
         {
             warningText.text = "";
         }
+
         gameObject.SetActive(false);
-        Time.timeScale = 1;
+        PauseGameState.Resume();
     }
 }

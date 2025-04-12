@@ -61,10 +61,6 @@ public class Bomb : MonoBehaviour, IDamageable
             else
             {
                 ChasePlayer();
-                /*if (Vector3.Distance(transform.position, player.position) <= agent.stoppingDistance)
-                {
-                    Explode();
-                }*/
             }
         }
     }
@@ -141,18 +137,6 @@ public class Bomb : MonoBehaviour, IDamageable
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        /*Debug.LogError("Я коснулся его");
-        IDamageable damageable = other.gameObject.GetComponent<IDamageable>();
-        if (other.gameObject.CompareTag("Player") && damageable != null)
-        {
-            Debug.LogError("Я коснулся его 1");
-            TakeDamage(20, TrapType.SaveMaze);
-            Explode();
-        }*/
-    }
-
     private IEnumerator DelayedExplosion()
     {
         yield return new WaitForSeconds(explosionDelay);
@@ -190,7 +174,7 @@ public class Bomb : MonoBehaviour, IDamageable
     }
 
 
-    public float radius = 2f;
+    public float radius = 0.1f;
     public LayerMask damageableLayers;
     public void DealAreaDamage(Vector3 center)
     {
@@ -228,5 +212,8 @@ public class Bomb : MonoBehaviour, IDamageable
             Gizmos.color = Color.green;
             Gizmos.DrawLine(transform.position, player.position);
         }
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 }

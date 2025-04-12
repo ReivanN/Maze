@@ -23,7 +23,8 @@ public class BulletEnemy : MonoBehaviour
 
     private void Update()
     {
-        float moveDistance = speed * Time.deltaTime;
+        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
+        float moveDistance = speed * DT;
 
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, moveDistance, ricochetMask, QueryTriggerInteraction.Collide))
         {
@@ -45,7 +46,7 @@ public class BulletEnemy : MonoBehaviour
         }
 
         IDamageable damageable = hitObject.GetComponent<IDamageable>();
-        if (damageable != null && !hitObject.CompareTag("Player"))
+        if (damageable != null && hitObject.CompareTag("Player"))
         {
             damageable.TakeDamage(damage, TrapType.NewMaze);
             Debug.Log($"Damage applied: {damage} to {hitObject.name}");

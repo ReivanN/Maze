@@ -5,7 +5,7 @@ public class Trap : MonoBehaviour
 
     public TrapData trapData;
 
-    private void OnTriggerEnter(Collider other)
+    /*private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
@@ -22,7 +22,7 @@ public class Trap : MonoBehaviour
             IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
             damageable.TakeDamage(trapData.damage, trapData.trapType);
         }
-    }
+    }*/
 }
 
 public enum TrapType 

@@ -53,7 +53,7 @@ public class AttributeUI : MonoBehaviour
         }
 
         yield return null;
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
     }
 
     void OnAttributeSelected(Atribute newAttribute)

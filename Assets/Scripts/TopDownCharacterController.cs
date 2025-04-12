@@ -44,6 +44,9 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private int coinCount = 1;
     public int currentCoins;
 
+    [Header("Input")]
+    public InputActionAsset inputActions;
+
     public float GetDamage() => currentDamage;
 
     private void LoadPlayerData()
@@ -114,22 +117,40 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         Debug.LogError("Current Fire Rate " + currentFireRate);
     }
 
-
+    private float fireCooldownTimer = 0f;
 
     void Update()
     {
+        float dt = Time.deltaTime * PauseGameState.LocalTimeScale;
+
+        // Переключение карты ввода
+        if (PauseGameState.IsPaused)
+        {
+            inputActions.FindActionMap("Player").Disable();
+        }
+        else
+        {
+            inputActions.FindActionMap("Player").Enable();
+        }
+
         RotateTowardsMouse();
         UpdateAnimations();
         MoveCamera();
         Move();
         HandleShooting();
 
-        if (isFiring && Time.time >= nextFireTime)
+        if (!PauseGameState.IsPaused)
         {
-            Shoot();
-            nextFireTime = Time.time + currentFireRate;
+            fireCooldownTimer += dt;
+
+            if (isFiring && fireCooldownTimer >= 1f / currentFireRate)
+            {
+                Shoot();
+                fireCooldownTimer = 0f;
+            }
         }
     }
+
 
     public void ApplyUpgrade(Upgrade upgrade)
     {
@@ -198,18 +219,19 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void Move()
     {
+        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
         Vector3 moveVector = new Vector3(moveInput.x, 0, moveInput.y) * playerData.moveSpeed;
         
         if (!characterController.isGrounded)
         {
-            velocity.y -= gravity * Time.deltaTime;
+            velocity.y -= gravity * DT;
         }
         else
         {
             velocity.y = -0.1f; 
         }
         
-        characterController.Move((moveVector + velocity) * Time.deltaTime);
+        characterController.Move((moveVector + velocity) * DT);
     }
     
     private void RotateTowardsMouse()
@@ -234,10 +256,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void MoveCamera()
     {
+        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
         if (cameraTransform != null)
         {
             Vector3 targetPosition = new Vector3(transform.position.x, cameraTransform.position.y, transform.position.z);
-            cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, cameraSmoothSpeed * Time.deltaTime);
+            cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, cameraSmoothSpeed * DT);
         }
     }
 
@@ -279,20 +302,27 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         if (context.started)
         {
-            isFiring = true; // Начинаем стрельбу
+            isFiring = true;
         }
         else if (context.canceled)
         {
-            isFiring = false; // Останавливаем стрельбу
+            isFiring = false;
         }
     }
 
     private void HandleShooting()
     {
-        if (Mouse.current.leftButton.isPressed && Time.time >= nextFireTime)
+        if (PauseGameState.IsPaused)
+            return;
+
+        float dt = Time.deltaTime * PauseGameState.LocalTimeScale;
+
+        fireCooldownTimer += dt;
+
+        if (Mouse.current.leftButton.isPressed && fireCooldownTimer >= currentFireRate)
         {
             Shoot();
-            nextFireTime = Time.time + currentFireRate;
+            fireCooldownTimer = 0f;
         }
     }
 

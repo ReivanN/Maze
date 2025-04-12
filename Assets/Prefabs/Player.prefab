@@ -124,7 +124,7 @@ Transform:
   m_GameObject: {fileID: 5357759567362765645}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0172, z: 0.0153}
+  m_LocalPosition: {x: 0, y: 0.0172, z: 0.00501}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -877,6 +877,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2905782489717234636}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 901172395806187047}
   m_SourcePrefab: {fileID: 100100000, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
 --- !u!4 &6970703272670071170 stripped
 Transform:
@@ -1034,6 +1037,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: da277a87-f1d8-4e52-87ae-e19e214f33b9
     m_ActionName: 'Player/OnPause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: af2ad9e8-3bab-4bef-8644-42966db37873
+    m_ActionName: 'Player/OpenShop[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1065,6 +1072,7 @@ MonoBehaviour:
   gunShot: {fileID: 8300000, guid: bb647f8d572f336468ba1305e0e6141e, type: 3}
   pickUp: {fileID: 8300000, guid: aa98781f151e13649a1c66881ee4db2c, type: 3}
   currentCoins: 0
+  inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!82 &2905782489717234636
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1162,6 +1170,27 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!65 &901172395806187047
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181426195906352140}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.010436318, y: 0.03600968, z: 0.015541318}
+  m_Center: {x: -0.00009115785, y: 0.018116618, z: 0.00009116381}
 --- !u!4 &7557706199888465590 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}

@@ -10,7 +10,7 @@ public class GameData
     public float health = 100;
     public float maxHealth = 100;
     public float damage = 10;
-    public float fireRate = 0.5f;
+    public float fireRate = 1f;
     public int ricochets = 0;
 
     public int coins = 0;

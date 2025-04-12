@@ -1,3 +1,5 @@
+using UnityEngine;
+
 [System.Serializable]
 public class Upgrade
 {
@@ -8,8 +10,9 @@ public class Upgrade
     public int cost;
     public string requiredUpgradeName;
     public string requiredAttributeName;
+    public Sprite icon;
 
-    public Upgrade(string name, string description, UpgradeType type, float value, int cost, string requiredUpgradeName = null, string requiredAttributeName = null)
+    public Upgrade(string name, string description, UpgradeType type, float value, int cost, Sprite icon, string requiredUpgradeName = null, string requiredAttributeName = null)
     {
         this.name = name;
         this.description = description;
@@ -18,6 +21,7 @@ public class Upgrade
         this.cost = cost;
         this.requiredUpgradeName = requiredUpgradeName;
         this.requiredAttributeName = requiredAttributeName;
+        this.icon = icon;
     }
 }
 

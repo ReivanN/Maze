@@ -15,7 +15,7 @@ public class ActivateShop : MonoBehaviour
     private void Awake()
     {
         interactionText = FindObjectOfType<OpenShowText>(true);
-        shopUI = FindObjectOfType<UpgradeUI>(true); // true Ч ищет и среди неактивных
+        shopUI = FindObjectOfType<UpgradeUI>(true);
     }
 
     private void OnEnable()
@@ -56,6 +56,7 @@ public class ActivateShop : MonoBehaviour
 
         interactionText?.gameObject.SetActive(false);
         shopUI?.gameObject.SetActive(true);
+        shopUI.StartShop();
         onShopActivate?.Invoke();
     }
 }

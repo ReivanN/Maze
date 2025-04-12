@@ -12,7 +12,7 @@ public class PauseManager : MonoBehaviour
     private bool isPaused = false;
     private void Start()
     {
-        Time.timeScale = 1f;
+        
     }
     void OnEnable()
     {
@@ -39,7 +39,7 @@ public class PauseManager : MonoBehaviour
     void Pause()
     {
         pause.SetActive(true);
-        Time.timeScale = 0f;
+        PauseGameState.Pause();
         isPaused = true;
     }
     public void OpenTutorial() 
@@ -57,7 +57,7 @@ public class PauseManager : MonoBehaviour
     void Resume()
     {
         pause.SetActive(false);
-        Time.timeScale = 1f;
+        PauseGameState.Resume();
         isPaused = false;
     }
 

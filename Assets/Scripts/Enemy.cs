@@ -21,6 +21,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private Transform firePoint;
     [SerializeField] private float bulletSpeed = 2f;
     [SerializeField] private float fireRate = 1f;
+    private float fireCooldownTimer = 0f;
     private float nextFireTime;
 
     [HideInInspector] public UnityAction EnemyDeath;
@@ -34,7 +35,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     [Header("Coins")]
     [SerializeField] private GameObject coinPrefab;
-    [SerializeField] private float spawnRadius = 0.25f;
+    [SerializeField] private float spawnRadius = 0.1f;
     [SerializeField] private Transform spawnCenter;
 
     void Start()
@@ -52,7 +53,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     void Update()
     {
-        if (!isActivated)
+        if (!isActivated )
         {
             DetectPlayer();
         }
@@ -66,10 +67,12 @@ public class Enemy : MonoBehaviour, IDamageable
             {
                 ChasePlayer();
                 RotateTowardsPlayer();
-                if (Time.time >= nextFireTime && CanSeePlayer(player))
+                float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
+                fireCooldownTimer += DT;
+                if (fireCooldownTimer >= 1f / fireRate && CanSeePlayer(player))
                 {
                     Shoot();
-                    nextFireTime = Time.time + 1f / fireRate;
+                    fireCooldownTimer = 0f;
                 }
             }
         }
@@ -130,12 +133,13 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void RotateTowardsPlayer()
     {
+        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
         if (player != null)
         {
             Vector3 direction = (player.position - transform.position).normalized;
             direction.y = 0;
             Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, DT * 5f);
         }
     }
 

@@ -23,8 +23,9 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        float moveDistance = speed * Time.deltaTime;
-
+        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
+        float moveDistance = speed * DT;
+        
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, moveDistance, ricochetMask, QueryTriggerInteraction.Collide))
         {
             HandleHit(hit);

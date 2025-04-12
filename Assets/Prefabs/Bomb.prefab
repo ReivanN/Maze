@@ -162,14 +162,15 @@ MonoBehaviour:
   explosionEffect: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
   meshRenderer: {fileID: 7055408107732474828}
   detectionRadius: 5
-  moveSpeed: 5
+  moveSpeed: 3
   obstaclesMask:
     serializedVersion: 2
     m_Bits: 128
   HP: 20
   currentHP: 0
   activationSound: {fileID: 8300000, guid: 262d140e56a7cec409dc39dcf17c381b, type: 3}
-  radius: 2
+  explosionDelay: 3
+  radius: 1
   damageableLayers:
     serializedVersion: 2
     m_Bits: 1024

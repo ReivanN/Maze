@@ -1,6 +1,6 @@
-using System.Collections;
-using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine;
+using System.Collections;
 
 public class Bomb : MonoBehaviour, IDamageable
 {
@@ -20,6 +20,8 @@ public class Bomb : MonoBehaviour, IDamageable
     private AudioSource audioSource;
     [SerializeField] private float explosionDelay = 3f;
     private Coroutine explosionCoroutine;
+
+    private bool isTimerExpired = false;
 
     private void Awake()
     {
@@ -140,13 +142,15 @@ public class Bomb : MonoBehaviour, IDamageable
     private IEnumerator DelayedExplosion()
     {
         yield return new WaitForSeconds(explosionDelay);
+        isTimerExpired = true;
         Explode();
     }
 
     private void Explode()
     {
-        if (!isActivated) return;
+        if (!isActivated || !isTimerExpired) return;
         isActivated = false;
+
         if (explosionCoroutine != null)
         {
             StopCoroutine(explosionCoroutine);
@@ -158,11 +162,38 @@ public class Bomb : MonoBehaviour, IDamageable
         Destroy(gameObject);
     }
 
+    public float radius = 0.1f;
+    public LayerMask damageableLayers;
+    public bool wasactivated;
+    public void DealAreaDamage(Vector3 center)
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(center, radius, damageableLayers);
+
+        foreach (Collider collider in hitColliders)
+        {
+            if(wasactivated == false) 
+            {
+                IDamageable damageable = collider.GetComponent<IDamageable>();
+                damageable?.TakeDamage(20, TrapType.SaveMaze, DamageType.Normal);
+                wasactivated = true;
+            }
+        }
+    }
+    public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
+    {
+        currentHP -= damage;
+        healthBar?.UpdateHealthBar(currentHP, HP);
+        if (currentHP <= 0)
+        {
+            ExplodeDead();
+        }
+    }
 
     private void ExplodeDead()
     {
         if (!isActivated) return;
         isActivated = false;
+
         if (explosionCoroutine != null)
         {
             StopCoroutine(explosionCoroutine);
@@ -171,35 +202,6 @@ public class Bomb : MonoBehaviour, IDamageable
 
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
-    }
-
-
-    public float radius = 0.1f;
-    public LayerMask damageableLayers;
-    public void DealAreaDamage(Vector3 center)
-    {
-        Collider[] hitColliders = Physics.OverlapSphere(center, radius, damageableLayers);
-
-        foreach (Collider collider in hitColliders)
-        {
-            IDamageable damageable = collider.GetComponent<IDamageable>();
-            if (damageable != null)
-            {
-                damageable.TakeDamage(20, TrapType.SaveMaze);
-            }
-        }
-    }
-
-
-    public void TakeDamage(float damage, TrapType trapType)
-    {
-        currentHP -= damage;
-        healthBar?.UpdateHealthBar(currentHP, HP);
-
-        if (currentHP <= 0)
-        {
-            ExplodeDead();
-        }
     }
 
     private void OnDrawGizmos()

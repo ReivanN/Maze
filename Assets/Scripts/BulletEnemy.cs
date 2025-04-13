@@ -48,7 +48,7 @@ public class BulletEnemy : MonoBehaviour
         IDamageable damageable = hitObject.GetComponent<IDamageable>();
         if (damageable != null && hitObject.CompareTag("Player"))
         {
-            damageable.TakeDamage(damage, TrapType.NewMaze);
+            damageable.TakeDamage(damage, TrapType.NewMaze, DamageType.Normal);
             Debug.Log($"Damage applied: {damage} to {hitObject.name}");
             Destroy(gameObject);
             return;

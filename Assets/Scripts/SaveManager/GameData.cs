@@ -12,8 +12,13 @@ public class GameData
     public float damage = 10;
     public float fireRate = 1f;
     public int ricochets = 0;
+    public int coins = 100000;
 
-    public int coins = 0;
+    public bool iceBullet = false;
+    public bool fireBullet = false;
+    public bool poisonBullet = false;
+
 
     public List<string> appliedUpgrades = new List<string>();
+    public List<string> appliedAttributes = new List<string>();
 }

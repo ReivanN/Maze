@@ -50,6 +50,13 @@ public class SaveManager : MonoBehaviour
         Save(data);
     }
 
+    public void SaveAttribute(Atribute attribute) 
+    {
+        GameData data = Load();
+        data.appliedAttributes.Add(attribute.name);
+        Save(data);
+    }
+
     public bool SaveExists() => File.Exists(savePath);
 
 

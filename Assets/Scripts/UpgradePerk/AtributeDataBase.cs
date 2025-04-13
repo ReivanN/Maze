@@ -3,10 +3,25 @@ using UnityEngine;
 
 public class AtributeDataBase : MonoBehaviour
 {
-    public static List<Atribute> allAttributes = new List<Atribute>
+    public static List<Atribute> allAttributes;
+
+    private void Awake()
     {
-        new Atribute("Shield", "Add for player a shield", AtributeType.Shield, 50),
-        new Atribute("Ice Bullets", "Add an ice bulltes which slown down the enemy", AtributeType.IceBullet, 100),
-        new Atribute("Спринтер", "Увеличивает скорость после уклонения", AtributeType.Shield,50),
-    };
+        InitialiseAttribute();
+    }
+    public static void InitialiseAttribute()
+    {
+        allAttributes = new List<Atribute>()
+        {
+            LoadDataBase("Shield", "Add for player a shield", AtributeType.Shield, 50),
+            LoadDataBase("Ice Bullets", "Add an ice bulltes which slown down the enemy", AtributeType.IceBullet, 100),
+            LoadDataBase("Fire Bullets", "Add the fire bullets, which intermittent damage (1.2) for 3 seconds. ", AtributeType.FireBullet, 75)
+        };
+    }
+
+    public static Atribute LoadDataBase(string name, string description, AtributeType type, int cost)
+    {
+        Sprite icon = Resources.Load<Sprite>($"Icons/{name}");
+        return new Atribute(name, description, type, cost, icon);
+    }
 }

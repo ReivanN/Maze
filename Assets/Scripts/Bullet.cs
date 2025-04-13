@@ -6,19 +6,21 @@ public class Bullet : MonoBehaviour
     private Vector3 direction;
     private float speed;
     private float damage;
-
+    public DamageType damageType;
     [Header("Ricochet")]
     //public int maxRicochets = 3;
     private int currentRicochets;
     public LayerMask ricochetMask;
     public GameObject impactEffect;
+    
 
-    public void Initialize(Vector3 direction, float speed, float damage, int maxRicochets)
+    public void Initialize(Vector3 direction, float speed, float damage, int maxRicochets, DamageType damageType)
     {
         this.direction = direction.normalized;
         this.speed = speed;
         this.damage = damage;
         this.currentRicochets = maxRicochets;
+        this.damageType = damageType;
     }
 
     private void Update()
@@ -48,7 +50,7 @@ public class Bullet : MonoBehaviour
         IDamageable damageable = hitObject.GetComponent<IDamageable>();
         if (damageable != null && !hitObject.CompareTag("Player"))
         {
-            damageable.TakeDamage(damage, TrapType.NewMaze);
+            damageable.TakeDamage(damage, TrapType.NewMaze, damageType);
             Debug.Log($"Damage applied: {damage} to {hitObject.name}");
             Destroy(gameObject);
             return;

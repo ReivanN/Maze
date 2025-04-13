@@ -10,6 +10,10 @@ public class AttributeManager : MonoBehaviour
 
     public static List<Atribute> GetAvailableAttributes()
     {
+        if (AtributeDataBase.allAttributes == null)
+        {
+            AtributeDataBase.InitialiseAttribute(); 
+        }
         return AtributeDataBase.allAttributes.OrderBy(u => Random.value).Take(MaxActiveAttributes).ToList();
     }
 

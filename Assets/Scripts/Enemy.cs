@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -14,12 +15,14 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private float health = 100f;
     [SerializeField] private float currentHealth;
     [SerializeField] private float speed = 3.5f;
+    [SerializeField] private float currentSpeed;
     [SerializeField] private float stoppingDistance = 2f;
     [SerializeField] private float detectionRadius = 10f;
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
     [SerializeField] private float bulletSpeed = 2f;
+    [SerializeField] private float currentbulletSpeed;
     [SerializeField] private float fireRate = 1f;
     private float fireCooldownTimer = 0f;
     private float nextFireTime;
@@ -32,6 +35,8 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public AudioSource audioSource;
     public AudioClip clip;
+    [SerializeField] private ParticleSystem slowEffectParticles;
+
 
     [Header("Coins")]
     [SerializeField] private GameObject coinPrefab;
@@ -40,12 +45,14 @@ public class Enemy : MonoBehaviour, IDamageable
 
     void Start()
     {
+        currentSpeed = speed;
+        currentbulletSpeed = bulletSpeed;
         ragdollBodies = GetComponentsInChildren<Rigidbody>();
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         healthBar = GetComponentInChildren<IHealthBar>();
         DisableRagdoll();
-        agent.speed = speed;
+        agent.speed = currentSpeed;
         agent.stoppingDistance = stoppingDistance;
         currentHealth = health;
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -155,16 +162,22 @@ public class Enemy : MonoBehaviour, IDamageable
             if (bulletScript != null)
             {
                 audioSource.PlayOneShot(clip);
-                bulletScript.Initialize(direction, bulletSpeed, 10, 0);
+                bulletScript.Initialize(direction, currentbulletSpeed, 10, 0);
                 bulletScript.SetDamage(10f);
             }
         }
     }
 
-    public void TakeDamage(float damage, TrapType trapType)
+    public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
         currentHealth -= damage;
         healthBar?.UpdateHealthBar(currentHealth, health);
+        if (damageType == DamageType.Ice)
+        {
+            ApplySlow(2f, 0.5f);
+            Debug.LogError("Damage" + currentSpeed + currentbulletSpeed);
+        }
+
         if (currentHealth <= 0)
         {
             Die();
@@ -220,6 +233,37 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
+    private Coroutine slowCoroutine;
+
+    private void ApplySlow(float duration, float slowMultiplier)
+    {
+        if (slowCoroutine != null) StopCoroutine(slowCoroutine);
+        slowCoroutine = StartCoroutine(SlowCoroutine(duration, slowMultiplier));
+    }
+
+    private IEnumerator SlowCoroutine(float duration, float slowMultiplier)
+    {
+        currentSpeed = speed * slowMultiplier;
+        currentbulletSpeed = bulletSpeed * slowMultiplier;
+        agent.speed = currentSpeed;
+        // Включаем партиклы
+        if (slowEffectParticles != null && !slowEffectParticles.isPlaying)
+        {
+            slowEffectParticles.Play();
+        }
+
+        yield return new WaitForSeconds(duration);
+
+        // Возвращаем скорость
+        currentSpeed = speed;
+        currentbulletSpeed = bulletSpeed;
+
+        // Выключаем партиклы
+        if (slowEffectParticles != null && slowEffectParticles.isPlaying)
+        {
+            slowEffectParticles.Stop();
+        }
+    }
 
 
     private void SpawnCoins() 

@@ -20,7 +20,7 @@ public class UpgradeDatabase : MonoBehaviour
             CreateUpgrade("HPBonus +30", "Add 30 HP to your current HP", UpgradeType.HpPlus, 30f, 15),
             CreateUpgrade("Ricoshet bullets 1", "Adds ricochet bullets (+1)", UpgradeType.Ricoshet, 1f, 50),
             CreateUpgrade("Ricoshet bullets 2", "Adds ricochet bullets (+2)", UpgradeType.Ricoshet, 3f, 100, "Ricoshet bullets 1"),
-            CreateUpgrade("Ricoshet bullets 3", "Adds ricochet bullets (+1)", UpgradeType.Ricoshet, 5f, 150)
+            CreateUpgrade("Ricoshet bullets 3", "Adds ricochet bullets (+1)", UpgradeType.Ricoshet, 5f, 150, "Ricoshet bullets 2")
         };
     }
 

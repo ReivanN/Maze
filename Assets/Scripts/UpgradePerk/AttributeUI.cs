@@ -13,7 +13,11 @@ public class AttributeUI : MonoBehaviour
     private List<Atribute> availableAttributes;
     private Atribute selectedNewAttribute;
     private Atribute attributeToReplace;
-
+    private TopDownCharacterController topDownCharacterController;
+    private void Awake()
+    {
+        UpgradeIcons.LoadIcons();
+    }
     void Start()
     {
         StartCoroutine(InitializeWithDelay());
@@ -26,6 +30,13 @@ public class AttributeUI : MonoBehaviour
             yield return null;
         }
 
+        while (topDownCharacterController == null)
+        {
+            topDownCharacterController = FindAnyObjectByType<TopDownCharacterController>();
+            yield return null;
+        }
+
+
         availableAttributes = AttributeManager.GetAvailableAttributes();
 
         for (int i = 0; i < buttons.Length; i++)
@@ -35,8 +46,13 @@ public class AttributeUI : MonoBehaviour
             {
                 Atribute attribute = availableAttributes[index];
                 TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = $"{attribute.name}\n\n{attribute.description}";
-
+                textComponent.text = $"{attribute.name}\n{attribute.description}\nСтоимость: {attribute.cost}";
+                Image iconImage = buttons[i].transform.Find("Icon")?.GetComponent<Image>();
+                if (iconImage != null)
+                {
+                    iconImage.sprite = attribute.icon != null ? attribute.icon : UpgradeIcons.GetIcon(attribute.name);
+                    iconImage.enabled = iconImage.sprite != null;
+                }
                 buttons[i].onClick.RemoveAllListeners();
                 buttons[i].onClick.AddListener(() => OnAttributeSelected(attribute));
             }
@@ -53,26 +69,36 @@ public class AttributeUI : MonoBehaviour
         }
 
         yield return null;
-        //Time.timeScale = 0;
     }
 
     void OnAttributeSelected(Atribute newAttribute)
     {
+        if (topDownCharacterController.currentCoins < newAttribute.cost)
+        {
+            if (warningText != null)
+            {
+                warningText.text = "Недостаточно монет для улучшения!";
+            }
+            return;
+        }
+
+        selectedNewAttribute = newAttribute;
+
         if (!AttributeManager.IsFull())
         {
-            AttributeManager.AddAttribute(newAttribute);
+            AttributeManager.AddAttribute(selectedNewAttribute);
+            topDownCharacterController.ApplyAtributes(selectedNewAttribute);
+            SaveManager.Instance.SaveAttribute(selectedNewAttribute);
             CloseUI();
             return;
         }
 
-        // Если атрибутов уже 3 — открываем окно замены
-        selectedNewAttribute = newAttribute;
         ShowReplacePrompt();
     }
 
+
     void ShowReplacePrompt()
     {
-        // Простая реализация: перезаписываем UI кнопок текущими активными атрибутами
         for (int i = 0; i < buttons.Length; i++)
         {
             if (i < AttributeManager.activeAttributes.Count)
@@ -81,7 +107,7 @@ public class AttributeUI : MonoBehaviour
                 int index = i;
 
                 TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = $"Заменить: {activeAttr.name}\n\n{activeAttr.description}";
+                textComponent.text = $"Change: {activeAttr.name}\n\n{activeAttr.description}";
 
                 buttons[i].onClick.RemoveAllListeners();
                 buttons[i].onClick.AddListener(() =>
@@ -98,7 +124,7 @@ public class AttributeUI : MonoBehaviour
 
         if (warningText != null)
         {
-            warningText.text = "Выберите атрибут, который хотите заменить.";
+            warningText.text = "";
         }
     }
 
@@ -107,10 +133,13 @@ public class AttributeUI : MonoBehaviour
         if (attributeToReplace != null && selectedNewAttribute != null)
         {
             AttributeManager.ReplaceAttribute(attributeToReplace, selectedNewAttribute);
+            topDownCharacterController.ApplyAtributes(selectedNewAttribute);
+            SaveManager.Instance.SaveAttribute(selectedNewAttribute);
         }
 
         CloseUI();
     }
+
 
     void SkipAttributeSelection()
     {
@@ -125,6 +154,5 @@ public class AttributeUI : MonoBehaviour
     void CloseUI()
     {
         gameObject.SetActive(false);
-        Time.timeScale = 1;
     }
 }

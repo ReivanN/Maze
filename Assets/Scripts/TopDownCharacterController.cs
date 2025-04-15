@@ -28,7 +28,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private float nextFireTime = 0f;
     public float bulletSpeed = 10f;
     public int currentmRicochets;
-    private DamageType currentDamageType = DamageType.Normal;
+    private DamageType currentDamageTypes = DamageType.Normal;
 
     [Header("Stats")]
     private float currentDamage;
@@ -72,10 +72,10 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         currentDamage = data.damage;
         currentmRicochets = data.ricochets;
         currentCoins = data.coins;
-        currentDamageType = data.iceBullet ? DamageType.Ice : DamageType.Normal;
+        currentDamageTypes = (DamageType)data.damageType;
         OnCoinsChanged?.Invoke(currentCoins);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
-        Debug.LogError(currentDamageType);
+        Debug.LogError(currentDamageTypes);
     }
 
 
@@ -89,6 +89,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.damage = currentDamage;
         data.coins = currentCoins;
         data.ricochets = currentmRicochets;
+        data.damageType = (int)currentDamageTypes;
         SaveManager.Instance.Save(data);
     }
 
@@ -116,6 +117,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             LoadPlayerData();
         }
         Debug.LogError("Current Fire Rate " + currentFireRate);
+        Debug.LogError("Current Damage Type " + currentDamageTypes);
     }
 
     private float fireCooldownTimer = 0f;
@@ -212,8 +214,18 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         switch (atribute.type) 
         {
             case AtributeType.IceBullet:
-                currentDamageType = DamageType.Ice;
-                data.iceBullet = true;
+                AddDamageType(DamageType.Ice);
+                data.damageType = (int)currentDamageTypes;
+                break;
+            case AtributeType.FireBullet:
+                AddDamageType(DamageType.Fire);
+                data.damageType = (int)currentDamageTypes;
+                break;
+            case AtributeType.PoisonBullets:
+                AddDamageType(DamageType.Poison);
+                data.damageType = (int)currentDamageTypes;
+                break;
+            case AtributeType.Shield:
                 break;
         }
         data.maxHealth = MAXHealth;
@@ -222,10 +234,15 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.fireRate = currentFireRate;
         data.ricochets = currentmRicochets;
         data.appliedAttributes.Add(atribute.name);
+        data.damageType = (int)currentDamageTypes;
         SaveManager.Instance.Save(data);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
     }
 
+    public void AddDamageType(DamageType damageType) 
+    {
+        currentDamageTypes |= damageType;
+    }
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -355,7 +372,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 Bullet bulletScript = bullet.GetComponent<Bullet>();
                 if (bulletScript != null)
                 {
-                    bulletScript.Initialize(direction, bulletSpeed, currentDamage, currentmRicochets, currentDamageType);
+                    bulletScript.Initialize(direction, bulletSpeed, currentDamage, currentmRicochets, currentDamageTypes);
                     bulletScript.SetDamage(GetDamage());
                     myaudioSource.PlayOneShot(gunShot);
                 }

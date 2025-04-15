@@ -55,4 +55,21 @@ public class AttributeManager : MonoBehaviour
     {
         activeAttributes.Remove(attribute);
     }
+
+    public static void LoadAttributesFromSave(List<string> savedNames)
+    {
+        if (AtributeDataBase.allAttributes == null)
+            AtributeDataBase.InitialiseAttribute();
+
+        activeAttributes.Clear();
+        foreach (var attrName in savedNames)
+        {
+            Atribute attr = AtributeDataBase.allAttributes.Find(a => a.name == attrName);
+            if (attr != null)
+                activeAttributes.Add(attr);
+            else
+                Debug.LogWarning($"јтрибут с именем {attrName} не найден в базе.");
+        }
+    }
+
 }

@@ -7,6 +7,7 @@ using System.Collections;
 public class AttributeUI : MonoBehaviour
 {
     public Button[] buttons;
+    public Image[] attributeSlots;
     public Button skipButton;
     public TextMeshProUGUI warningText;
 
@@ -21,6 +22,7 @@ public class AttributeUI : MonoBehaviour
     void Start()
     {
         StartCoroutine(InitializeWithDelay());
+        UpdateHUD();
     }
 
     private IEnumerator InitializeWithDelay()
@@ -136,10 +138,33 @@ public class AttributeUI : MonoBehaviour
             topDownCharacterController.ApplyAtributes(selectedNewAttribute);
             SaveManager.Instance.SaveAttribute(selectedNewAttribute);
         }
-
+        UpdateHUD();
         CloseUI();
     }
 
+    public void UpdateHUD()
+    {
+        GameData gameData = SaveManager.Instance.Load();
+
+        List<Atribute> saveAttributes = AttributeManager.activeAttributes;
+
+        for (int i = 0; i < attributeSlots.Length; i++)
+        {
+            if (i < saveAttributes.Count)
+            {
+                attributeSlots[i].sprite = saveAttributes[i].icon != null
+                    ? saveAttributes[i].icon
+                    : UpgradeIcons.GetIcon(saveAttributes[i].name);
+                attributeSlots[i].enabled = attributeSlots[i].sprite != null;
+            }
+            else
+            {
+                attributeSlots[i].sprite = null;
+                attributeSlots[i].enabled = false;
+            }
+        }
+
+    }
 
     void SkipAttributeSelection()
     {

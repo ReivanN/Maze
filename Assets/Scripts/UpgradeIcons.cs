@@ -17,6 +17,7 @@ public static class UpgradeIcons
         iconMap["Shield"] = Resources.Load<Sprite>("Icons/shield");
         iconMap["Ice Bullets"] = Resources.Load<Sprite>("Icons/IceBullets");
         iconMap["Fire Bullets"] = Resources.Load<Sprite>("Icons/FireBullets");
+        iconMap["Poison Bullets"] = Resources.Load<Sprite>("Icons/PoisonBullets");
     }
 
     public static Sprite GetIcon(string upgradeName)

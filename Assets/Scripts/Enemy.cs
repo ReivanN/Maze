@@ -35,7 +35,13 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public AudioSource audioSource;
     public AudioClip clip;
+    [Header("Particles")]
     [SerializeField] private ParticleSystem slowEffectParticles;
+    [SerializeField] private ParticleSystem burnEffectParticles;
+    [SerializeField] private ParticleSystem poisonEffectParticles;
+    private Coroutine slowCoroutine;
+    private Coroutine burnCoroutine;
+    private Coroutine posionCourutine;
 
 
     [Header("Coins")]
@@ -94,6 +100,7 @@ public class Enemy : MonoBehaviour, IDamageable
             {
                 player = hitCollider.transform;
                 ActivateEnemy();
+                ChasePlayer();
                 return;
             }
         }
@@ -172,10 +179,22 @@ public class Enemy : MonoBehaviour, IDamageable
     {
         currentHealth -= damage;
         healthBar?.UpdateHealthBar(currentHealth, health);
-        if (damageType == DamageType.Ice)
+        if ((damageType & DamageType.Ice) != 0)
         {
             ApplySlow(2f, 0.5f);
-            Debug.LogError("Damage" + currentSpeed + currentbulletSpeed);
+            Debug.LogError("Was ACTIVE ICE");
+        }
+
+        if ((damageType & DamageType.Fire) != 0)
+        {
+            ApplyBurn(8f, 3f, 1f);
+            Debug.LogError("Was ACTIVE FIRE");
+        }
+
+        if((damageType & DamageType.Poison) != 0) 
+        {
+            ApplyPoison(5f, 10f, 1f);
+            Debug.LogError("Was ACTIVE POISON");
         }
 
         if (currentHealth <= 0)
@@ -186,8 +205,9 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void Die()
     {
-        healthBar.HideHealthBar();
+        if (!isAlive) return;
         isAlive = false;
+        healthBar.HideHealthBar();
         GetComponent<Collider>().enabled = false;
         EnableRagdoll();
         agent.enabled = false;
@@ -233,8 +253,6 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-    private Coroutine slowCoroutine;
-
     private void ApplySlow(float duration, float slowMultiplier)
     {
         if (slowCoroutine != null) StopCoroutine(slowCoroutine);
@@ -251,18 +269,75 @@ public class Enemy : MonoBehaviour, IDamageable
         {
             slowEffectParticles.Play();
         }
-
         yield return new WaitForSeconds(duration);
-
-        // Возвращаем скорость
         currentSpeed = speed;
         currentbulletSpeed = bulletSpeed;
-
-        // Выключаем партиклы
         if (slowEffectParticles != null && slowEffectParticles.isPlaying)
         {
             slowEffectParticles.Stop();
         }
+    }
+
+    void ApplyBurn(float damagePerTick, float duration, float tickRate) 
+    {
+        if (burnCoroutine != null)
+            StopCoroutine(burnCoroutine);
+        burnCoroutine = StartCoroutine(BurnCoroutine(damagePerTick, duration, tickRate));
+    }
+    private IEnumerator BurnCoroutine(float damagePerTick, float duration, float tickRate)
+    {
+        if (burnEffectParticles != null)
+            burnEffectParticles.Play();
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            currentHealth -= damagePerTick;
+            healthBar?.UpdateHealthBar(currentHealth, health);
+
+            if (currentHealth <= 0)
+            {
+                Die();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(tickRate);
+            elapsed += tickRate;
+        }
+
+        if (burnEffectParticles != null)
+            burnEffectParticles.Stop();
+    }
+
+    private void ApplyPoison(float damagePerTick, float duration, float tickRate) 
+    {
+        if (posionCourutine != null)
+            StopCoroutine(posionCourutine);
+        posionCourutine = StartCoroutine(PoisonCourutine(damagePerTick, duration, tickRate));
+    }
+    private IEnumerator PoisonCourutine(float damagePerTick, float duration, float tickRate) 
+    {
+        if (poisonEffectParticles != null)
+            poisonEffectParticles.Play();
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            currentHealth -= damagePerTick;
+            healthBar?.UpdateHealthBar(currentHealth, health);
+
+            if (currentHealth <= 0)
+            {
+                Die();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(tickRate);
+            elapsed += tickRate;
+        }
+
+        if (poisonEffectParticles != null)
+            poisonEffectParticles.Stop();
     }
 
 

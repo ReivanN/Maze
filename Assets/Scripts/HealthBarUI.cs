@@ -11,7 +11,6 @@ public class HealthBarUI : MonoBehaviour, IHealthBar
 
     public void UpdateHealthBar(float currentHP, float maxHP)
     {
-        Debug.LogError("LOG 2");
         healthBarFill.fillAmount = currentHP / maxHP;
         ShowHealthBar();
     }

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: 0.4
   m_EditorClassIdentifier: 
   difficultyName: Hard
-  width: 31
-  height: 31
-  spawnRateMultiplier: 3
+  width: 41
+  height: 41
+  spawnRateMultiplier: 1

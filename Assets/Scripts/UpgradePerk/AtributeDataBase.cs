@@ -15,7 +15,8 @@ public class AtributeDataBase : MonoBehaviour
         {
             LoadDataBase("Shield", "Add for player a shield", AtributeType.Shield, 50),
             LoadDataBase("Ice Bullets", "Add an ice bulltes which slown down the enemy", AtributeType.IceBullet, 100),
-            LoadDataBase("Fire Bullets", "Add the fire bullets, which intermittent damage (1.2) for 3 seconds. ", AtributeType.FireBullet, 75)
+            LoadDataBase("Fire Bullets", "Add the fire bullets, which intermittent damage (1.2) for 3 seconds. ", AtributeType.FireBullet, 75),
+            LoadDataBase("Poison Bullets", "Add the poison bullets, which intermittent damage (5) for 5 seconds. ", AtributeType.PoisonBullets, 135)
         };
     }
 

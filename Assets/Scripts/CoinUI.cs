@@ -14,7 +14,7 @@ public class CoinUI : MonoBehaviour
     private void UpdateUI(int count)
     {
         coinText.text = $"{count}";
-        Debug.LogError("Wasssssssssssssssss");
+        //Debug.LogError("Wasssssssssssssssss");
     }
 
 }

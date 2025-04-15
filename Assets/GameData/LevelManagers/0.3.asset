@@ -15,4 +15,4 @@ MonoBehaviour:
   difficultyName: Hard
   width: 31
   height: 31
-  spawnRateMultiplier: 3
+  spawnRateMultiplier: 1

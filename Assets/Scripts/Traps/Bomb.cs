@@ -8,6 +8,7 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private float detectionRadius = 5f;
     [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float currentMoveSpeed;
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private float HP = 20f;
     [SerializeField] private float currentHP;
@@ -20,13 +21,14 @@ public class Bomb : MonoBehaviour, IDamageable
     private AudioSource audioSource;
     [SerializeField] private float explosionDelay = 3f;
     private Coroutine explosionCoroutine;
-
+    [SerializeField] private ParticleSystem slowEffectParticles;
     private bool isTimerExpired = false;
 
     private void Awake()
     {
+        currentMoveSpeed = moveSpeed;
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = moveSpeed;
+        agent.speed = currentMoveSpeed;
         meshRenderer.enabled = false;
         agent.enabled = false;
         healthBar = GetComponentInChildren<IHealthBar>();
@@ -183,9 +185,39 @@ public class Bomb : MonoBehaviour, IDamageable
     {
         currentHP -= damage;
         healthBar?.UpdateHealthBar(currentHP, HP);
+        if (damageType == DamageType.Ice)
+        {
+            ApplySlow(2f, 0.5f);
+        }
         if (currentHP <= 0)
         {
             ExplodeDead();
+        }
+    }
+
+    private Coroutine slowCoroutine;
+
+    private void ApplySlow(float duration, float slowMultiplier)
+    {
+        if (slowCoroutine != null) StopCoroutine(slowCoroutine);
+        slowCoroutine = StartCoroutine(SlowCoroutine(duration, slowMultiplier));
+    }
+
+    private IEnumerator SlowCoroutine(float duration, float slowMultiplier)
+    {
+        currentMoveSpeed = moveSpeed * slowMultiplier;
+        agent.speed = currentMoveSpeed;
+        if (slowEffectParticles != null && !slowEffectParticles.isPlaying)
+        {
+            slowEffectParticles.Play();
+        }
+
+        yield return new WaitForSeconds(duration);
+
+        currentMoveSpeed = moveSpeed;
+        if (slowEffectParticles != null && slowEffectParticles.isPlaying)
+        {
+            slowEffectParticles.Stop();
         }
     }
 

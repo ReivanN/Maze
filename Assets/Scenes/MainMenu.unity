@@ -938,6 +938,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 50f11ddce95fd52438290e359f5994e6, type: 2}
   - {fileID: 11400000, guid: 0e0887c24559be447b1690baf6beaffa, type: 2}
   - {fileID: 11400000, guid: e506ffd10c8c51249af8e7d10ed49070, type: 2}
+  - {fileID: 11400000, guid: 7379d540c5be03b408f1f5db69f4f8e9, type: 2}
+  - {fileID: 11400000, guid: c2e4299a592bedc4388d0e90455045d9, type: 2}
 --- !u!4 &1259430124
 Transform:
   m_ObjectHideFlags: 0
@@ -1904,7 +1906,7 @@ Camera:
   m_GameObject: {fileID: 2041192286}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
+  m_ClearFlags: 1
   m_BackGroundColor: {r: 0.03893734, g: 0.3301887, b: 0.25132945, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2

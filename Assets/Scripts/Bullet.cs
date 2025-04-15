@@ -27,16 +27,42 @@ public class Bullet : MonoBehaviour
     {
         float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
         float moveDistance = speed * DT;
-        
-        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, moveDistance, ricochetMask, QueryTriggerInteraction.Collide))
+
+        RaycastHit[] hits = Physics.RaycastAll(transform.position, direction, moveDistance, ricochetMask, QueryTriggerInteraction.Collide);
+
+        if (hits.Length > 0)
         {
-            HandleHit(hit);
+            foreach (var hit in hits)
+            {
+                GameObject hitObject = hit.collider.gameObject;
+                IDamageable damageable = hitObject.GetComponent<IDamageable>();
+
+                if (damageable != null && !hitObject.CompareTag("Player"))
+                {
+                    HandleHit(hit); // наносим урон
+
+                    // Если пуля не ядовитая — уничтожаем после первого попадания
+                    if ((damageType & DamageType.Poison) != 0)
+                        break;
+                }
+                else
+                {
+                    // Если объект не враг (например, стена) — уничтожаем даже ядовитую пулю
+                    Destroy(gameObject);
+                    if (impactEffect != null)
+                    {
+                        Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                    }
+                    break;
+                }
+            }
         }
         else
         {
             transform.Translate(direction * moveDistance, Space.World);
         }
     }
+
 
     private void HandleHit(RaycastHit hit)
     {
@@ -53,6 +79,11 @@ public class Bullet : MonoBehaviour
             damageable.TakeDamage(damage, TrapType.NewMaze, damageType);
             Debug.Log($"Damage applied: {damage} to {hitObject.name}");
             Destroy(gameObject);
+            return;
+        }
+
+        if ((damageType & DamageType.Poison) != 0)
+        {
             return;
         }
 

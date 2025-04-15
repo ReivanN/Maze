@@ -15,4 +15,4 @@ MonoBehaviour:
   difficultyName: Medium
   width: 21
   height: 21
-  spawnRateMultiplier: 1.5
+  spawnRateMultiplier: 1

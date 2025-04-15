@@ -49,7 +49,7 @@ public class LevelManager : MonoBehaviour
 
     private void UpdateDifficulty()
     {
-        int index = Mathf.Min(completedLevels / 5, difficultyPresets.Length - 1);
+        int index = Mathf.Min(completedLevels / 4, difficultyPresets.Length - 1);
         currentDifficulty = difficultyPresets[index];
     }
 

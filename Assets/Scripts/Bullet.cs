@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 
 public class Bullet : MonoBehaviour
 {
@@ -7,12 +8,14 @@ public class Bullet : MonoBehaviour
     private float speed;
     private float damage;
     public DamageType damageType;
+
     [Header("Ricochet")]
-    //public int maxRicochets = 3;
     private int currentRicochets;
     public LayerMask ricochetMask;
     public GameObject impactEffect;
-    
+
+    private bool isPoison => (damageType & DamageType.Poison) != 0;
+    private bool isDestroyed = false;
 
     public void Initialize(Vector3 direction, float speed, float damage, int maxRicochets, DamageType damageType)
     {
@@ -25,77 +28,87 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
-        float moveDistance = speed * DT;
+        if (isDestroyed) return;
 
+        float deltaTime = Time.deltaTime * PauseGameState.LocalTimeScale;
+        float moveDistance = speed * deltaTime;
+
+        HandleCollision(moveDistance);
+    }
+
+    private void HandleCollision(float moveDistance)
+    {
         RaycastHit[] hits = Physics.RaycastAll(transform.position, direction, moveDistance, ricochetMask, QueryTriggerInteraction.Collide);
 
-        if (hits.Length > 0)
+        if (hits.Length == 0)
         {
-            foreach (var hit in hits)
+            Move(moveDistance);
+            return;
+        }
+
+        hits = hits.OrderBy(h => h.distance).ToArray();
+
+        foreach (var hit in hits)
+        {
+            GameObject hitObject = hit.collider.gameObject;
+            IDamageable damageable = hitObject.GetComponent<IDamageable>();
+            bool isEnemy = damageable != null && !hitObject.CompareTag("Player");
+
+            if (isEnemy)
             {
-                GameObject hitObject = hit.collider.gameObject;
-                IDamageable damageable = hitObject.GetComponent<IDamageable>();
+                damageable.TakeDamage(damage, TrapType.NewMaze, damageType);
+                Debug.Log($"[PoisonCheck: {isPoison}] Damage {damage} applied to {hitObject.name}");
 
-                if (damageable != null && !hitObject.CompareTag("Player"))
+                if (!isPoison)
                 {
-                    HandleHit(hit); // наносим урон
+                    CreateImpact(hit);
+                    DestroySelf();
+                    return;
+                }
 
-                    // ≈сли пул€ не €довита€ Ч уничтожаем после первого попадани€
-                    if ((damageType & DamageType.Poison) != 0)
-                        break;
+                // ядовита€ пул€ Ч продолжаем движение
+                continue;
+            }
+            else
+            {
+                // —тена или другой объект
+                if (currentRicochets > 0)
+                {
+                    currentRicochets--;
+                    direction = Vector3.Reflect(direction, hit.normal).normalized;
+                    transform.position = hit.point + hit.normal * 0.01f;
+                    CreateImpact(hit);
                 }
                 else
                 {
-                    // ≈сли объект не враг (например, стена) Ч уничтожаем даже €довитую пулю
-                    Destroy(gameObject);
-                    if (impactEffect != null)
-                    {
-                        Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-                    }
-                    break;
+                    CreateImpact(hit);
+                    DestroySelf();
                 }
+                return;
             }
         }
-        else
-        {
-            transform.Translate(direction * moveDistance, Space.World);
-        }
+
+        // ≈сли все попадани€ Ч это враги, и пул€ €довита€ Ч продолжаем движение
+        Move(moveDistance);
     }
 
-
-    private void HandleHit(RaycastHit hit)
+    private void Move(float distance)
     {
-        GameObject hitObject = hit.collider.gameObject;
+        transform.Translate(direction * distance, Space.World);
+    }
 
+    private void DestroySelf()
+    {
+        if (isDestroyed) return;
+        isDestroyed = true;
+        Destroy(gameObject);
+    }
+
+    private void CreateImpact(RaycastHit hit)
+    {
         if (impactEffect != null)
         {
             Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-        }
-
-        IDamageable damageable = hitObject.GetComponent<IDamageable>();
-        if (damageable != null && !hitObject.CompareTag("Player"))
-        {
-            damageable.TakeDamage(damage, TrapType.NewMaze, damageType);
-            Debug.Log($"Damage applied: {damage} to {hitObject.name}");
-            Destroy(gameObject);
-            return;
-        }
-
-        if ((damageType & DamageType.Poison) != 0)
-        {
-            return;
-        }
-
-        if (currentRicochets > 0)
-        {
-            currentRicochets--;
-            direction = Vector3.Reflect(direction, hit.normal).normalized;
-            transform.position = hit.point + hit.normal * 0.01f;
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 

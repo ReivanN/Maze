@@ -41,8 +41,13 @@ public class AttributesUIImages : MonoBehaviour
                 attributeSlots[i].sprite = null;
                 attributeSlots[i].enabled = false;
             }
-            Debug.Log($"[{i}] {saveAttributes[i].name}");
-            Debug.Log($"[{i}] {gameData.appliedAttributes[i]}");
+            
         }
+
+        for(int i = 0; i < gameData.appliedAttributes.Count; i++) 
+        {
+            Debug.Log($"{i}");
+        }
+
     }
 }

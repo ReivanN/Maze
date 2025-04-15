@@ -29,12 +29,13 @@ public class AttributeManager : MonoBehaviour
 
     public static void ReplaceAttribute(Atribute attributeToRemove, Atribute newAttribute)
     {
-        int index = activeAttributes.IndexOf(attributeToRemove);
-        if (index != -1 && !activeAttributes.Contains(newAttribute))
+        if (activeAttributes.Contains(attributeToRemove))
         {
-            activeAttributes[index] = newAttribute;
+            RemoveAttribute(attributeToRemove);
+            AddAttribute(newAttribute);
         }
     }
+
 
     public static void AddAttribute(Atribute newAttribute)
     {
@@ -62,14 +63,29 @@ public class AttributeManager : MonoBehaviour
             AtributeDataBase.InitialiseAttribute();
 
         activeAttributes.Clear();
+
+        HashSet<string> addedNames = new HashSet<string>();
+
         foreach (var attrName in savedNames)
         {
+            if (addedNames.Contains(attrName))
+            {
+                Debug.LogWarning($"Дубликат атрибута '{attrName}' пропущен при загрузке.");
+                continue;
+            }
+
             Atribute attr = AtributeDataBase.allAttributes.Find(a => a.name == attrName);
             if (attr != null)
+            {
                 activeAttributes.Add(attr);
+                addedNames.Add(attrName);
+            }
             else
-                Debug.LogWarning($"Атрибут с именем {attrName} не найден в базе.");
+            {
+                Debug.LogWarning($"Атрибут с именем '{attrName}' не найден в базе.");
+            }
         }
     }
+
 
 }

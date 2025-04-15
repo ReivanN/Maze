@@ -91,6 +91,7 @@ public class AttributeUI : MonoBehaviour
             AttributeManager.AddAttribute(selectedNewAttribute);
             topDownCharacterController.ApplyAtributes(selectedNewAttribute);
             SaveManager.Instance.SaveAttribute(selectedNewAttribute);
+            UpdateHUD();
             CloseUI();
             return;
         }
@@ -101,22 +102,30 @@ public class AttributeUI : MonoBehaviour
 
     void ShowReplacePrompt()
     {
+        List<Atribute> activeAttributes = AttributeManager.activeAttributes;
+
         for (int i = 0; i < buttons.Length; i++)
         {
-            if (i < AttributeManager.activeAttributes.Count)
+            if (i < activeAttributes.Count)
             {
-                Atribute activeAttr = AttributeManager.activeAttributes[i];
+                Atribute activeAttr = activeAttributes[i];
                 int index = i;
-
                 TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = $"Change: {activeAttr.name}\n\n{activeAttr.description}";
-
+                textComponent.text = $"Replace: {activeAttr.name}";
+                Image iconImage = buttons[i].transform.Find("Icon")?.GetComponent<Image>();
+                if (iconImage != null)
+                {
+                    iconImage.sprite = activeAttr.icon != null ? activeAttr.icon : UpgradeIcons.GetIcon(activeAttr.name);
+                    iconImage.enabled = iconImage.sprite != null;
+                }
                 buttons[i].onClick.RemoveAllListeners();
                 buttons[i].onClick.AddListener(() =>
                 {
                     attributeToReplace = activeAttr;
                     ReplaceAttribute();
                 });
+
+                buttons[i].gameObject.SetActive(true);
             }
             else
             {
@@ -130,32 +139,32 @@ public class AttributeUI : MonoBehaviour
         }
     }
 
+
     void ReplaceAttribute()
     {
         if (attributeToReplace != null && selectedNewAttribute != null)
         {
+            AttributeManager.RemoveAttribute(attributeToReplace);
             AttributeManager.ReplaceAttribute(attributeToReplace, selectedNewAttribute);
             topDownCharacterController.ApplyAtributes(selectedNewAttribute);
             SaveManager.Instance.SaveAttribute(selectedNewAttribute);
         }
         UpdateHUD();
-        CloseUI();
+        StartCoroutine(InitializeWithDelay());
     }
+
 
     public void UpdateHUD()
     {
-        GameData gameData = SaveManager.Instance.Load();
-
-        List<Atribute> saveAttributes = AttributeManager.activeAttributes;
+        List<Atribute> activeAttributes = AttributeManager.activeAttributes;
 
         for (int i = 0; i < attributeSlots.Length; i++)
         {
-            if (i < saveAttributes.Count)
+            if (i < activeAttributes.Count)
             {
-                attributeSlots[i].sprite = saveAttributes[i].icon != null
-                    ? saveAttributes[i].icon
-                    : UpgradeIcons.GetIcon(saveAttributes[i].name);
-                attributeSlots[i].enabled = attributeSlots[i].sprite != null;
+                Sprite icon = activeAttributes[i].icon ?? UpgradeIcons.GetIcon(activeAttributes[i].name);
+                attributeSlots[i].sprite = icon;
+                attributeSlots[i].enabled = icon != null;
             }
             else
             {
@@ -163,8 +172,8 @@ public class AttributeUI : MonoBehaviour
                 attributeSlots[i].enabled = false;
             }
         }
-
     }
+
 
     void SkipAttributeSelection()
     {
@@ -174,10 +183,12 @@ public class AttributeUI : MonoBehaviour
         }
 
         CloseUI();
+        
     }
 
     void CloseUI()
     {
         gameObject.SetActive(false);
+        PauseGameState.Resume();
     }
 }

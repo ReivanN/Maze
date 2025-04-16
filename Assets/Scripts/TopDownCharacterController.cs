@@ -154,6 +154,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         MoveCamera();
         Move();
         HandleShooting();
+        OnShieldActivate();
 
         if (!PauseGameState.IsPaused)
         {
@@ -163,18 +164,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             {
                 Shoot();
                 fireCooldownTimer = 0f;
-            }
-        }
-
-        if (Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            if (canActivateShield)
-            {
-                ActivateShield();
-            }
-            else
-            {
-                Debug.Log("Щит недоступен. Получите соответствующий атрибут.");
             }
         }
 
@@ -188,6 +177,21 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             }
         }
 
+    }
+
+    void OnShieldActivate() 
+    {
+        if (Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            if (canActivateShield)
+            {
+                ActivateShield();
+            }
+            else
+            {
+                Debug.Log("Щит недоступен. Получите соответствующий атрибут.");
+            }
+        }
     }
 
 

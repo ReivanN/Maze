@@ -47,16 +47,36 @@ public class AttributeUI : MonoBehaviour
             if (i < availableAttributes.Count)
             {
                 Atribute attribute = availableAttributes[index];
+                bool alreadyOwned = AttributeManager.activeAttributes.Contains(attribute);
+
                 TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = $"{attribute.name}\n{attribute.description}\nСтоимость: {attribute.cost}";
                 Image iconImage = buttons[i].transform.Find("Icon")?.GetComponent<Image>();
+
+                // Устанавливаем текст
+                textComponent.text = alreadyOwned
+                    ? $"{attribute.name}\nУже куплен"
+                    : $"{attribute.name}\n{attribute.description}\nСтоимость: {attribute.cost}";
+
+                // Устанавливаем иконку
                 if (iconImage != null)
                 {
                     iconImage.sprite = attribute.icon != null ? attribute.icon : UpgradeIcons.GetIcon(attribute.name);
                     iconImage.enabled = iconImage.sprite != null;
+
+                    var color = iconImage.color;
+                    color.a = alreadyOwned ? 0.4f : 1f;
+                    iconImage.color = color;
                 }
+
+                // Настройка кнопки
+                buttons[i].interactable = !alreadyOwned;
                 buttons[i].onClick.RemoveAllListeners();
-                buttons[i].onClick.AddListener(() => OnAttributeSelected(attribute));
+
+                if (!alreadyOwned)
+                {
+                    buttons[i].onClick.AddListener(() => OnAttributeSelected(attribute));
+                }
+
             }
             else
             {

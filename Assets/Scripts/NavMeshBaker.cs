@@ -79,10 +79,10 @@ public class NavMeshBaker : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        /*if (Input.GetKeyDown(KeyCode.F))
         {
             BakeNavMesh();
-        }
+        }*/
     }
 
     private void OnDestroy()

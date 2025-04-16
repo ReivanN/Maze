@@ -237,12 +237,57 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.damageType = (int)currentDamageTypes;
         SaveManager.Instance.Save(data);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
+        Debug.Log($"Атрибут {atribute.name} добавлен в состояние игрока.");
     }
+
+    public void RemoveAtribute(Atribute atribute)
+    {
+        if (atribute == null)
+        {
+            Debug.LogWarning("Попытка удалить null-атрибут.");
+            return;
+        }
+
+        GameData data = SaveManager.Instance.Load();
+
+        if (data.appliedAttributes.Contains(atribute.name))
+        {
+            data.appliedAttributes.Remove(atribute.name);
+        }
+        switch (atribute.type)
+        {
+            case AtributeType.IceBullet:
+                currentDamageTypes &= ~DamageType.Ice;
+                break;
+            case AtributeType.FireBullet:
+                currentDamageTypes &= ~DamageType.Fire;
+                break;
+            case AtributeType.PoisonBullets:
+                currentDamageTypes &= ~DamageType.Poison;
+                break;
+            case AtributeType.Shield:
+
+                break;
+        }
+
+        data.damageType = (int)currentDamageTypes;
+        SaveManager.Instance.Save(data);
+
+        Debug.Log($"Атрибут {atribute.name} удалён из состояния игрока и сохранения.");
+    }
+
+
 
     public void AddDamageType(DamageType damageType) 
     {
         currentDamageTypes |= damageType;
     }
+
+    public void RemoveDamageType(DamageType damageType)
+    {
+        currentDamageTypes &= ~damageType;
+    }
+
 
     public void OnMove(InputAction.CallbackContext context)
     {

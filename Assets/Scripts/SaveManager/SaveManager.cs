@@ -57,6 +57,34 @@ public class SaveManager : MonoBehaviour
         Save(data);
     }
 
+    public void RemoveAttribute(Atribute attribute)
+    {
+        GameData data = Load();
+        if (data.appliedAttributes.Contains(attribute.name))
+        {
+            data.appliedAttributes.Remove(attribute.name);
+            Save(data);
+        }
+    }
+
+    public void ReplaceAttribute(Atribute attributeToRemove, Atribute newAttribute)
+    {
+        GameData data = Load();
+
+        if (data.appliedAttributes.Contains(attributeToRemove.name))
+        {
+            data.appliedAttributes.Remove(attributeToRemove.name);
+        }
+
+        if (!data.appliedAttributes.Contains(newAttribute.name))
+        {
+            data.appliedAttributes.Add(newAttribute.name);
+        }
+
+        Save(data);
+    }
+
+
     public bool SaveExists() => File.Exists(savePath);
 
 

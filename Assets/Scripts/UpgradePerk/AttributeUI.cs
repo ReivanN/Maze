@@ -144,14 +144,29 @@ public class AttributeUI : MonoBehaviour
     {
         if (attributeToReplace != null && selectedNewAttribute != null)
         {
+            // Удаляем из менеджеров и из сейва
             AttributeManager.RemoveAttribute(attributeToReplace);
-            AttributeManager.ReplaceAttribute(attributeToReplace, selectedNewAttribute);
+            SaveManager.Instance.RemoveAttribute(attributeToReplace);
+            topDownCharacterController.RemoveAtribute(attributeToReplace);
+
+            // Добавляем новый
+            AttributeManager.AddAttribute(selectedNewAttribute);
             topDownCharacterController.ApplyAtributes(selectedNewAttribute);
             SaveManager.Instance.SaveAttribute(selectedNewAttribute);
+
+            // Обновляем интерфейс
+            UpdateHUD();
+
+            // Сбрасываем флаги
+            selectedNewAttribute = null;
+            attributeToReplace = null;
+
+            // Закрыть UI или перезапустить выбор
+            CloseUI();
         }
-        UpdateHUD();
-        StartCoroutine(InitializeWithDelay());
     }
+
+
 
 
     public void UpdateHUD()
@@ -181,7 +196,8 @@ public class AttributeUI : MonoBehaviour
         {
             warningText.text = "";
         }
-
+        selectedNewAttribute = null;
+        attributeToReplace = null; 
         CloseUI();
         
     }

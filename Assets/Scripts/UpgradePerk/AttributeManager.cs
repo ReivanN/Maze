@@ -55,6 +55,7 @@ public class AttributeManager : MonoBehaviour
     public static void RemoveAttribute(Atribute attribute)
     {
         activeAttributes.Remove(attribute);
+        SaveManager.Instance.RemoveAttribute(attribute);
     }
 
     public static void LoadAttributesFromSave(List<string> savedNames)

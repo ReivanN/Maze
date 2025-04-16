@@ -13,8 +13,11 @@ public class GameData
     public float fireRate = 1f;
     public int ricochets = 0;
     public int coins = 1000;
+    public float shieldValue = 50f;
 
     public int damageType = 0;
+    public bool Shield = false;
+
 
     public List<string> appliedUpgrades = new List<string>();
     public List<string> appliedAttributes = new List<string>();

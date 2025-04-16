@@ -45,6 +45,15 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private int coinCount = 1;
     public int currentCoins;
 
+    [Header("Shield")]
+    [SerializeField] private float currentShieldValue;
+    [SerializeField] private float MAXShieldValue = 50;
+    private bool hasShieldAttribute = false;
+    private bool canActivateShield = true;
+    [SerializeField] private float shieldCooldownTime = 15f;
+    private float shieldCooldownTimer = 0f;
+
+
     [Header("Input")]
     public InputActionAsset inputActions;
 
@@ -72,6 +81,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         currentDamage = data.damage;
         currentmRicochets = data.ricochets;
         currentCoins = data.coins;
+        MAXShieldValue = data.shieldValue;
+        hasShieldAttribute = data.Shield;
         currentDamageTypes = (DamageType)data.damageType;
         OnCoinsChanged?.Invoke(currentCoins);
         healthUI.UpdateHealth(currentHealth, MAXHealth);
@@ -89,6 +100,8 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.damage = currentDamage;
         data.coins = currentCoins;
         data.ricochets = currentmRicochets;
+        data.Shield = hasShieldAttribute;
+        data.shieldValue = MAXShieldValue;
         data.damageType = (int)currentDamageTypes;
         SaveManager.Instance.Save(data);
     }
@@ -126,7 +139,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime * PauseGameState.LocalTimeScale;
 
-        // Переключение карты ввода
+
         if (PauseGameState.IsPaused)
         {
             inputActions.FindActionMap("Player").Disable();
@@ -152,6 +165,29 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 fireCooldownTimer = 0f;
             }
         }
+
+        if (Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            if (canActivateShield)
+            {
+                ActivateShield();
+            }
+            else
+            {
+                Debug.Log("Щит недоступен. Получите соответствующий атрибут.");
+            }
+        }
+
+        if (!canActivateShield)
+        {
+            shieldCooldownTimer += dt;
+            if (shieldCooldownTimer >= shieldCooldownTime)
+            {
+                canActivateShield = true;
+                Debug.Log("Щит готов к повторной активации");
+            }
+        }
+
     }
 
 
@@ -226,7 +262,10 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 data.damageType = (int)currentDamageTypes;
                 break;
             case AtributeType.Shield:
+                hasShieldAttribute = true;
+                data.Shield = true;
                 break;
+
         }
         data.maxHealth = MAXHealth;
         data.health = currentHealth;
@@ -266,7 +305,9 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 currentDamageTypes &= ~DamageType.Poison;
                 break;
             case AtributeType.Shield:
-
+                hasShieldAttribute = false;
+                canActivateShield = false;
+                data.Shield = false;
                 break;
         }
 
@@ -275,6 +316,30 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
         Debug.Log($"Атрибут {atribute.name} удалён из состояния игрока и сохранения.");
     }
+
+    private void ActivateShield()
+    {
+        if (!hasShieldAttribute)
+        {
+            Debug.Log("Щит недоступен. Получите атрибут 'Shield' для активации.");
+            return;
+        }
+
+        if (!canActivateShield)
+        {
+            Debug.Log("Щит находится на перезарядке.");
+            return;
+        }
+
+        currentShieldValue = MAXShieldValue;
+        hasShieldAttribute = true;
+        canActivateShield = false;
+        shieldCooldownTimer = 0f;
+        healthUI.UpdateShield(currentShieldValue, MAXShieldValue);
+        Debug.Log("Щит активирован");
+    }
+
+
 
 
 
@@ -287,7 +352,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         currentDamageTypes &= ~damageType;
     }
-
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -352,21 +416,40 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
-        currentHealth -= damage;
-        onTakeDamage?.Invoke(currentHealth);
-
-        if (currentHealth > 0)
+        if (hasShieldAttribute && currentShieldValue > 0)
         {
-            SavePlayerData();
-            healthUI.UpdateHealth(currentHealth, MAXHealth);
+            float shieldAbsorbed = Mathf.Min(currentShieldValue, damage);
+            currentShieldValue -= shieldAbsorbed;
+            damage -= shieldAbsorbed;
+            healthUI.UpdateShield(currentShieldValue, MAXShieldValue);
+            Debug.Log("Щит атакуют.");
+            if (currentShieldValue <= 0)
+            {
+                canActivateShield = false;
+                Debug.Log("Щит разрушен.");
+            }
         }
 
-        if (currentHealth <= 0)
+        // Если после щита ещё остался урон — он идёт в здоровье
+        if (damage > 0f)
         {
-            DeletePlayerData();
-            Die();
+            currentHealth -= damage;
+            onTakeDamage?.Invoke(currentHealth);
+
+            if (currentHealth > 0)
+            {
+                SavePlayerData();
+                healthUI.UpdateHealth(currentHealth, MAXHealth);
+            }
+
+            if (currentHealth <= 0)
+            {
+                DeletePlayerData();
+                Die();
+            }
         }
     }
+
 
     public void Die() 
     {

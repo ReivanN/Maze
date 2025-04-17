@@ -7,6 +7,7 @@ using System.Collections;
 public class AttributeUI : MonoBehaviour
 {
     public Button[] buttons;
+    public Button[] replaceButtons;
     public Image[] attributeSlots;
     public Button skipButton;
     public TextMeshProUGUI warningText;
@@ -124,32 +125,32 @@ public class AttributeUI : MonoBehaviour
     {
         List<Atribute> activeAttributes = AttributeManager.activeAttributes;
 
-        for (int i = 0; i < buttons.Length; i++)
+        for (int i = 0; i < replaceButtons.Length; i++)
         {
             if (i < activeAttributes.Count)
             {
                 Atribute activeAttr = activeAttributes[i];
                 int index = i;
-                TextMeshProUGUI textComponent = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = $"Replace: {activeAttr.name}";
-                Image iconImage = buttons[i].transform.Find("Icon")?.GetComponent<Image>();
+                TextMeshProUGUI textComponent = replaceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+                //textComponent.text = $"Replace: {activeAttr.name}";
+                Image iconImage = replaceButtons[i].transform.Find("Icon")?.GetComponent<Image>();
                 if (iconImage != null)
                 {
                     iconImage.sprite = activeAttr.icon != null ? activeAttr.icon : UpgradeIcons.GetIcon(activeAttr.name);
                     iconImage.enabled = iconImage.sprite != null;
                 }
-                buttons[i].onClick.RemoveAllListeners();
-                buttons[i].onClick.AddListener(() =>
+                replaceButtons[i].onClick.RemoveAllListeners();
+                replaceButtons[i].onClick.AddListener(() =>
                 {
                     attributeToReplace = activeAttr;
                     ReplaceAttribute();
                 });
 
-                buttons[i].gameObject.SetActive(true);
+                replaceButtons[i].gameObject.SetActive(true);
             }
             else
             {
-                buttons[i].gameObject.SetActive(false);
+                replaceButtons[i].gameObject.SetActive(false);
             }
         }
 

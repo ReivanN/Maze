@@ -4541,7 +4541,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 850, y: -450}
+  m_AnchoredPosition: {x: 600, y: -450}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1125288099
@@ -5194,7 +5194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.05660379, g: 0.05660379, b: 0.05660379, a: 0.39215687}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6722,7 +6722,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 600, y: -450}
+  m_AnchoredPosition: {x: 850, y: -450}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1611946057
@@ -7241,6 +7241,10 @@ MonoBehaviour:
   - {fileID: 760977070}
   - {fileID: 1442101684}
   - {fileID: 1163946653}
+  replaceButtons:
+  - {fileID: 885856432}
+  - {fileID: 1376059634}
+  - {fileID: 895475361}
   attributeSlots:
   - {fileID: 1125288099}
   - {fileID: 1521067223}

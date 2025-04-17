@@ -96,11 +96,20 @@ public class AttributeUI : MonoBehaviour
 
     void OnAttributeSelected(Atribute newAttribute)
     {
+        if (AttributeManager.activeAttributes.Contains(newAttribute))
+        {
+            if (warningText != null)
+            {
+                warningText.text = "This Attribute was bought.";
+            }
+            return;
+        }
+
         if (topDownCharacterController.currentCoins < newAttribute.cost)
         {
             if (warningText != null)
             {
-                warningText.text = "Недостаточно монет для улучшения!";
+                warningText.text = "Not enough money!";
             }
             return;
         }
@@ -119,6 +128,7 @@ public class AttributeUI : MonoBehaviour
 
         ShowReplacePrompt();
     }
+
 
 
     void ShowReplacePrompt()
@@ -144,6 +154,7 @@ public class AttributeUI : MonoBehaviour
                 {
                     attributeToReplace = activeAttr;
                     ReplaceAttribute();
+                    replaceButtons[i].gameObject.SetActive(false);
                 });
 
                 replaceButtons[i].gameObject.SetActive(true);

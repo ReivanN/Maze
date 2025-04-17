@@ -17,6 +17,7 @@ public class UpgradeUI : MonoBehaviour
     private TopDownCharacterController topDownCharacterController;
     private RectTransform rectTransform;
     private bool wasActivated;
+    private bool wasBought;
 
     private void Awake()
     {
@@ -26,8 +27,7 @@ public class UpgradeUI : MonoBehaviour
     void Start()
     {
         rectTransform = GetComponent<RectTransform>();
-        //StartCoroutine(InitializeWithDelay());
-        //Animation();
+        
     }
 
     public void StartShop() 
@@ -43,6 +43,7 @@ public class UpgradeUI : MonoBehaviour
     private IEnumerator InitializeWithDelay()
     {
         PauseGameState.Pause();
+        wasBought = false;
         while (topDownCharacterController == null)
         {
             topDownCharacterController = FindAnyObjectByType<TopDownCharacterController>();
@@ -90,8 +91,14 @@ public class UpgradeUI : MonoBehaviour
         {
             if (warningText != null)
             {
-                warningText.text = "Недостаточно монет для улучшения!";
+                warningText.text = "Not enough money for this upgrade";
             }
+            return;
+        }
+
+        if(wasBought == true) 
+        {
+            warningText.text = "You already bought this upgrade!";
             return;
         }
 
@@ -102,7 +109,7 @@ public class UpgradeUI : MonoBehaviour
 
         topDownCharacterController.ApplyUpgrade(selectedUpgrade);
         SaveManager.Instance.SaveUpgrade(selectedUpgrade);
-
+        wasBought = true;
         gameObject.SetActive(false);
         PauseGameState.Resume();
     }

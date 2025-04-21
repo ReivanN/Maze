@@ -169,7 +169,7 @@ public class Enemy : MonoBehaviour, IDamageable
             if (bulletScript != null)
             {
                 audioSource.PlayOneShot(clip);
-                bulletScript.Initialize(direction, currentbulletSpeed, 10, 0);
+                bulletScript.Initialize(direction, currentbulletSpeed, 10, 3);
                 bulletScript.SetDamage(10f);
             }
         }

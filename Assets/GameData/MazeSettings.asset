@@ -23,3 +23,4 @@ MonoBehaviour:
   startPointPrefab: {fileID: 9091674112727050998, guid: cfa41e90f69222a49a64b1ebbb386845, type: 3}
   exitPointPrefab: {fileID: 8234590230774685726, guid: cdaa9c49d78ac4a4a91072ff55bb789a, type: 3}
   Trader: {fileID: 3403274519767884263, guid: ee20e1e4f1655d84fb2b4ea2a0905b3a, type: 3}
+  bossPrefab: {fileID: 7718154780804771419, guid: 8f2adbbf28f4b8e44b0db98787bac49f, type: 3}

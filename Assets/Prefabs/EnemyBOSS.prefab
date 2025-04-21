@@ -1022,7 +1022,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       propertyPath: m_Name
-      value: Enemy
+      value: EnemyBOSS
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f5abd89e727b3e0429f9c2bcfdf5f92e, type: 3}
       propertyPath: m_Layer
@@ -2344,12 +2344,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3152f89a639acae47a063b5b3352c84b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 50
+  health: 600
   currentHealth: 0
   speed: 2
   currentSpeed: 0
   stoppingDistance: 1.5
-  detectionRadius: 5
+  detectionRadius: 10
   obstaclesMask:
     serializedVersion: 2
     m_Bits: 128
@@ -2357,7 +2357,7 @@ MonoBehaviour:
   firePoint: {fileID: 6460857869785256769}
   bulletSpeed: 3
   currentbulletSpeed: 0
-  fireRate: 2
+  fireRate: 4
   isAlive: 1
   HPBonus: {fileID: 3180190772059161819, guid: acc591f3f3af45842beb61b22a2ee1c0, type: 3}
   audioSource: {fileID: 1040106989956083627}

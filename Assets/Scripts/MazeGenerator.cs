@@ -26,7 +26,11 @@ public class MazeGenerator : MonoBehaviour
         enemyCount = Mathf.RoundToInt(mazeSettings.enemyCount * spawnRateMultiplier);
         trapCount = Mathf.RoundToInt(mazeSettings.trapCount * spawnRateMultiplier);
 
-        if (MazeManager.Instance.savedMaze != null)
+        if ((LevelManager.Instance.Level + 1) % 5 == 0)
+        {
+            StartCoroutine(GenerateBossRoom());
+        }
+        else if (MazeManager.Instance.savedMaze != null)
         {
             StartCoroutine(SpawnSave());
         }
@@ -35,6 +39,8 @@ public class MazeGenerator : MonoBehaviour
             StartCoroutine(GenerateAndSpawn());
         }
     }
+
+
 
     IEnumerator GenerateAndSpawn()
     {
@@ -397,6 +403,46 @@ public class MazeGenerator : MonoBehaviour
             Debug.Log($"Бомба {agent.gameObject.name} успешно на NavMesh.");
         }
     }
+
+    IEnumerator GenerateBossRoom()
+    {
+        width = 15;
+        height = 15;
+        maze = new int[width, height];
+
+        // Заполняем стены
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                maze[x, y] = 0;
+
+        // Центр - пол
+        for (int x = 1; x < width - 1; x++)
+            for (int y = 1; y < height - 1; y++)
+                maze[x, y] = 1;
+
+        startPosition = new Vector2Int(1, 1);
+        exitPosition = new Vector2Int(width - 2, height - 2);
+
+        yield return StartCoroutine(SpawnEntitiesCoroutine());
+        yield return StartCoroutine(NavMeshBaker.Instance.BakeNavMeshCoroutine());
+        yield return StartCoroutine(SpawnBossCoroutine());
+        StartCoroutine(SpawnPlayerCoroutine());
+        IsDone = true;
+    }
+
+    IEnumerator SpawnBossCoroutine()
+    {
+        Vector3 bossPosition = new Vector3(width / 2f, 0, height / 2f);
+        GameObject boss = Instantiate(mazeSettings.bossPrefab, bossPosition, Quaternion.identity);
+
+        NavMeshAgent agent = boss.GetComponent<NavMeshAgent>();
+        if (agent != null)
+            yield return WaitForNavMesh(agent);
+        else
+            yield return null;
+    }
+
+
 
     void SpawnPlayer()
     {

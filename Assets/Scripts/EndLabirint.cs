@@ -4,11 +4,20 @@ using UnityEngine;
 public class EndLabirint : MonoBehaviour
 {
     private bool playerInZone = false;
-    private GameObject end;
+    private TextMeshProUGUI endText;
+
     private void Start()
     {
-        end = GameObject.FindGameObjectWithTag("End");
-        end.GetComponent<TextMeshProUGUI>();
+        GameObject endObject = GameObject.FindGameObjectWithTag("End");
+        if (endObject != null)
+        {
+            endText = endObject.GetComponent<TextMeshProUGUI>();
+            endText.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Объект с тегом 'End' не найден.");
+        }
     }
 
     private void Update()
@@ -24,7 +33,10 @@ public class EndLabirint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInZone = true;
-            end.
+            if (endText != null)
+            {
+                endText.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -33,13 +45,19 @@ public class EndLabirint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInZone = false;
-            EndLevelUI.Instance.HidePrompt();
+            if (endText != null)
+            {
+                endText.gameObject.SetActive(false);
+            }
         }
     }
 
     private void TriggerNewMaze()
     {
-        EndLevelUI.Instance.HidePrompt();
+        if (endText != null)
+        {
+            endText.gameObject.SetActive(false);
+        }
 
         if (MazeManager.Instance.savedMaze != null)
         {

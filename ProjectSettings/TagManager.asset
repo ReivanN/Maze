@@ -9,6 +9,8 @@ TagManager:
   - Bomb
   - Coin
   - Waypoint
+  - End
+  - EndBoss
   layers:
   - Default
   - TransparentFX

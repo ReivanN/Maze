@@ -5,8 +5,9 @@ using UnityEngine;
 public class GameData
 {
 
-    public int level = 1;
-    public int completedlevel = 0;
+    public int level = 5;
+    public int completedlevel = 4;
+    public int pass = 0;
     public float health = 100;
     public float maxHealth = 100;
     public float damage = 10;
@@ -16,7 +17,12 @@ public class GameData
     public float shieldValue = 50f;
 
     public int damageType = 0;
+
     public bool Shield = false;
+
+    public bool IceBiom = true;
+    public bool VelkanBiom = true;
+    public bool JungleBiom = true;
 
 
     public List<string> appliedUpgrades = new List<string>();

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f43fa370342f99943af14c364334ae80, type: 3}
+  m_Name: VulkanBIOM
+  m_EditorClassIdentifier: 
+  enemyCount: 5
+  trapCount: 5
+  wallPrefab: {fileID: 0}
+  floorPrefab: {fileID: 0}
+  trapPrefabs: []
+  enemyPrefab: {fileID: 0}
+  playerPrefab: {fileID: 0}
+  startPointPrefab: {fileID: 0}
+  exitPointPrefab: {fileID: 0}
+  exitBossRoomPrefab: {fileID: 0}
+  Trader: {fileID: 0}
+  bossPrefab: {fileID: 0}

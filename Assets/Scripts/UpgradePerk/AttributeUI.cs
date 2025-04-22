@@ -55,8 +55,8 @@ public class AttributeUI : MonoBehaviour
 
                 // Устанавливаем текст
                 textComponent.text = alreadyOwned
-                    ? $"{attribute.name}\nУже куплен"
-                    : $"{attribute.name}\n{attribute.description}\nСтоимость: {attribute.cost}";
+                    ? $"{attribute.name}\nAlready Open"
+                    : $"{attribute.name}\n{attribute.description}\nCost: {attribute.cost}";
 
                 // Устанавливаем иконку
                 if (iconImage != null)
@@ -121,6 +121,7 @@ public class AttributeUI : MonoBehaviour
             AttributeManager.AddAttribute(selectedNewAttribute);
             topDownCharacterController.ApplyAtributes(selectedNewAttribute);
             SaveManager.Instance.SaveAttribute(selectedNewAttribute);
+
             UpdateHUD();
             CloseUI();
             return;
@@ -153,8 +154,8 @@ public class AttributeUI : MonoBehaviour
                 replaceButtons[i].onClick.AddListener(() =>
                 {
                     attributeToReplace = activeAttr;
-                    ReplaceAttribute();
                     replaceButtons[i].gameObject.SetActive(false);
+                    ReplaceAttribute();
                 });
 
                 replaceButtons[i].gameObject.SetActive(true);

@@ -4,8 +4,8 @@ using UnityEngine;
 public class MazeSettings : ScriptableObject
 {
     [Header("Count Objects")]
-    public int enemyCount = 5;
-    public int trapCount = 5;
+    public int enemyCount = 8;
+    public int trapCount = 8;
 
     [Header("Prefabs Objects")]
     public GameObject wallPrefab;
@@ -15,6 +15,7 @@ public class MazeSettings : ScriptableObject
     public GameObject playerPrefab;
     public GameObject startPointPrefab;
     public GameObject exitPointPrefab;
+    public GameObject exitBossRoomPrefab;
     public GameObject Trader;
     public GameObject bossPrefab;
 

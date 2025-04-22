@@ -289,7 +289,14 @@ public class MazeGenerator : MonoBehaviour
         }
 
         Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
-        Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
+        if ((LevelManager.Instance.Level + 1) % 5 == 0) 
+        {
+            Instantiate(mazeSettings.exitBossRoomPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
+        }
+        else 
+        {
+            Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
+        }
         SpawnTrader();
     }
 

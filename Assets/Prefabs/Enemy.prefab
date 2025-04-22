@@ -2366,7 +2366,7 @@ MonoBehaviour:
   burnEffectParticles: {fileID: 1557367917797810006}
   poisonEffectParticles: {fileID: 5815966198126213459}
   coinPrefab: {fileID: 8475623264655157560, guid: b554b94f7a9b8d34a8a5f052dbb57a47, type: 3}
-  spawnRadius: 0.5
+  spawnRadius: 0.2
   spawnCenter: {fileID: 6942215597546124513}
 --- !u!114 &3548371263764172012
 MonoBehaviour:

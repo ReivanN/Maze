@@ -173,7 +173,10 @@ MonoBehaviour:
   activationSound: {fileID: 8300000, guid: 262d140e56a7cec409dc39dcf17c381b, type: 3}
   explosionDelay: 3
   slowEffectParticles: {fileID: 7240679721124243305}
-  radius: 1
+  coinPrefab: {fileID: 8475623264655157560, guid: b554b94f7a9b8d34a8a5f052dbb57a47, type: 3}
+  spawnRadius: 0.1
+  spawnCenter: {fileID: 3653827936563908436}
+  radius: 0.2
   damageableLayers:
     serializedVersion: 2
     m_Bits: 1024

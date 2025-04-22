@@ -169,7 +169,7 @@ public class Enemy : MonoBehaviour, IDamageable
             if (bulletScript != null)
             {
                 audioSource.PlayOneShot(clip);
-                bulletScript.Initialize(direction, currentbulletSpeed, 10, 3);
+                bulletScript.Initialize(direction, currentbulletSpeed, 10, 0);
                 bulletScript.SetDamage(10f);
             }
         }
@@ -343,7 +343,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void SpawnCoins() 
     {
-        int coinCount = Random.Range(1, 6);
+        int coinCount = Random.Range(3, 6);
 
         for (int i = 0; i < coinCount; i++)
         {

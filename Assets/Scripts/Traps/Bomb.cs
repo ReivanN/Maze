@@ -24,6 +24,11 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private ParticleSystem slowEffectParticles;
     private bool isTimerExpired = false;
 
+    [Header("Coins")]
+    [SerializeField] private GameObject coinPrefab;
+    [SerializeField] private float spawnRadius = 0.1f;
+    [SerializeField] private Transform spawnCenter;
+
     private void Awake()
     {
         currentMoveSpeed = moveSpeed;
@@ -177,6 +182,7 @@ public class Bomb : MonoBehaviour, IDamageable
             {
                 IDamageable damageable = collider.GetComponent<IDamageable>();
                 damageable?.TakeDamage(20, TrapType.SaveMaze, DamageType.Normal);
+                SpawnCoins();
                 wasactivated = true;
             }
         }
@@ -233,7 +239,21 @@ public class Bomb : MonoBehaviour, IDamageable
         }
 
         Instantiate(explosionEffect, transform.position, Quaternion.identity);
+        SpawnCoins();
         Destroy(gameObject);
+    }
+
+    private void SpawnCoins()
+    {
+        int coinCount = Random.Range(1, 6);
+
+        for (int i = 0; i < coinCount; i++)
+        {
+            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+            Vector3 spawnPosition = spawnCenter.position + new Vector3(randomOffset.x, 0.1f, randomOffset.y);
+
+            Instantiate(coinPrefab, spawnPosition, Quaternion.identity);
+        }
     }
 
     private void OnDrawGizmos()

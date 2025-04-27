@@ -53,6 +53,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField] private float shieldCooldownTime = 15f;
     private float shieldCooldownTimer = 0f;
 
+    [Header("Animation Tracking")]
+    [SerializeField] private string attackAnimationName = "Death";
+    [SerializeField][Range(0, 1)] private float deathpplicationPoint = 1f;
+    private AnimatorStateInfo currentStateInfo;
+    private bool isDeathAnimation = false;
 
     [Header("Input")]
     public InputActionAsset inputActions;
@@ -434,7 +439,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             }
         }
 
-        // Если после щита ещё остался урон — он идёт в здоровье
         if (damage > 0f)
         {
             currentHealth -= damage;
@@ -457,7 +461,20 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     public void Die() 
     {
-        deadUI.Activate();
+        animator.SetTrigger("Death");
+        currentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
+        if (currentStateInfo.IsName(attackAnimationName))
+        {
+            float normalizedTime = currentStateInfo.normalizedTime % 1;
+            if (normalizedTime >= deathpplicationPoint)
+            {
+                healthUI.gameObject.SetActive(false);
+                characterController.enabled = false;
+                deadUI.Activate();
+                PauseGameState.Pause();
+            }
+        }
     }
 
     private bool isFiring; 

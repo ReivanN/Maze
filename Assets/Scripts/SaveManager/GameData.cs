@@ -5,8 +5,8 @@ using UnityEngine;
 public class GameData
 {
 
-    public int level = 1;
-    public int completedlevel = 0;
+    public int level = 5;
+    public int completedlevel = 4;
     public int pass = 10;
     public float health = 100;
     public float maxHealth = 100;

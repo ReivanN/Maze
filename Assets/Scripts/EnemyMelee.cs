@@ -16,7 +16,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
     [SerializeField] private float currentHealth;
     [SerializeField] private float speed = 3.5f;
     [SerializeField] private float currentSpeed;
-    [SerializeField] private float stoppingDistance = 1.5f; // Уменьшено для ближнего боя
+    [SerializeField] private float stoppingDistance = 1.5f;
     [SerializeField] private float detectionRadius = 10f;
     [SerializeField] private float meleeAttackRange = 1.5f;
     [SerializeField] private float meleeDamage = 15f;
@@ -49,7 +49,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
     [SerializeField] private Transform spawnCenter;
 
     [Header("Animation Tracking")]
-    [SerializeField] private string attackAnimationName = "Attack";
+    private static readonly int AttackAnimationHash = Animator.StringToHash("Attack");
     [SerializeField][Range(0, 1)] private float damageApplicationPoint = 0.5f;
     private AnimatorStateInfo currentStateInfo;
     private bool isInAttackAnimation = false;
@@ -69,48 +69,47 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    void Update()
+    private void Update()
     {
         if (!isActivated)
         {
             DetectPlayer();
+            return;
         }
-        else
+
+        if (player == null || !IsPlayerStillVisible())
         {
-            if (player == null || !IsPlayerStillVisible())
-            {
-                DeactivateEnemy();
-            }
-            else
-            {
-                ChasePlayer();
-                RotateTowardsPlayer();
+            DeactivateEnemy();
+            return;
+        }
 
-                meleeAttackTimer += Time.deltaTime * PauseGameState.LocalTimeScale;
+        ChasePlayer();
+        meleeAttackTimer += Time.deltaTime * PauseGameState.LocalTimeScale;
 
-                float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-                if (distanceToPlayer <= meleeAttackRange &&
-                    meleeAttackTimer >= meleeAttackCooldown &&
-                    !isInAttackAnimation)
-                {
-                    StartAttack();
-                }
+        if (distanceToPlayer <= meleeAttackRange &&
+            meleeAttackTimer >= meleeAttackCooldown &&
+            !isInAttackAnimation &&
+            CanSeePlayer(player))
+        {
+            StartAttack();
+        }
 
-                // Отслеживание прогресса анимации
-                if (isInAttackAnimation)
-                {
-                    TrackAttackAnimation();
-                }
-            }
+        if (isInAttackAnimation)
+        {
+            TrackAttackAnimation(); // <-- Раскомментировать
         }
     }
+
+
 
     private void StartAttack()
     {
         isInAttackAnimation = true;
         damageAppliedThisAttack = false;
         meleeAttackTimer = 0f;
+        agent.isStopped = true;
         animator.SetBool("Walk", false);
         animator.SetTrigger("Attack");
 
@@ -120,16 +119,18 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         }
     }
 
+
+
     private void TrackAttackAnimation()
     {
+        if (animator.IsInTransition(0)) return;
+
         currentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-        // Проверяем, что играет именно анимация атаки
-        if (currentStateInfo.IsName(attackAnimationName))
+        if (currentStateInfo.shortNameHash == AttackAnimationHash)
         {
-            float normalizedTime = currentStateInfo.normalizedTime % 1; // Получаем прогресс анимации (0-1)
+            float normalizedTime = currentStateInfo.normalizedTime;
 
-            // Если достигли нужного момента и еще не наносили урон
             if (normalizedTime >= damageApplicationPoint && !damageAppliedThisAttack)
             {
                 ApplyDamage();
@@ -141,18 +142,22 @@ public class EnemyMelee : MonoBehaviour, IDamageable
                 }
             }
 
-            // Если анимация завершилась
-            if (normalizedTime >= 0.95f) // 0.95 чтобы не ждать полного завершения
+            if (normalizedTime >= 0.95f) // Завершение атаки
             {
                 isInAttackAnimation = false;
+                agent.isStopped = false;
+                animator.SetBool("Walk", true); // Возвращаем анимацию ходьбы
             }
         }
         else
         {
-            // Если анимация была прервана
             isInAttackAnimation = false;
+            agent.isStopped = false;
+            animator.SetBool("Walk", true);
         }
     }
+
+
 
     private void ApplyDamage()
     {
@@ -222,30 +227,38 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         if (player != null && agent.enabled)
         {
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
             if (distanceToPlayer <= meleeAttackRange)
             {
                 agent.isStopped = true;
+                animator.SetBool("Walk", false);
             }
-            else
+            else if (!isInAttackAnimation)
             {
-                animator.SetBool("Walk", true);
                 agent.isStopped = false;
                 agent.SetDestination(player.position);
+                animator.SetBool("Walk", true);
+
+                RotateTowards(agent.desiredVelocity);
             }
         }
     }
 
-    private void RotateTowardsPlayer()
+
+
+
+
+    private void RotateTowards(Vector3 direction)
     {
-        float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
-        if (player != null)
+        if (direction.sqrMagnitude > 0.01f)
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0;
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            float DT = Time.deltaTime * PauseGameState.LocalTimeScale;
+            Quaternion lookRotation = Quaternion.LookRotation(direction.normalized);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, DT * 5f);
         }
     }
+
+
 
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {

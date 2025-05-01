@@ -55,9 +55,10 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     [Header("Animation Tracking")]
     [SerializeField] private string attackAnimationName = "Death";
-    [SerializeField][Range(0, 1)] private float deathpplicationPoint = 1f;
+    [SerializeField][Range(0, 1)] private float deathpplicationPoint = 0.8f;
     private AnimatorStateInfo currentStateInfo;
     private bool isDeathAnimation = false;
+    private bool isDying = false;
 
     [Header("Input")]
     public InputActionAsset inputActions;
@@ -181,6 +182,20 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                 Debug.Log("ўит готов к повторной активации");
             }
         }
+/*
+        if (isDying)
+        {
+            currentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            if (currentStateInfo.IsName("Death"))
+            {
+                float normalizedTime = currentStateInfo.normalizedTime % 1;
+                if (normalizedTime >= deathpplicationPoint)
+                {
+                    
+                }
+            }
+        }*/
+
 
     }
 
@@ -452,29 +467,20 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
             if (currentHealth <= 0)
             {
-                DeletePlayerData();
                 Die();
             }
         }
     }
 
-
-    public void Die() 
+    public void Die()
     {
         animator.SetTrigger("Death");
-        currentStateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-        if (currentStateInfo.IsName(attackAnimationName))
-        {
-            float normalizedTime = currentStateInfo.normalizedTime % 1;
-            if (normalizedTime >= deathpplicationPoint)
-            {
-                healthUI.gameObject.SetActive(false);
-                characterController.enabled = false;
-                deadUI.Activate();
-                PauseGameState.Pause();
-            }
-        }
+        healthUI.gameObject.SetActive(false);
+        characterController.enabled = false;
+        deadUI.Activate();
+        PauseGameState.Pause();
+        DeletePlayerData();
+        Debug.LogError("DIE");
     }
 
     private bool isFiring; 

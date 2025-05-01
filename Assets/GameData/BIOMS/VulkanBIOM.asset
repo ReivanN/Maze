@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyCount: 5
   trapCount: 5
   wallPrefab: {fileID: 0}
-  floorPrefab: {fileID: 0}
+  floorPrefab: {fileID: 5829781341011263699, guid: ab1a79a4f63812d4ab0ff0d5b5a33dd4, type: 3}
   trapPrefabs: []
   enemyPrefab: {fileID: 0}
   playerPrefab: {fileID: 0}

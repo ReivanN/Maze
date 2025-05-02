@@ -4,6 +4,17 @@ using UnityEngine.SceneManagement;
 public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject Con;
+    [SerializeField] private GameObject main;
+    [SerializeField] private GameObject settings;
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) && settings.activeInHierarchy) 
+        {
+            main.SetActive(true);
+            settings.SetActive(false);
+        }
+    }
 
     public void Start()
     {
@@ -11,6 +22,12 @@ public class MainMenuManager : MonoBehaviour
         {
             Con.SetActive(true);
         }
+    }
+
+    public void OpenSettings() 
+    {
+        settings.SetActive(true);
+        main.SetActive(false);
     }
     public void ContinueGame() 
     {

@@ -13,6 +13,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
     private Transform player;
 
     [SerializeField] private float health = 100f;
+    [SerializeField] private int level = 1;
     [SerializeField] private float currentHealth;
     [SerializeField] private float speed = 3.5f;
     [SerializeField] private float currentSpeed;
@@ -263,7 +264,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
         currentHealth -= damage;
-        healthBar?.UpdateHealthBar(currentHealth, health);
+        healthBar?.UpdateHealthBar(currentHealth, health, level);
         if ((damageType & DamageType.Ice) != 0)
         {
             ApplySlow(2f, 0.5f);
@@ -373,7 +374,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         while (elapsed < duration)
         {
             currentHealth -= damagePerTick;
-            healthBar?.UpdateHealthBar(currentHealth, health);
+            healthBar?.UpdateHealthBar(currentHealth, health, level);
 
             if (currentHealth <= 0)
             {
@@ -405,7 +406,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         while (elapsed < duration)
         {
             currentHealth -= damagePerTick;
-            healthBar?.UpdateHealthBar(currentHealth, health);
+            healthBar?.UpdateHealthBar(currentHealth, health, level);
 
             if (currentHealth <= 0)
             {

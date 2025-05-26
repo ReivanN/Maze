@@ -29,6 +29,13 @@ public class MazeGenerator : MonoBehaviour
         if ((LevelManager.Instance.Level + 1) % 5 == 0)
         {
             StartCoroutine(GenerateBossRoom());
+            GameData data = SaveManager.Instance.Load();
+            if (data.unlockedEnemyCount < mazeSettings.enemyPrefab.Length)
+            {
+                data.unlockedEnemyCount++;
+                Debug.Log("Открыт новый враг: " + mazeSettings.enemyPrefab[data.unlockedEnemyCount - 1].name);
+            }
+            SaveManager.Instance.Save(data);
         }
         else if (MazeManager.Instance.savedMaze != null)
         {
@@ -265,6 +272,7 @@ public class MazeGenerator : MonoBehaviour
 
     void SpawnEntities()
     {
+        GameData gameData = SaveManager.Instance.Load();
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -283,7 +291,11 @@ public class MazeGenerator : MonoBehaviour
 
                 if (maze[x, y] == 3)
                 {
-                    Instantiate(mazeSettings.enemyPrefab, position, Quaternion.identity, transform);
+                    if (gameData.unlockedEnemyCount <= 0) return;
+                    int index = UnityEngine.Random.Range(0, gameData.unlockedEnemyCount);
+                    GameObject enemyToSpawn = mazeSettings.enemyPrefab[index];
+                    Instantiate(enemyToSpawn, position, Quaternion.identity);
+                    SaveManager.Instance.Save(gameData);
                 }
             }
         }
@@ -319,11 +331,7 @@ public class MazeGenerator : MonoBehaviour
                         continue;
                     }
 
-                    GameObject bomb = Instantiate(
-                        mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)],
-                        trapPosition,
-                        Quaternion.identity
-                    );
+                    GameObject bomb = Instantiate(mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)],trapPosition,Quaternion.identity);
 
                     NavMeshAgent agent = bomb.GetComponent<NavMeshAgent>();
                     if (agent != null)
@@ -339,7 +347,6 @@ public class MazeGenerator : MonoBehaviour
     {
         List<Vector2Int> deadEnds = new List<Vector2Int>();
 
-        // Проходим по всем ячейкам, чтобы найти тупики
         for (int x = 1; x < width - 1; x += 2)
         {
             for (int y = 1; y < height - 1; y += 2)
@@ -349,7 +356,6 @@ public class MazeGenerator : MonoBehaviour
                 int openCount = 0;
                 List<Vector2Int> openDirections = new List<Vector2Int>();
 
-                // Проверяем соседей
                 foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
                 {
                     Vector2Int neighbor = new Vector2Int(x + dir.x, y + dir.y);
@@ -360,7 +366,6 @@ public class MazeGenerator : MonoBehaviour
                     }
                 }
 
-                // Если есть только один проход, это тупик
                 if (openCount == 1 && new Vector2Int(x, y) != startPosition && new Vector2Int(x, y) != exitPosition)
                 {
                     deadEnds.Add(new Vector2Int(x, y));
@@ -372,8 +377,6 @@ public class MazeGenerator : MonoBehaviour
         {
             Vector2Int traderPos = deadEnds[rand.Next(deadEnds.Count)];
             GameObject trader = Instantiate(mazeSettings.Trader, new Vector3(traderPos.x, 0.01f, traderPos.y), Quaternion.identity);
-
-            // Определяем направление торговца
             List<Vector2Int> possibleDirections = new List<Vector2Int>();
 
             foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
@@ -383,7 +386,6 @@ public class MazeGenerator : MonoBehaviour
                     possibleDirections.Add(dir);
             }
 
-            // Если мы нашли проход, поворачиваем торговца
             if (possibleDirections.Count == 1)
             {
                 Vector2Int direction = possibleDirections[0];
@@ -417,12 +419,10 @@ public class MazeGenerator : MonoBehaviour
         height = 15;
         maze = new int[width, height];
 
-        // Заполняем стены
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
                 maze[x, y] = 0;
 
-        // Центр - пол
         for (int x = 1; x < width - 1; x++)
             for (int y = 1; y < height - 1; y++)
                 maze[x, y] = 1;

@@ -11,6 +11,7 @@ public class Bomb : MonoBehaviour, IDamageable
     [SerializeField] private float currentMoveSpeed;
     [SerializeField] private LayerMask obstaclesMask;
     [SerializeField] private float HP = 20f;
+    [SerializeField] private int level = 1;
     [SerializeField] private float currentHP;
     [SerializeField] private AudioClip activationSound;
 
@@ -190,7 +191,7 @@ public class Bomb : MonoBehaviour, IDamageable
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
         currentHP -= damage;
-        healthBar?.UpdateHealthBar(currentHP, HP);
+        healthBar?.UpdateHealthBar(currentHP, HP, level);
         if (damageType == DamageType.Ice)
         {
             ApplySlow(2f, 0.5f);

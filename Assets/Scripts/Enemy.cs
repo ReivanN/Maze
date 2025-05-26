@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour, IDamageable
     private Transform player;
 
     [SerializeField] private float health = 100f;
+    [SerializeField] private int levelEnemy = 1;
     [SerializeField] private float currentHealth;
     [SerializeField] private float speed = 3.5f;
     [SerializeField] private float currentSpeed;
@@ -22,6 +23,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
     [SerializeField] private float bulletSpeed = 2f;
+    [SerializeField] private float bulletDamage = 10f;
     [SerializeField] private float currentbulletSpeed;
     [SerializeField] private float fireRate = 1f;
     private float fireCooldownTimer = 0f;
@@ -47,6 +49,8 @@ public class Enemy : MonoBehaviour, IDamageable
     [Header("Coins")]
     [SerializeField] private GameObject coinPrefab;
     [SerializeField] private float spawnRadius = 0.1f;
+    [SerializeField] private int minCountCoins = 3;
+    [SerializeField] private int maxCountCoins = 6;
     [SerializeField] private Transform spawnCenter;
 
     void Start()
@@ -170,7 +174,7 @@ public class Enemy : MonoBehaviour, IDamageable
             {
                 audioSource.PlayOneShot(clip);
                 bulletScript.Initialize(direction, currentbulletSpeed, 10, 0);
-                bulletScript.SetDamage(10f);
+                bulletScript.SetDamage(bulletDamage);
             }
         }
     }
@@ -178,7 +182,7 @@ public class Enemy : MonoBehaviour, IDamageable
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
         currentHealth -= damage;
-        healthBar?.UpdateHealthBar(currentHealth, health);
+        healthBar?.UpdateHealthBar(currentHealth, health, levelEnemy);
         if ((damageType & DamageType.Ice) != 0)
         {
             ApplySlow(2f, 0.5f);
@@ -293,7 +297,7 @@ public class Enemy : MonoBehaviour, IDamageable
         while (elapsed < duration)
         {
             currentHealth -= damagePerTick;
-            healthBar?.UpdateHealthBar(currentHealth, health);
+            healthBar?.UpdateHealthBar(currentHealth, health, levelEnemy);
 
             if (currentHealth <= 0)
             {
@@ -324,7 +328,7 @@ public class Enemy : MonoBehaviour, IDamageable
         while (elapsed < duration)
         {
             currentHealth -= damagePerTick;
-            healthBar?.UpdateHealthBar(currentHealth, health);
+            healthBar?.UpdateHealthBar(currentHealth, health, levelEnemy);
 
             if (currentHealth <= 0)
             {
@@ -343,7 +347,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void SpawnCoins() 
     {
-        int coinCount = Random.Range(3, 6);
+        int coinCount = Random.Range(minCountCoins, maxCountCoins);
 
         for (int i = 0; i < coinCount; i++)
         {

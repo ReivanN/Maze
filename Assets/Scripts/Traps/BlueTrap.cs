@@ -35,7 +35,7 @@ public class BlueTrap : MonoBehaviour
     public void TakeDamage(int damage, TrapType trapType)
     {
         currentHP -= damage;
-        healthBar?.UpdateHealthBar(currentHP, HP);
+        //healthBar?.UpdateHealthBar(currentHP, HP);
 
         if (currentHP <= 0)
         {

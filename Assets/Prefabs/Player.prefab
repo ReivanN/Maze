@@ -1059,6 +1059,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerData: {fileID: 11400000, guid: b933b10015a1bb04da298065a08c62e4, type: 2}
+  player: {fileID: 7557706199888465590}
   cameraTransform: {fileID: 0}
   cameraSmoothSpeed: 5
   healthUI: {fileID: 0}
@@ -1072,6 +1073,11 @@ MonoBehaviour:
   gunShot: {fileID: 8300000, guid: bb647f8d572f336468ba1305e0e6141e, type: 3}
   pickUp: {fileID: 8300000, guid: aa98781f151e13649a1c66881ee4db2c, type: 3}
   currentCoins: 0
+  currentShieldValue: 0
+  MAXShieldValue: 50
+  shieldCooldownTime: 15
+  attackAnimationName: Death
+  deathpplicationPoint: 0.8
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!82 &2905782489717234636
 AudioSource:

@@ -1,4 +1,6 @@
+using DG.Tweening;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -8,6 +10,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 {
     [Header("PLayerStat")]
     public PlayerData playerData;
+    public Transform player;
     private Vector2 moveInput;
     private CharacterController characterController;
     private Animator animator;
@@ -58,7 +61,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField][Range(0, 1)] private float deathpplicationPoint = 0.8f;
     private AnimatorStateInfo currentStateInfo;
     private bool isDeathAnimation = false;
-    private bool isDying = false;
+    private bool isDead = false;
 
     [Header("Input")]
     public InputActionAsset inputActions;
@@ -403,6 +406,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Time.timeScale == 0f) return;
+        if (isDead == true) return;
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             Vector3 lookPos = new Vector3(hit.point.x, transform.position.y, hit.point.z);
@@ -472,16 +476,34 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         }
     }
 
-    public void Die()
+    public async void Die()
     {
+        if (isDead) return;
+
+        isDead = true;
         animator.SetTrigger("Death");
         healthUI.gameObject.SetActive(false);
         characterController.enabled = false;
+
+        // Камера плавно опускается по оси Y
+        Transform cameraTransform = Camera.main.transform;
+        float duration = 3f;
+        float targetY = transform.position.y + 2f; // настрой по вкусу
+
+        // Только по оси Y, X и Z остаются прежними
+        cameraTransform.DOMoveY(targetY, duration).SetEase(Ease.InOutSine);
+
+        // Ожидание завершения анимации смерти
+        await Task.Delay(TimeSpan.FromSeconds(duration));
+
+        // Показ UI и окончание
         deadUI.Activate();
         PauseGameState.Pause();
         DeletePlayerData();
         Debug.LogError("DIE");
     }
+
+
 
     private bool isFiring; 
 

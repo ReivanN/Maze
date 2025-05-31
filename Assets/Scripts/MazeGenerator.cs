@@ -295,7 +295,6 @@ public class MazeGenerator : MonoBehaviour
                     int index = UnityEngine.Random.Range(0, gameData.unlockedEnemyCount);
                     GameObject enemyToSpawn = mazeSettings.enemyPrefab[index];
                     Instantiate(enemyToSpawn, position, Quaternion.identity);
-                    SaveManager.Instance.Save(gameData);
                 }
             }
         }

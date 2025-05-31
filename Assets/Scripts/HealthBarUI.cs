@@ -40,4 +40,9 @@ public class HealthBarUI : MonoBehaviour, IHealthBar
             }
         }
     }
+    void LateUpdate()
+    {
+        healthBarCanvas.transform.localRotation = Quaternion.identity;
+    }
+
 }

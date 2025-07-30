@@ -1,8 +1,11 @@
-using TMPro;
+Ôªøusing TMPro;
 using UnityEngine;
+using System;
 
 public class EndLabirint : MonoBehaviour
 {
+    public static event Action OnLevelCompleted;
+
     private bool playerInZone = false;
     private TextMeshProUGUI endText;
 
@@ -16,7 +19,7 @@ public class EndLabirint : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Œ·˙ÂÍÚ Ò ÚÂ„ÓÏ 'End' ÌÂ Ì‡È‰ÂÌ.");
+            Debug.LogWarning("–û–±—ä–µ–∫—Ç —Å —Ç–µ–≥–æ–º 'End' –Ω–µ –Ω–∞–π–¥–µ–Ω.");
         }
     }
 
@@ -63,6 +66,8 @@ public class EndLabirint : MonoBehaviour
         {
             MazeManager.Instance.savedMaze = null;
         }
+
+        OnLevelCompleted?.Invoke();
 
         LevelManager.Instance.LevelCompleted();
         MazeManager.Instance.NewMaze();

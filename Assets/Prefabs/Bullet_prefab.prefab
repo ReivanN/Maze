@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da571d4e5ed1a45d58934e4d710725e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageType: 0
+  damageType: 1
   ricochetMask:
     serializedVersion: 2
     m_Bits: 704

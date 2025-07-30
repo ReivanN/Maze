@@ -42,6 +42,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField] private AudioSource myaudioSource;
     [SerializeField] private AudioClip gunShot;
     [SerializeField] private AudioClip pickUp;
+    [SerializeField] private AudioClip dash;
 
     [Header("Coin")]
     public static Action<int> OnCoinsChanged;
@@ -55,6 +56,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     private bool canActivateShield = true;
     [SerializeField] private float shieldCooldownTime = 15f;
     private float shieldCooldownTimer = 0f;
+    [SerializeField] private GameObject ShieldObject;
 
     [Header("Animation Tracking")]
     [SerializeField] private string attackAnimationName = "Death";
@@ -70,7 +72,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     public float dashForce = 10f;
     public float dashUpwardForce = 0f;
     public float dashDuration = 0.25f;
-    public float dashCooldown = 1.0f;
+    public float dashCooldown = 2.0f;
     public float dashFov = 60;
     public bool allowAllDirections = true;
     public bool resetVelocityBeforeDash = true;
@@ -85,6 +87,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField] private string dashLayerName = "PlayerDuringDash";
     private int dashLayer;
 
+    private bool isLevelCompleted = false;
 
     public float GetDamage() => currentDamage;
 
@@ -133,6 +136,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         data.shieldValue = MAXShieldValue;
         data.damageType = (int)currentDamageTypes;
         SaveManager.Instance.Save(data);
+        Debug.LogError("The data o player was saved");
     }
 
 
@@ -141,16 +145,28 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         SaveManager.Instance.DeleteSave();
     }
 
+    public void OnLevelCompleted()
+    {
+        isLevelCompleted = true;
+    }
+
     private void OnEnable()
     {
         inputActions.FindActionMap("Player").Enable();
         inputActions.FindActionMap("Player").FindAction("Dash").performed += OnDash;
+        EndLabirint.OnLevelCompleted += OnLevelCompleted;
     }
 
     private void OnDisable()
     {
         inputActions.FindActionMap("Player").FindAction("Dash").performed -= OnDash;
         inputActions.FindActionMap("Player").Disable();
+        EndLabirint.OnLevelCompleted -= OnLevelCompleted;
+
+        if (!isDead && isLevelCompleted)
+        {
+            SavePlayerData();
+        }
     }
 
 
@@ -404,6 +420,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         shieldCooldownTimer = 0f;
         healthUI.UpdateShield(currentShieldValue, MAXShieldValue);
         Debug.Log("Щит активирован");
+        ShieldObject.SetActive(true);
     }
 
 
@@ -435,10 +452,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     private void StartDash()
     {
+        myaudioSource.PlayOneShot(dash);
         isDashing = true;
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
-
+        healthUI.UpdateDash(dashCooldown);
         Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y);
         dashDirection = allowAllDirections && inputDirection != Vector3.zero
             ? inputDirection.normalized
@@ -560,6 +578,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             {
                 canActivateShield = false;
                 Debug.Log("Щит разрушен.");
+                ShieldObject.SetActive(false);
             }
         }
 
@@ -570,7 +589,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
             if (currentHealth > 0)
             {
-                SavePlayerData();
+                //SavePlayerData();
                 healthUI.UpdateHealth(currentHealth, MAXHealth);
             }
 
@@ -590,18 +609,13 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         healthUI.gameObject.SetActive(false);
         characterController.enabled = false;
 
-        // Камера плавно опускается по оси Y
         Transform cameraTransform = Camera.main.transform;
         float duration = 3f;
-        float targetY = transform.position.y + 2f; // настрой по вкусу
-
-        // Только по оси Y, X и Z остаются прежними
+        float targetY = transform.position.y + 2f;
         cameraTransform.DOMoveY(targetY, duration).SetEase(Ease.InOutSine);
 
-        // Ожидание завершения анимации смерти
         await Task.Delay(TimeSpan.FromSeconds(duration));
 
-        // Показ UI и окончание
         deadUI.Activate();
         PauseGameState.Pause();
         DeletePlayerData();
@@ -674,7 +688,6 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (other.CompareTag("Coin"))
         {
             AddCoin();
-            SavePlayerData();
             Destroy(other.gameObject);
         }
     }

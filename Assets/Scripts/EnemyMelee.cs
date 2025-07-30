@@ -35,6 +35,15 @@ public class EnemyMelee : MonoBehaviour, IDamageable
     public AudioSource audioSource;
     public AudioClip meleeAttackSound;
 
+    [Header("Area Damage")]
+    [SerializeField] private GameObject areaDamagePrefab;
+    [SerializeField] private float areaDamageRadius = 2f;
+    [SerializeField] private float areaDamageAmount = 20f;
+    [SerializeField] private float areaDamageDuration = 5f;
+    [SerializeField] private float areaDamageTickRate = 2f;
+    [SerializeField] private LayerMask playerMask;
+
+
     [Header("Particles")]
     [SerializeField] private ParticleSystem slowEffectParticles;
     [SerializeField] private ParticleSystem burnEffectParticles;
@@ -68,6 +77,7 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         agent.stoppingDistance = stoppingDistance;
         currentHealth = health;
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        SpawnAreaDamage(transform.position + transform.forward * 1.5f);
     }
 
     private void Update()
@@ -120,6 +130,41 @@ public class EnemyMelee : MonoBehaviour, IDamageable
         }
     }
 
+    public void SpawnAreaDamage(Vector3 position)
+    {
+        GameObject area = Instantiate(areaDamagePrefab, position, Quaternion.identity);
+        StartCoroutine(AreaDamageCoroutine(area.transform));
+    }
+
+    private IEnumerator AreaDamageCoroutine(Transform areaTransform)
+    {
+        float elapsed = 0f;
+
+        if (areaDamagePrefab != null)
+        {
+            ParticleSystem ps = areaTransform.GetComponentInChildren<ParticleSystem>();
+            ps?.Play();
+        }
+
+        while (elapsed < areaDamageDuration)
+        {
+            Collider[] hitPlayers = Physics.OverlapSphere(areaTransform.position, areaDamageRadius, playerMask);
+
+            foreach (var hitPlayer in hitPlayers)
+            {
+                IDamageable damageable = hitPlayer.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(areaDamageAmount, TrapType.SaveMaze, DamageType.Normal);
+                }
+            }
+
+            yield return new WaitForSeconds(areaDamageTickRate);
+            elapsed += areaDamageTickRate;
+        }
+
+        Destroy(areaTransform.gameObject);
+    }
 
 
     private void TrackAttackAnimation()

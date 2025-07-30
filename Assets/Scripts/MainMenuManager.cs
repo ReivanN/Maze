@@ -32,6 +32,7 @@ public class MainMenuManager : MonoBehaviour
     public void ContinueGame() 
     {
         SaveManager.Instance.Load();
+        PauseGameState.Resume();
         SceneManager.LoadScene("MazeScene");
     }
 
@@ -39,6 +40,7 @@ public class MainMenuManager : MonoBehaviour
     {
         SaveManager.Instance.DeleteSave();
         LevelManager.Instance.LoadProgress();
+        PauseGameState.Resume();
         SceneManager.LoadScene("MazeScene");
     }
 

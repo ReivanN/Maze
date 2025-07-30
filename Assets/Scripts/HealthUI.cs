@@ -9,8 +9,9 @@ public class HealthUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI ShieldText;
     [SerializeField] private Image healthBar;
     [SerializeField] private Image shieldBar;
+    [SerializeField] private Image dashBar;
     [SerializeField] private float animationDuration = 0.5f;
-
+    private Tween dashCooldownTween;
     public void UpdateHealth(float currentHealth, float maxHealth, bool instant = false)
     {
         int current = Mathf.RoundToInt(currentHealth);
@@ -47,4 +48,12 @@ public class HealthUI : MonoBehaviour
             shieldBar.DOFillAmount(healthPercentage, animationDuration).SetEase(Ease.OutQuad);
         }
     }
+
+    public void UpdateDash(float dashCooldown)
+    {
+        dashBar.fillAmount = 0;
+        dashCooldownTween = dashBar.DOFillAmount(1f, dashCooldown)
+        .SetEase(Ease.Linear);
+    }
+
 }

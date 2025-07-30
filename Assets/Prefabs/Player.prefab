@@ -1041,6 +1041,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: af2ad9e8-3bab-4bef-8644-42966db37873
     m_ActionName: 'Player/OpenShop[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2438493800660897407}
+        m_TargetAssemblyTypeName: TopDownCharacterController, Assembly-CSharp
+        m_MethodName: OnDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: dd0aea4b-bdea-442e-8a59-83c70150c285
+    m_ActionName: 'Player/Dash[/Keyboard/shift]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1079,6 +1095,14 @@ MonoBehaviour:
   attackAnimationName: Death
   deathpplicationPoint: 0.8
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  dashForce: 10
+  dashUpwardForce: 0
+  dashDuration: 0.15
+  dashCooldown: 1.5
+  dashFov: 70
+  allowAllDirections: 1
+  resetVelocityBeforeDash: 1
+  dashLayerName: DashPlayer
 --- !u!82 &2905782489717234636
 AudioSource:
   m_ObjectHideFlags: 0

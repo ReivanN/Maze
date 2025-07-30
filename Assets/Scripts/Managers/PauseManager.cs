@@ -8,6 +8,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject pause;
     [SerializeField] private GameObject tutorial;
     [SerializeField] private GameObject main;
+    [SerializeField] private GameObject shop;
     [SerializeField] private InputAction action;
     private bool isPaused = false;
     private void Start()
@@ -28,6 +29,8 @@ public class PauseManager : MonoBehaviour
 
     private void OnPause(InputAction.CallbackContext context)
     {
+        if (shop.activeInHierarchy == true)
+            return;
         if (isPaused && main.activeInHierarchy)
             Resume();
         else if (isPaused && tutorial.activeInHierarchy)

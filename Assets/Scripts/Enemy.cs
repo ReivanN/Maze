@@ -32,8 +32,12 @@ public class Enemy : MonoBehaviour, IDamageable
     [HideInInspector] public UnityAction EnemyDeath;
     [HideInInspector] public bool isAlive = true;
     private bool isActivated = false;
-    [SerializeField] private GameObject HPBonus;
     private IHealthBar healthBar;
+
+    [Header("Drop Settings")]
+    [SerializeField, Range(0f, 1f)] private float bonusDropChance = 0.2f;
+    [SerializeField] private GameObject HPBonus;
+
 
     public AudioSource audioSource;
     public AudioClip clip;
@@ -216,11 +220,21 @@ public class Enemy : MonoBehaviour, IDamageable
         EnableRagdoll();
         agent.enabled = false;
         EnemyDeath?.Invoke();
-        Vector3 HPPosition = new Vector3(this.transform.position.x, 0.5f, this.transform.position.z);
-        GameObject bonus = Instantiate(HPBonus, HPPosition, Quaternion.identity);
+
+        TrySpawnBonus();
         SpawnCoins();
-        AnimateBonusDrop(bonus);
     }
+
+    private void TrySpawnBonus()
+    {
+        if (Random.value <= bonusDropChance)
+        {
+            Vector3 HPPosition = new Vector3(transform.position.x, 0.5f, transform.position.z);
+            GameObject bonus = Instantiate(HPBonus, HPPosition, Quaternion.identity);
+            AnimateBonusDrop(bonus);
+        }
+    }
+
 
     private void AnimateBonusDrop(GameObject bonus)
     {

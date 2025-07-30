@@ -2587,6 +2587,7 @@ MonoBehaviour:
   pause: {fileID: 660201522}
   tutorial: {fileID: 1072162188}
   main: {fileID: 381134745}
+  shop: {fileID: 1687215030}
   action:
     m_Name: Action
     m_Type: 0

@@ -66,6 +66,26 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [Header("Input")]
     public InputActionAsset inputActions;
 
+    [Header("Dashing")]
+    public float dashForce = 10f;
+    public float dashUpwardForce = 0f;
+    public float dashDuration = 0.25f;
+    public float dashCooldown = 1.0f;
+    public float dashFov = 60;
+    public bool allowAllDirections = true;
+    public bool resetVelocityBeforeDash = true;
+
+    private bool isDashing = false;
+    private float dashTimer = 0f;
+    private float dashCooldownTimer = 0f;
+    private Vector3 dashDirection;
+    private float originalFov;
+    private Camera mainCam;
+    private int defaultLayer;
+    [SerializeField] private string dashLayerName = "PlayerDuringDash";
+    private int dashLayer;
+
+
     public float GetDamage() => currentDamage;
 
     private void LoadPlayerData()
@@ -120,6 +140,20 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         SaveManager.Instance.DeleteSave();
     }
+
+    private void OnEnable()
+    {
+        inputActions.FindActionMap("Player").Enable();
+        inputActions.FindActionMap("Player").FindAction("Dash").performed += OnDash;
+    }
+
+    private void OnDisable()
+    {
+        inputActions.FindActionMap("Player").FindAction("Dash").performed -= OnDash;
+        inputActions.FindActionMap("Player").Disable();
+    }
+
+
     void Awake()
     {
         healthUI = FindAnyObjectByType<HealthUI>();
@@ -130,6 +164,11 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         {
             cameraTransform = Camera.main.transform;
         }
+        mainCam = Camera.main;
+        defaultLayer = gameObject.layer;
+        dashLayer = LayerMask.NameToLayer(dashLayerName);
+        if (mainCam != null)
+            originalFov = mainCam.fieldOfView;
     }
 
     private void Start()
@@ -147,6 +186,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     void Update()
     {
         float dt = Time.deltaTime * PauseGameState.LocalTimeScale;
+        UpdateDash(Time.deltaTime * PauseGameState.LocalTimeScale);
 
 
         if (PauseGameState.IsPaused)
@@ -384,6 +424,71 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     {
         moveInput = context.ReadValue<Vector2>();
     }
+
+    public void OnDash(InputAction.CallbackContext context)
+    {
+        if (context.started && dashCooldownTimer <= 0f && !isDashing)
+        {
+            StartDash();
+        }
+    }
+
+    private void StartDash()
+    {
+        isDashing = true;
+        dashTimer = dashDuration;
+        dashCooldownTimer = dashCooldown;
+
+        Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y);
+        dashDirection = allowAllDirections && inputDirection != Vector3.zero
+            ? inputDirection.normalized
+            : transform.forward;
+
+        if (resetVelocityBeforeDash)
+            velocity = Vector3.zero;
+
+        if (mainCam != null)
+        {
+            DOTween.Kill(mainCam);
+            mainCam.DOFieldOfView(dashFov, 0.15f).SetEase(Ease.OutQuad);
+        }
+
+        gameObject.layer = dashLayer;
+    }
+
+
+
+    private void UpdateDash(float dt)
+    {
+        if (dashCooldownTimer > 0f)
+            dashCooldownTimer -= dt;
+
+        if (!isDashing)
+            return;
+
+        characterController.Move(dashDirection * dashForce * dt);
+
+        dashTimer -= dt;
+        if (dashTimer <= 0f)
+        {
+            EndDash();
+        }
+    }
+
+    private void EndDash()
+    {
+        isDashing = false;
+        gameObject.layer = defaultLayer;
+
+        if (mainCam != null)
+        {
+            DOTween.Kill(mainCam);
+            mainCam.DOFieldOfView(originalFov, 0.25f).SetEase(Ease.OutQuad);
+        }
+    }
+
+
+
 
     private void Move()
     {

@@ -34,6 +34,7 @@ public class MazeManager : MonoBehaviour
     public void NewMaze()
     {
         savedMaze = null;
+        PauseGameState.Resume();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

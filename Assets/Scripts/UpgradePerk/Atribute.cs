@@ -28,7 +28,7 @@ public enum AtributeType
     PoisonBullets,
     piercingBullets,
     GrabBullets,
-    InvinÒible,
+    Invin—Åible,
     Bomb,
 
     IceBomb,

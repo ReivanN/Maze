@@ -22,6 +22,7 @@ MonoBehaviour:
   - {fileID: 7718154780804771419, guid: feaccdc489b1d634181a47b5b77d9438, type: 3}
   - {fileID: 7718154780804771419, guid: 0d81bf3105d340049b3cc2ab34439234, type: 3}
   - {fileID: 0}
+  SpreadEnemyPrefab: {fileID: 4677280634806542626, guid: 2de02a1507b4b4a45870e8fdf34dec6d, type: 3}
   playerPrefab: {fileID: 7181426195906352140, guid: dcd1286545e77224d8c242ca516cd87c, type: 3}
   startPointPrefab: {fileID: 9091674112727050998, guid: cfa41e90f69222a49a64b1ebbb386845, type: 3}
   exitPointPrefab: {fileID: 8234590230774685726, guid: cdaa9c49d78ac4a4a91072ff55bb789a, type: 3}

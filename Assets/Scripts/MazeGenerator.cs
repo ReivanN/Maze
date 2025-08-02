@@ -16,6 +16,9 @@ public class MazeGenerator : MonoBehaviour
 
     private int enemyCount;
     private int trapCount;
+    private int spreadCount;
+
+    private const float blockScale = 2f;
 
     public static bool IsDone = false;
 
@@ -46,8 +49,6 @@ public class MazeGenerator : MonoBehaviour
             StartCoroutine(GenerateAndSpawn());
         }
     }
-
-
 
     IEnumerator GenerateAndSpawn()
     {
@@ -268,6 +269,34 @@ public class MazeGenerator : MonoBehaviour
             possiblePositions.RemoveAt(index);
             maze[enemyPos.x, enemyPos.y] = 3;
         }
+
+        List<Vector2Int> intersections = new List<Vector2Int>();
+
+        for (int x = 1; x < width - 1; x++)
+        {
+            for (int y = 1; y < height - 1; y++)
+            {
+                if (maze[x, y] != 1) continue;
+                if (new Vector2Int(x, y) == startPosition || new Vector2Int(x, y) == exitPosition) continue;
+
+                int openCount = 0;
+                foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                {
+                    Vector2Int neighbor = new Vector2Int(x + dir.x, y + dir.y);
+                    if (maze[neighbor.x, neighbor.y] == 1)
+                        openCount++;
+                }
+
+                if (openCount >= 3)
+                    intersections.Add(new Vector2Int(x, y));
+            }
+        }
+
+        if (intersections.Count > 0)
+        {
+            Vector2Int crossPos = intersections[rand.Next(intersections.Count)];
+            maze[crossPos.x, crossPos.y] = 3;
+        }
     }
 
     void SpawnEntities()
@@ -277,8 +306,8 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3 position = new Vector3(x, 0, y);
-                Vector3 wallPosition = new Vector3(x, 1f, y);
+                Vector3 position = new Vector3(x * blockScale, 0, y * blockScale);
+                Vector3 wallPosition = new Vector3(x * blockScale, 1f, y * blockScale);
 
                 if (maze[x, y] == 0)
                 {
@@ -296,18 +325,40 @@ public class MazeGenerator : MonoBehaviour
                     GameObject enemyToSpawn = mazeSettings.enemyPrefab[index];
                     Instantiate(enemyToSpawn, position, Quaternion.identity);
                 }
+
+                if (spreadCount < 5 && maze[x, y] == 0 && mazeSettings.SpreadEnemyPrefab != null)
+                {
+                    int openCount = 0;
+
+                    foreach (Vector2Int dir in new Vector2Int[] {
+                        Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                    {
+                        int nx = x + dir.x;
+                        int ny = y + dir.y;
+
+                        if (nx >= 0 && ny >= 0 && nx < width && ny < height && maze[nx, ny] == 1)
+                        {
+                            openCount++;
+                        }
+                    }
+
+                    if (openCount >= 3) 
+                    {
+                        Vector3 enemyPos = new Vector3(x * blockScale + blockScale / 2f, 0, y * blockScale + blockScale / 2f);
+                        Instantiate(mazeSettings.SpreadEnemyPrefab, enemyPos, Quaternion.identity);
+                        spreadCount++;
+                    }
+                }
             }
         }
 
-        Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x, 0.01f, startPosition.y), Quaternion.identity);
-        if ((LevelManager.Instance.Level + 1) % 5 == 0) 
-        {
-            Instantiate(mazeSettings.exitBossRoomPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
-        }
-        else 
-        {
-            Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x, 0.01f, exitPosition.y), Quaternion.identity);
-        }
+        Instantiate(mazeSettings.startPointPrefab, new Vector3(startPosition.x * blockScale, 0.01f, startPosition.y * blockScale), Quaternion.identity);
+
+        if ((LevelManager.Instance.Level + 1) % 5 == 0)
+            Instantiate(mazeSettings.exitBossRoomPrefab, new Vector3(exitPosition.x * blockScale, 0.01f, exitPosition.y * blockScale), Quaternion.identity);
+        else
+            Instantiate(mazeSettings.exitPointPrefab, new Vector3(exitPosition.x * blockScale, 0.01f, exitPosition.y * blockScale), Quaternion.identity);
+
         SpawnTrader();
     }
 
@@ -319,7 +370,7 @@ public class MazeGenerator : MonoBehaviour
             {
                 if (maze[x, y] == 2)
                 {
-                    Vector3 trapPosition = new Vector3(x, 0.5f, y);
+                    Vector3 trapPosition = new Vector3(x * blockScale, 0.5f, y * blockScale);
 
                     if (NavMesh.SamplePosition(trapPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
                     {
@@ -330,7 +381,7 @@ public class MazeGenerator : MonoBehaviour
                         continue;
                     }
 
-                    GameObject bomb = Instantiate(mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)],trapPosition,Quaternion.identity);
+                    GameObject bomb = Instantiate(mazeSettings.trapPrefabs[rand.Next(mazeSettings.trapPrefabs.Length)], trapPosition, Quaternion.identity);
 
                     NavMeshAgent agent = bomb.GetComponent<NavMeshAgent>();
                     if (agent != null)
@@ -375,7 +426,7 @@ public class MazeGenerator : MonoBehaviour
         if (deadEnds.Count > 0)
         {
             Vector2Int traderPos = deadEnds[rand.Next(deadEnds.Count)];
-            GameObject trader = Instantiate(mazeSettings.Trader, new Vector3(traderPos.x, 0.01f, traderPos.y), Quaternion.identity);
+            GameObject trader = Instantiate(mazeSettings.Trader, new Vector3(traderPos.x * blockScale, 0.01f, traderPos.y * blockScale), Quaternion.identity);
             List<Vector2Int> possibleDirections = new List<Vector2Int>();
 
             foreach (Vector2Int dir in new Vector2Int[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
@@ -388,7 +439,7 @@ public class MazeGenerator : MonoBehaviour
             if (possibleDirections.Count == 1)
             {
                 Vector2Int direction = possibleDirections[0];
-                trader.transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+                trader.transform.rotation = Quaternion.LookRotation(new Vector3(direction.x * blockScale, 0, direction.y * blockScale));
             }
         }
         else
@@ -397,19 +448,14 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-
     private IEnumerator WaitForNavMesh(NavMeshAgent agent)
     {
         yield return new WaitForSeconds(0.1f);
 
         if (!agent.isOnNavMesh)
-        {
             Debug.LogError($"Бомба {agent.gameObject.name} заспавнилась вне NavMesh!");
-        }
         else
-        {
             Debug.Log($"Бомба {agent.gameObject.name} успешно на NavMesh.");
-        }
     }
 
     IEnumerator GenerateBossRoom()
@@ -438,7 +484,7 @@ public class MazeGenerator : MonoBehaviour
 
     IEnumerator SpawnBossCoroutine()
     {
-        Vector3 bossPosition = new Vector3(width / 2f, 0, height / 2f);
+        Vector3 bossPosition = new Vector3(width / 2f * blockScale, 0, height / 2f * blockScale);
         GameObject boss = Instantiate(mazeSettings.bossPrefab, bossPosition, Quaternion.identity);
 
         NavMeshAgent agent = boss.GetComponent<NavMeshAgent>();
@@ -448,11 +494,10 @@ public class MazeGenerator : MonoBehaviour
             yield return null;
     }
 
-
-
     void SpawnPlayer()
     {
-        Vector3 spawnPosition = new Vector3(startPosition.x, 0, startPosition.y);
+        Vector3 spawnPosition = new Vector3(startPosition.x * blockScale, 0, startPosition.y * blockScale);
         Instantiate(mazeSettings.playerPrefab, spawnPosition, Quaternion.identity);
     }
+    
 }

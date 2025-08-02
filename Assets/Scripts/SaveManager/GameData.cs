@@ -5,8 +5,8 @@ using UnityEngine;
 public class GameData
 {
     public int unlockedEnemyCount = 1;
-    public int level = 20;
-    public int completedlevel = 19;
+    public int level = 1;
+    public int completedlevel = 0;
     public int pass = 10;
     public float health = 100;
     public float maxHealth = 100;

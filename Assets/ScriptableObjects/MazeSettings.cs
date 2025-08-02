@@ -12,6 +12,7 @@ public class MazeSettings : ScriptableObject
     public GameObject floorPrefab;
     public GameObject[] trapPrefabs;
     public GameObject[] enemyPrefab;
+    public GameObject SpreadEnemyPrefab;
     public GameObject playerPrefab;
     public GameObject startPointPrefab;
     public GameObject exitPointPrefab;

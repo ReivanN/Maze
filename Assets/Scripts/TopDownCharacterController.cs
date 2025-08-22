@@ -1,4 +1,6 @@
 using DG.Tweening;
+using MoreMountains.Feedbacks;
+using MoreMountains.Tools;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -87,6 +89,18 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     [SerializeField] private string dashLayerName = "PlayerDuringDash";
     private int dashLayer;
 
+    [Header("FEEL / Feedbacks")]
+    [SerializeField] private MMF_Player fbShoot;
+    [SerializeField] private MMF_Player fbDashStart;
+    [SerializeField] private MMF_Player fbDashEnd;
+    [SerializeField] private MMF_Player fbTakeDamage;
+    [SerializeField] private MMF_Player fbShieldActivate;
+    [SerializeField] private MMF_Player fbShieldHit;
+    [SerializeField] private MMF_Player fbCoinPickup;
+    [SerializeField] private MMF_Player fbDeath;
+    [SerializeField] private MMF_Player fbLevelComplete;
+    [SerializeField] private MMF_Feedback mMF;
+
     private bool isLevelCompleted = false;
 
     public float GetDamage() => currentDamage;
@@ -148,6 +162,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
     public void OnLevelCompleted()
     {
         isLevelCompleted = true;
+        fbLevelComplete?.PlayFeedbacks(transform.position);
     }
 
     private void OnEnable()
@@ -457,6 +472,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
         healthUI.UpdateDash(dashCooldown);
+        fbDashStart?.PlayFeedbacks(transform.position);
         Vector3 inputDirection = new Vector3(moveInput.x, 0, moveInput.y);
         dashDirection = allowAllDirections && inputDirection != Vector3.zero
             ? inputDirection.normalized
@@ -503,6 +519,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             DOTween.Kill(mainCam);
             mainCam.DOFieldOfView(originalFov, 0.25f).SetEase(Ease.OutQuad);
         }
+        fbDashEnd?.PlayFeedbacks(transform.position);
     }
 
 
@@ -567,6 +584,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage, TrapType trapType, DamageType damageType)
     {
+        float residual = damage;
         if (hasShieldAttribute && currentShieldValue > 0)
         {
             float shieldAbsorbed = Mathf.Min(currentShieldValue, damage);
@@ -582,21 +600,18 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
             }
         }
 
-        if (damage > 0f)
+        if (residual > 0f)
         {
-            currentHealth -= damage;
+            currentHealth -= residual;
             onTakeDamage?.Invoke(currentHealth);
 
-            if (currentHealth > 0)
-            {
-                //SavePlayerData();
-                healthUI.UpdateHealth(currentHealth, MAXHealth);
-            }
+            // FEEL: интенсивность от доли HP или от величины урона
+            float intensity = Mathf.Clamp01(residual / Mathf.Max(1f, MAXHealth * 0.35f));
+            //fbTakeDamage?.FeedbacksIntensity = Mathf.Lerp(0.6f, 1.2f, intensity);
+            fbTakeDamage?.PlayFeedbacks(transform.position);
 
-            if (currentHealth <= 0)
-            {
-                Die();
-            }
+            if (currentHealth > 0) healthUI.UpdateHealth(currentHealth, MAXHealth);
+            if (currentHealth <= 0) Die();
         }
     }
 
@@ -605,6 +620,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (isDead) return;
 
         isDead = true;
+        fbDeath?.PlayFeedbacks(transform.position);
         animator.SetTrigger("Death");
         healthUI.gameObject.SetActive(false);
         characterController.enabled = false;
@@ -672,6 +688,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
                     bulletScript.SetDamage(GetDamage());
                     myaudioSource.PlayOneShot(gunShot);
                 }
+                fbShoot?.PlayFeedbacks(firePoint.position);
             }
         }
     }
@@ -688,6 +705,7 @@ public class TopDownCharacterController : MonoBehaviour, IDamageable
         if (other.CompareTag("Coin"))
         {
             AddCoin();
+            fbCoinPickup?.PlayFeedbacks(other.transform.position);
             Destroy(other.gameObject);
         }
     }

@@ -7,6 +7,7 @@ public class PauseManager : MonoBehaviour
 {
     [SerializeField] private GameObject pause;
     [SerializeField] private GameObject tutorial;
+    [SerializeField] private GameObject settings;
     [SerializeField] private GameObject main;
     [SerializeField] private GameObject shop;
     [SerializeField] private InputAction action;
@@ -33,8 +34,8 @@ public class PauseManager : MonoBehaviour
             return;
         if (isPaused && main.activeInHierarchy)
             Resume();
-        else if (isPaused && tutorial.activeInHierarchy)
-            CloseTutorial();
+        else if (isPaused && settings.activeInHierarchy)
+            CloseSettings();
         else
             Pause();
     }
@@ -54,6 +55,18 @@ public class PauseManager : MonoBehaviour
     void CloseTutorial() 
     {
         tutorial.SetActive(false);
+        main.SetActive(true);
+    }
+
+    public void OpenSettings()
+    {
+        settings.SetActive(true);
+        main.SetActive(false);
+    }
+
+    void CloseSettings()
+    {
+        settings.SetActive(false);
         main.SetActive(true);
     }
 
